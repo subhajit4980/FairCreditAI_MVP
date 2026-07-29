@@ -1,0 +1,64 @@
+@startuml 02_sequence_diagram
+title FairCreditScore — Five End-to-End Workflows
+
+skinparam shadowing false
+skinparam SequenceMessageAlignment center
+skinparam ParticipantBackgroundColor #E3F2FD
+skinparam ParticipantBorderColor #1565C0
+
+actor Customer
+actor Ops
+actor Lender
+participant "Browser\n(Templates)" as UI
+participant "Django Views\n(core.views)" as Views
+participant "Scoring Engine\n(core.scoring)" as Scoring
+participant "ORM" as ORM
+database "DB" as DB
+
+== 1. Customer signs up ==
+Customer -> UI : GET /signup/
+UI -> Views : signup()
+Views -> ORM : create User + CustomerProfile
+ORM -> DB : INSERT
+Views --> UI : 302 → /me/
+UI --> Customer : Dashboard
+
+== 2. Document upload ==
+Customer -> UI : POST /me/documents/upload/
+UI -> Views : upload_document()
+Views -> Views : DocumentUploadForm.clean_file\n(MIME, ≤10MB)
+Views -> ORM : Document(status=uploaded)
+ORM -> DB : INSERT
+Views -> ORM : AuditLog(action=document_upload)
+Views --> UI : 302 → /me/
+
+== 3. AA consent (mock) ==
+Customer -> UI : POST /me/consent/initiate/
+UI -> Views : initiate_consent()
+Views -> Views : secrets.token_hex(16)
+Views -> ORM : AAConsent(status=pending)
+Views --> UI : 302 → /me/consent/<handle>/
+Customer -> UI : POST /me/consent/<handle>/approve/
+UI -> Views : consent_approve()
+Views -> ORM : status=active, approved_at=now()
+
+== 4. Score generation (canonical) ==
+Customer -> UI : POST /me/score/generate/\n(algorithm=canonical)
+UI -> Views : generate_my_score()
+Views -> Scoring : generate_score(user, "canonical")
+Scoring -> Scoring : _generate_features(seeded RNG)
+Scoring -> Scoring : _to_subscores(...) → 0..100
+Scoring -> Scoring : alt = Σ subscore × weight
+Scoring -> Scoring : score = round(300 + alt × 6)
+Scoring -> ORM : ScoreReport(...)
+ORM -> DB : INSERT
+Views --> UI : 302 → /me/score/<id>/
+UI --> Customer : Dial + SHAP-style factors
+
+== 5. Lender API ==
+Lender -> Views : GET /api/lender/score/<customer_id>/
+Views -> ORM : ScoreReport.objects.filter(customer=...).first()
+ORM -> DB : SELECT
+Views --> Lender : 200 JSON {score, band, factors, ...}
+
+@enduml

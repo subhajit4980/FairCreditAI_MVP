@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% block title %}Wiki · FairCreditScore{% endblock %}
+{% block content %}
+<div class="wiki-shell">
+  <aside class="wiki-side">
+    <h3>{{ wiki_root_name }}/</h3>
+    <p class="small muted">Admin-only knowledge base. Mirrors the <code>documents/</code> folder in the repo. Markdown is rendered Jekyll-style; images render inline; PDFs / other files download.</p>
+    <p class="small"><a href="{% url 'admin_wiki' %}">&larr; Back to root</a></p>
+  </aside>
+  <article class="wiki-main">
+    <h1>{% if rel_path %}{{ rel_path }}/{% else %}Wiki — {{ wiki_root_name }}/{% endif %}</h1>
+
+    {% if breadcrumbs %}
+      <nav class="wiki-breadcrumbs small">
+        <a href="{% url 'admin_wiki' %}">{{ wiki_root_name }}</a>
+        {% for c in breadcrumbs %}
+          <span> / </span><a href="{% url 'admin_wiki_node' c.rel %}">{{ c.name }}</a>
+        {% endfor %}
+      </nav>
+    {% endif %}
+
+    <ul class="wiki-list">
+      {% for e in entries %}
+        <li>
+          {% if e.is_dir %}
+            <a class="wiki-entry dir" href="{% url 'admin_wiki_node' e.rel %}">📁 {{ e.name }}/</a>
+          {% else %}
+            <a class="wiki-entry file" href="{% url 'admin_wiki_node' e.rel %}">📄 {{ e.name }}</a>
+            <span class="small muted">{{ e.size|filesizeformat }}</span>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="muted small">Empty.</li>
+      {% endfor %}
+    </ul>
+  </article>
+</div>
+{% endblock %}

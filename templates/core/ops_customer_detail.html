@@ -1,0 +1,77 @@
+{% extends "core/base.html" %}
+{% block content %}
+<a class="small" href="{% url 'ops_customers' %}">&larr; All customers</a>
+<h1 style="margin-top:8px;">{{ customer.username }}</h1>
+<p class="small muted">{{ customer.email }} · {{ customer.mobile }} · PAN {{ customer.pan|default:"—" }}</p>
+
+{% if bank_statements %}
+<div class="card">
+  <h3>Bank statements &amp; AA fetches</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>When</th><th>Source</th><th>Txns</th><th>Months</th><th>Parsed</th><th>Notes</th></tr></thead>
+      <tbody>
+        {% for bs in bank_statements %}
+          <tr>
+            <td class="small">{{ bs.uploaded_at|date:"d M Y H:i" }}</td>
+            <td>
+              {% if bs.source == 'aa_fetch' %}<span class="badge info">AA fetch</span>
+              {% else %}<span class="badge">Upload</span>{% endif %}
+            </td>
+            <td>{{ bs.txn_count }}</td>
+            <td>{{ bs.period_months }}</td>
+            <td>{% if bs.parsed_at %}<span class="badge success">Parsed</span>{% else %}<span class="badge warn">Unparsed</span>{% endif %}</td>
+            <td class="small muted">{{ bs.parse_notes|default:"—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <h3 style="margin:0 0 8px;">Fetch transactions for {{ customer.username }}</h3>
+  <p class="muted small">Extract UPI transactions, Online transactions, Bank Statement for calculating Score and Loan Eligibility via RBI authorised Account Aggregator.</p>
+  <form method="post" action="{% url 'ops_fetch_aa' customer.id %}" style="margin-top: 10px;">
+    {% csrf_token %}
+    <button class="btn" type="submit">Fetch via Account Aggregator</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin:0 0 8px;">Score generation</h3>
+  <p class="muted small">Uses the most recent parsed AA fetch or upload. Without one we score against a sample profile.</p>
+  <form method="post" action="{% url 'ops_generate_score' customer.id %}" style="margin-top: 10px;">
+    {% csrf_token %}
+    <label class="small muted" style="display:block; margin-bottom:8px;">Scoring algorithm
+      <select name="algorithm" style="display:block; margin-top:4px;">
+        <option value="canonical" selected>Weighted Score Algorithm (300–900)</option>
+        <option value="ai_model">AI Model (alternative-data, 1–100)</option>
+      </select>
+    </label>
+    <button class="btn" type="submit">Get the Score and Loan Eligibility</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Score history</h3>
+  {% if scores %}
+    <div class="table-wrap">
+      <table>
+      <thead><tr><th>Score</th><th>Band</th><th>Loan eligibility</th><th>Generated</th></tr></thead>
+      <tbody>
+        {% for s in scores %}
+          <tr>
+            <td><a href="{% url 'score_detail' s.id %}"><strong>{{ s.score }}</strong></a></td>
+            <td>{{ s.get_band_display }}</td>
+            <td>₹{{ s.recommended_loan_amount }}</td>
+            <td class="small">{{ s.generated_at|date:"d M Y H:i" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  {% else %}<p class="muted small">No scores generated yet.</p>{% endif %}
+</div>
+{% endblock %}

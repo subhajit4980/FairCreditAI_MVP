@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block title %}Onboard customer · FairCreditScore{% endblock %}
+{% block content %}
+<a class="small" href="{% url 'ops_customers' %}">&larr; All customers</a>
+<div class="card" style="max-width: 580px; margin: 12px auto 0;">
+  <h1>Onboard a new customer</h1>
+  <p class="muted small">Operations use this when a walk-in customer doesn't have an account yet. The customer can sign in with these credentials and finish their profile from <code>/me/</code>.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button class="btn" type="submit">Create customer</button>
+    <a class="btn secondary" href="{% url 'ops_customers' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

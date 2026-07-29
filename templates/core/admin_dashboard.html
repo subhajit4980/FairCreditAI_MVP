@@ -1,0 +1,33 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h1>Administrator dashboard</h1>
+<div class="grid cols-4">
+  <div class="stat"><div class="label">Total users</div><div class="value">{{ stats.total_users }}</div></div>
+  <div class="stat"><div class="label">Customers</div><div class="value">{{ stats.customers }}</div></div>
+  <div class="stat"><div class="label">Operations</div><div class="value">{{ stats.ops_users }}</div></div>
+  <div class="stat"><div class="label">Admins</div><div class="value">{{ stats.admins }}</div></div>
+  <div class="stat"><div class="label">Documents</div><div class="value">{{ stats.documents }}</div></div>
+  <div class="stat"><div class="label">Verified docs</div><div class="value">{{ stats.verified_docs }}</div></div>
+  <div class="stat"><div class="label">Active consents</div><div class="value">{{ stats.active_consents }}</div></div>
+  <div class="stat"><div class="label">Avg. score</div><div class="value">{{ stats.avg_score }}</div></div>
+</div>
+
+<div class="grid cols-2">
+  <div class="card">
+    <h2>User management</h2>
+    <p><a class="btn" href="{% url 'admin_users' %}">All users</a> <a class="btn secondary" href="{% url 'admin_user_create' %}">+ New user</a></p>
+  </div>
+  <div class="card">
+    <h2>Recent activity</h2>
+    <ul class="factor-list">
+      {% for log in recent_audit %}
+        <li>
+          <span class="small">{{ log.actor.username|default:"system" }} — {{ log.action }} {% if log.target %}#{{ log.target }}{% endif %}</span>
+          <span class="small muted">{{ log.timestamp|date:"d M H:i" }}</span>
+        </li>
+      {% empty %}<li class="muted small">No audit entries yet.</li>{% endfor %}
+    </ul>
+    <p style="margin-top:8px;"><a class="small" href="{% url 'admin_audit' %}">View full audit trail &rarr;</a></p>
+  </div>
+</div>
+{% endblock %}

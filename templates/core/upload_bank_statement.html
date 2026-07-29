@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% block title %}Upload bank statement · FairCreditScore{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 620px; margin: 0 auto;">
+  <h2>Upload bank statement</h2>
+  <p class="muted small">CSV, XLS, or XLSX. The parser looks for columns like <code>Date</code>, <code>Description</code>, <code>Withdrawal</code>/<code>Debit</code>, <code>Deposit</code>/<code>Credit</code>. Most Indian retail bank exports (HDFC, ICICI, SBI, Kotak, IDFC, Federal) work out of the box.</p>
+  <p class="muted small">A few preamble rows are skipped automatically; the parser finds the header row itself.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button class="btn" type="submit">Upload &amp; parse</button>
+    <a class="btn secondary" href="{% url 'customer_dashboard' %}">Cancel</a>
+  </form>
+  <details style="margin-top: 18px;">
+    <summary class="small muted">Sample CSV layout</summary>
+    <pre style="background:#f4f6fb;padding:10px;border-radius:6px;font-size:12px;">Date,Description,Withdrawal,Deposit,Balance
+01-04-2026,UPI/PAYTM/SHOPKEEPER,,8500,12500
+03-04-2026,UPI/GPAY/MILK,180,,12320
+05-04-2026,SALARY APRIL,,42000,54320
+...</pre>
+  </details>
+</div>
+{% endblock %}

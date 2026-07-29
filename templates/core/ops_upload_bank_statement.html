@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}Upload statement · {{ customer.username }} · FairCreditScore{% endblock %}
+{% block content %}
+<a class="small" href="{% url 'ops_customer_detail' customer.id %}">&larr; Back to {{ customer.username }}</a>
+<div class="card" style="max-width: 620px; margin: 12px auto 0;">
+  <h2>Upload bank statement for {{ customer.username }}</h2>
+  <p class="muted small">CSV, XLS, or XLSX. Parser auto-detects columns like Date / Description / Debit / Credit and skips preamble rows.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button class="btn" type="submit">Upload &amp; parse</button>
+    <a class="btn secondary" href="{% url 'ops_customer_detail' customer.id %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,522 @@
+[
+  {
+    "name": "Customer_ID",
+    "dtype": "object",
+    "type": "predictor"
+  },
+  {
+    "name": "transaction_frequency",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "average_transaction_amount",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "median_transaction_amount",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "largest_deposit",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "largest_withdrawal",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "average_balance",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "minimum_balance",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "maximum_balance",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "balance_variance",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "active_month_count",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "transaction_consistency",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "average_monthly_income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "median_income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "income_variance",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "income_consistency",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "average_monthly_expense",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "monthly_savings",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "monthly_transaction_count",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "cash_flow_stability",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "expense_stability",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "total_income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "total_expense",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "essential_expense",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "discretionary_expense",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "atm_withdrawals",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "emi_payments",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "utility_payments",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "investment_amount",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "atm_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "emi_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "food_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "groceries_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "investment_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "others_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "salary_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "shopping_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "travel_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "utilities_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "expense_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "savings_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "essential_expense_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "discretionary_expense_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "atm_cash_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "financial_buffer",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "cash_reserve_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Full_Name",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Gender",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "DOB",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Age",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "Education",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Occupation",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Employer",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Employment_Type",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Industry",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Annual_Income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Monthly_Income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Bank",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "IFSC",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Account_Number",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "Account_Type",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "City",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "District",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "State",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "PIN",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "Customer_Segment",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Savings_Balance",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Credit_Card_Holder",
+    "dtype": "bool",
+    "type": "predictor"
+  },
+  {
+    "name": "Account_Open_Date",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Nominee_Relation",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Device_Age_Years",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "OS",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Rooted",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "SIM_Age_Years",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Phone_Vintage_Years",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Device_Fingerprint",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "PAN",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Passport_Number",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Driving_Licence",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Voter_ID",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "KYC_Status",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Face_Match_Score",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "OCR_Match_Score",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Liveness_Score",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "Address_Match_Score",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "kyc_verified",
+    "dtype": "int64",
+    "type": "predictor"
+  },
+  {
+    "name": "total_loans",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "total_loan_amount",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "total_monthly_emi",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "avg_interest_rate",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "max_debt_to_income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "avg_credit_score",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "max_fraud_score",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "approved_loan_count",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "has_default",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "has_npa",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "income_stability_index",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "net_disposable_income",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "dti_ratio",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "device_risk_index",
+    "dtype": "float64",
+    "type": "predictor"
+  },
+  {
+    "name": "biometric_identity_score",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "financial_discipline_score",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "business_score",
+    "dtype": "float64",
+    "type": "target_metric"
+  },
+  {
+    "name": "business_grade",
+    "dtype": "object",
+    "type": "target_metric"
+  }
+]

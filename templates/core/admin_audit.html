@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h1>Audit trail</h1>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+    <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead>
+    <tbody>
+      {% for log in logs %}
+        <tr>
+          <td class="small">{{ log.timestamp|date:"d M Y H:i" }}</td>
+          <td>{{ log.actor.username|default:"system" }}</td>
+          <td>{{ log.action }}</td>
+          <td class="small muted">{{ log.target|default:"—" }}</td>
+          <td class="small muted">{{ log.detail|default:"—" }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="muted small">No audit entries.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

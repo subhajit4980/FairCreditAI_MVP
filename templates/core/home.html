@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block content %}
+<section class="hero">
+  <h1>{% trans "Your credit score, made fair." %}</h1>
+  <p>{% blocktrans %}FairCreditScore is an alternative credit scoring platform for the 400+ million Indians who transact every day on UPI but stay invisible to traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator framework.{% endblocktrans %}</p>
+</section>
+
+<section class="grid cols-2 audience-picker">
+  <div class="card audience-card">
+    <h2>{% trans "Individual Customer" %}</h2>
+    <p class="muted small">{% blocktrans %}Generate your FairCreditScore in seconds. Upload a bank statement and see what helped or hurt your score.{% endblocktrans %}</p>
+    <div class="audience-actions">
+      <a class="btn" href="{% url 'signup' %}">{% trans "Get my score" %}</a>
+      <a class="btn secondary" href="{% url 'login' %}">{% trans "Sign in" %}</a>
+    </div>
+  </div>
+
+  <div class="card audience-card">
+    <h2>{% trans "Financial Institutions" %}</h2>
+    <p class="muted small">{% blocktrans %}Operations console for partner banks and NBFCs &mdash; onboard customers, generate scores on their behalf.{% endblocktrans %}</p>
+    <div class="audience-actions">
+      <a class="btn" href="{% url 'login' %}">{% trans "Sign in" %}</a>
+      <a class="btn secondary" href="mailto:partners@faircredit.example?subject=Partner%20access%20request">{% trans "Request access" %}</a>
+    </div>
+  </div>
+</section>
+
+<section class="grid cols-3">
+  <div class="card">
+    <h3>{% trans "Consent-based" %}</h3>
+    <p class="muted small">{% blocktrans %}Share data once via the RBI-licensed Account Aggregator framework. No screen scraping, no document hassle.{% endblocktrans %}</p>
+  </div>
+  <div class="card">
+    <h3>{% trans "Explainable" %}</h3>
+    <p class="muted small">{% blocktrans %}Every score comes with a SHAP-style breakdown of what helped or hurt &mdash; no black box.{% endblocktrans %}</p>
+  </div>
+  <div class="card">
+    <h3>{% trans "Inclusive" %}</h3>
+    <p class="muted small">{% blocktrans %}Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL was never built for.{% endblocktrans %}</p>
+  </div>
+</section>
+{% endblock %}

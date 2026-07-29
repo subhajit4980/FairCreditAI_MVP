@@ -1,0 +1,91 @@
+@startuml 01_high_level_architecture
+title FairCreditScore — High-Level Architecture
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ArrowColor #14233A
+skinparam DefaultTextAlignment center
+
+skinparam packageBackgroundColor<<Presentation>>   #FFFDE7
+skinparam packageBorderColor<<Presentation>>       #F9A825
+skinparam packageBackgroundColor<<Application>>    #E3F2FD
+skinparam packageBorderColor<<Application>>        #1565C0
+skinparam packageBackgroundColor<<Domain>>         #E8F5E9
+skinparam packageBorderColor<<Domain>>             #2E7D32
+skinparam packageBackgroundColor<<Infrastructure>> #FFF9C4
+skinparam packageBorderColor<<Infrastructure>>     #F57F17
+skinparam packageBackgroundColor<<DataStore>>      #FCE4EC
+skinparam packageBorderColor<<DataStore>>          #C62828
+skinparam packageBackgroundColor<<CrossCutting>>   #EDE7F6
+skinparam packageBorderColor<<CrossCutting>>       #4527A0
+
+actor "Customer\n(mobile / web)" as Cust
+actor "Operations" as Ops
+actor "Administrator" as Admin
+actor "Lender Partner\n(API client)" as Lender
+
+package "Presentation" <<Presentation>> {
+  [Django Templates] as TPL
+  [static/css/app.css\n(responsive)] as CSS
+}
+
+package "Application (Django views)" <<Application>> {
+  [core.views\nrole-gated handlers] as Views
+  [core.forms\nvalidation] as Forms
+  [core.urls\nrouting] as Routes
+}
+
+package "Domain" <<Domain>> {
+  [core.scoring\nbaseline + canonical] as Scoring
+}
+
+package "Infrastructure" <<Infrastructure>> {
+  [Django ORM] as ORM
+  [FileField\nlocal storage / S3] as Files
+  [WhiteNoise\nstatic files] as WN
+}
+
+package "Data Store" <<DataStore>> {
+  database "Postgres / SQLite" as DB
+  folder "media/documents/" as Media
+}
+
+package "Cross-Cutting" <<CrossCutting>> {
+  [Audit Log] as Audit
+  [settings.py\nenv-driven] as Settings
+  [Django Admin\n(/django-admin/)] as DjAdmin
+}
+
+Cust   --> TPL : HTTPS
+Ops    --> TPL : HTTPS
+Admin  --> TPL : HTTPS
+Lender --> Views : HTTPS\nGET /api/lender/score/<id>/
+TPL --> CSS
+
+TPL --> Routes
+Routes --> Views
+Views --> Forms
+Views --> Scoring
+Views --> ORM
+Views --> Audit
+ORM --> DB
+Files --> Media
+WN --> CSS
+Settings --> Views
+Admin --> DjAdmin
+DjAdmin --> ORM
+
+note right of Scoring
+  Two algorithms:
+  - baseline (heuristic)
+  - canonical (300 + alt × 6)
+  per documents/business-idea1.jpeg
+end note
+
+note bottom of Audit
+  AuditLog rows on every state
+  change: signup, upload, review,
+  consent, score, user_saved
+end note
+
+@enduml

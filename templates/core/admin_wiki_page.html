@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% block title %}{{ filename }} · Wiki{% endblock %}
+{% block content %}
+<div class="wiki-shell">
+  <aside class="wiki-side">
+    <h3>{{ wiki_root_name }}/</h3>
+    <p class="small muted">Rendered from <code>documents/{{ rel_path }}</code>.</p>
+    <p class="small">
+      <a href="{% url 'admin_wiki' %}">&larr; Back to wiki root</a><br>
+      <a href="{% url 'admin_wiki_raw' rel_path %}">Raw / download</a>
+    </p>
+  </aside>
+  <article class="wiki-main wiki-page">
+    {% if breadcrumbs %}
+      <nav class="wiki-breadcrumbs small">
+        <a href="{% url 'admin_wiki' %}">{{ wiki_root_name }}</a>
+        {% for c in breadcrumbs %}
+          <span> / </span>
+          {% if forloop.last %}<span>{{ c.name }}</span>{% else %}<a href="{% url 'admin_wiki_node' c.rel %}">{{ c.name }}</a>{% endif %}
+        {% endfor %}
+      </nav>
+    {% endif %}
+    <div class="wiki-content">
+      {{ content_html }}
+    </div>
+  </article>
+</div>
+{% endblock %}

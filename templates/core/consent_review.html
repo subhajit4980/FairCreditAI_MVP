@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="card" style="max-width: 580px; margin: 30px auto;">
+  <h2>Review Account Aggregator consent</h2>
+  <p class="muted small">This is a simulated Setu Bridge consent screen. In production this is hosted by the licensed Account Aggregator and you approve via OTP.</p>
+  <div class="grid cols-2" style="gap:8px; font-size: 14px;">
+    <div><strong>Provider</strong><br>{{ consent.aa_provider }}</div>
+    <div><strong>Status</strong><br><span class="badge warn">{{ consent.get_status_display }}</span></div>
+    <div><strong>Purpose</strong><br>{{ consent.purpose }}</div>
+    <div><strong>FI Types</strong><br><span class="small">{{ consent.fi_types }}</span></div>
+    <div><strong>Handle</strong><br><code class="small">{{ consent.handle }}</code></div>
+    <div><strong>Created</strong><br>{{ consent.created_at|date:"d M Y H:i" }}</div>
+  </div>
+
+  <div style="margin-top: 20px; display:flex; gap: 8px; flex-wrap: wrap;">
+    {% if consent.status == 'pending' %}
+      <form method="post" action="{% url 'consent_approve' consent.handle %}">
+        {% csrf_token %}<button class="btn success" type="submit">Approve consent (mock OTP 123456)</button>
+      </form>
+      <a class="btn secondary" href="{% url 'customer_dashboard' %}">Cancel</a>
+    {% else %}
+      <a class="btn secondary" href="{% url 'customer_dashboard' %}">Back to dashboard</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

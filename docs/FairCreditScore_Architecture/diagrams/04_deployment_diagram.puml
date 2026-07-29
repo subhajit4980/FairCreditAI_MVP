@@ -1,0 +1,72 @@
+@startuml 04_deployment_diagram
+title FairCreditScore — Deployment Topology (Heroku)
+
+skinparam shadowing false
+skinparam node {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+}
+skinparam database {
+  BackgroundColor #FCE4EC
+  BorderColor #C62828
+}
+skinparam cloud {
+  BackgroundColor #EDE7F6
+  BorderColor #4527A0
+}
+
+cloud "Internet" as Internet
+
+node "Client" {
+  artifact "Browser\n(desktop / mobile)" as Browser
+  artifact "Lender\nAPI client" as ApiClient
+}
+
+node "Heroku Router" as Router {
+  artifact "TLS termination\n(HTTPS:443)" as TLS
+  artifact "X-Forwarded-Proto: https" as XFP
+}
+
+node "Heroku Dyno (web)" as Dyno {
+  artifact "gunicorn\nworker" as GUni
+  artifact "Django app\n(faircredit + core)" as App
+  artifact "WhiteNoise\ncompressed manifest" as WhiteN
+}
+
+node "Heroku release phase" as ReleaseDyno {
+  artifact "python manage.py migrate" as Mig
+}
+
+database "Heroku Postgres\n(SSL)" as PG
+
+node "Object storage (planned for prod)" as S3 {
+  artifact "media/documents/\nuploaded PDFs" as MediaProd
+}
+
+Browser   --> Internet : HTTPS:443
+ApiClient --> Internet : HTTPS:443
+Internet --> TLS
+TLS --> GUni : HTTP:5000\n+ X-Forwarded-Proto
+GUni --> App
+App --> WhiteN : /static/*
+App --> PG : TCP:5432\n(SSL)
+App --> MediaProd : (S3 in prod;\nlocal /media/ in dev)
+ReleaseDyno --> PG : migrate
+
+note right of App
+  ENV vars (Heroku config):
+  - DJANGO_SECRET_KEY
+  - DJANGO_DEBUG=0
+  - DJANGO_ALLOWED_HOSTS
+  - DJANGO_CSRF_TRUSTED_ORIGINS
+  - DATABASE_URL  (auto-set by addon)
+end note
+
+note bottom of Browser
+  Dev setup:
+    runserver 8000 + SQLite at db.sqlite3
+    + local /media/ on disk
+    + WhiteNoise serving /static/ from staticfiles/
+end note
+
+@enduml

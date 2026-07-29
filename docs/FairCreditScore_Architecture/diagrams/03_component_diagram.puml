@@ -1,0 +1,107 @@
+@startuml 03_component_diagram
+title FairCreditScore — Component Diagram (core app)
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam ArrowColor #14233A
+
+skinparam packageBackgroundColor<<Application>>    #E3F2FD
+skinparam packageBorderColor<<Application>>        #1565C0
+skinparam packageBackgroundColor<<Domain>>         #E8F5E9
+skinparam packageBorderColor<<Domain>>             #2E7D32
+skinparam packageBackgroundColor<<Models>>         #FCE4EC
+skinparam packageBorderColor<<Models>>             #C62828
+skinparam packageBackgroundColor<<Presentation>>   #FFFDE7
+skinparam packageBorderColor<<Presentation>>       #F9A825
+skinparam packageBackgroundColor<<Infrastructure>> #FFF9C4
+skinparam packageBorderColor<<Infrastructure>>     #F57F17
+
+package "Presentation" <<Presentation>> {
+  [base.html] as Base
+  [customer_dashboard.html] as CustDash
+  [score_detail.html] as ScoreDetail
+  [ops_documents.html] as OpsDocs
+  [admin_wiki_index.html] as WikiIdx
+  [admin_wiki_page.html] as WikiPage
+}
+
+package "Application" <<Application>> {
+  [core.urls] as Urls
+  [core.views\n(home / signup / login)] as VAuth
+  [core.views\n(customer flows)] as VCustomer
+  [core.views\n(ops flows)] as VOps
+  [core.views\n(admin flows)] as VAdmin
+  [core.views\n(wiki)] as VWiki
+  [core.views\n(lender_api_score)] as VLender
+  [core.forms] as Forms
+}
+
+package "Domain" <<Domain>> {
+  [core.scoring\n_score_baseline] as ScoreB
+  [core.scoring\n_score_canonical] as ScoreC
+  [core.scoring\ngenerate_score (dispatcher)] as ScoreD
+}
+
+package "Models" <<Models>> {
+  [User] as MUser
+  [CustomerProfile] as MProfile
+  [Document] as MDoc
+  [AAConsent] as MConsent
+  [ScoreReport] as MScore
+  [AuditLog] as MAudit
+}
+
+package "Infrastructure" <<Infrastructure>> {
+  [Django ORM] as ORM
+  [FileField storage] as Files
+  [Markdown lib] as MD
+}
+
+Urls --> VAuth
+Urls --> VCustomer
+Urls --> VOps
+Urls --> VAdmin
+Urls --> VWiki
+Urls --> VLender
+
+VCustomer --> Forms
+VCustomer --> ScoreD : generate_score()
+VCustomer --> ORM
+VOps --> Forms
+VOps --> ORM
+VAdmin --> Forms
+VAdmin --> ORM
+VWiki --> MD : markdown(...)
+VLender --> ORM
+
+ScoreD --> ScoreB
+ScoreD --> ScoreC
+ScoreD --> MScore
+ScoreD --> MConsent
+ScoreD --> MDoc
+
+ORM --> MUser
+ORM --> MProfile
+ORM --> MDoc
+ORM --> MConsent
+ORM --> MScore
+ORM --> MAudit
+
+MDoc --> Files
+
+VCustomer --> Base
+VCustomer --> CustDash
+VCustomer --> ScoreDetail
+VOps --> OpsDocs
+VWiki --> WikiIdx
+VWiki --> WikiPage
+
+note right of ScoreD
+  Strategy pattern: caller picks
+  algorithm via POST field;
+  dispatcher whitelists against
+  ALGORITHMS tuple before calling
+  the correct private function.
+end note
+
+@enduml

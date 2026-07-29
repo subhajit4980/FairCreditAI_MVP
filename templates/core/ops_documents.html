@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h1>Document review</h1>
+<p>
+  <a class="btn small {% if status == 'uploaded' %}{% else %}secondary{% endif %}" href="?status=uploaded">Pending</a>
+  <a class="btn small {% if status == 'verified' %}{% else %}secondary{% endif %}" href="?status=verified">Verified</a>
+  <a class="btn small {% if status == 'rejected' %}{% else %}secondary{% endif %}" href="?status=rejected">Rejected</a>
+</p>
+
+<div class="card">
+  {% if documents %}
+    <div class="table-wrap">
+      <table>
+      <thead><tr><th>Customer</th><th>Type</th><th>Uploaded</th><th>File</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for d in documents %}
+          <tr>
+            <td><a href="{% url 'ops_customer_detail' d.customer.id %}">{{ d.customer.username }}</a><br><span class="small muted">{{ d.customer.mobile }}</span></td>
+            <td>{{ d.get_doc_type_display }}</td>
+            <td class="small">{{ d.uploaded_at|date:"d M Y H:i" }}</td>
+            <td><a href="{{ d.file.url }}" target="_blank">View</a></td>
+            <td>
+              {% if status == 'uploaded' %}
+                <form method="post" action="{% url 'ops_review_document' d.id %}" style="display:flex; gap:6px; flex-wrap: wrap;">
+                  {% csrf_token %}
+                  <input type="text" name="notes" placeholder="Notes (optional)" style="flex:1; min-width:140px;">
+                  <button class="btn small success" name="decision" value="approve">Approve</button>
+                  <button class="btn small danger" name="decision" value="reject">Reject</button>
+                </form>
+              {% else %}
+                <span class="small muted">{{ d.notes|default:"—" }}</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  {% else %}
+    <p class="muted small">No {{ status }} documents.</p>
+  {% endif %}
+</div>
+{% endblock %}

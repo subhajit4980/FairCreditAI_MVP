@@ -1,0 +1,118 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: FairCreditScore\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: bn\n"
+
+msgid "Admin"
+msgstr "অ্যাডমিন"
+
+msgid "Users"
+msgstr "ব্যবহারকারী"
+
+msgid "Audit"
+msgstr "নিরীক্ষা"
+
+msgid "Wiki"
+msgstr "উইকি"
+
+msgid "Operations"
+msgstr "পরিচালনা"
+
+msgid "Documents"
+msgstr "নথিপত্র"
+
+msgid "Customers"
+msgstr "গ্রাহক"
+
+msgid "+ New customer"
+msgstr "+ নতুন গ্রাহক"
+
+msgid "My Score"
+msgstr "আমার স্কোর"
+
+msgid "Profile"
+msgstr "প্রোফাইল"
+
+msgid "Sign out"
+msgstr "সাইন আউট"
+
+msgid "Sign in"
+msgstr "সাইন ইন"
+
+msgid "Get my score"
+msgstr "আমার স্কোর নিন"
+
+msgid "Language"
+msgstr "ভাষা"
+
+msgid "Go"
+msgstr "যান"
+
+msgid "Your credit score, made fair."
+msgstr "আপনার ক্রেডিট স্কোর, ন্যায্যভাবে।"
+
+msgid "Individual Customer"
+msgstr "ব্যক্তিগত গ্রাহক"
+
+msgid "Financial Institutions"
+msgstr "আর্থিক প্রতিষ্ঠান"
+
+msgid "Request access"
+msgstr "অ্যাক্সেসের অনুরোধ করুন"
+
+msgid "Consent-based"
+msgstr "সম্মতি-ভিত্তিক"
+
+msgid "Explainable"
+msgstr "ব্যাখ্যাযোগ্য"
+
+msgid "Inclusive"
+msgstr "অন্তর্ভুক্তিমূলক"
+
+msgid "FairCreditScore is an alternative credit scoring platform for the 400+ million Indians who transact every day on UPI but stay invisible to traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator framework."
+msgstr "FairCreditScore হল সেই ৪০ কোটিরও বেশি ভারতীয়ের জন্য একটি বিকল্প ক্রেডিট স্কোরিং প্ল্যাটফর্ম যাঁরা প্রতিদিন UPI-তে লেনদেন করেন কিন্তু প্রথাগত ব্যুরোর কাছে অদৃশ্য থেকে যান। FairCreditAI এবং RBI অ্যাকাউন্ট অ্যাগ্রিগেটর কাঠামো দ্বারা চালিত।"
+
+msgid "Generate your FairCreditScore in seconds. Upload a bank statement and see what helped or hurt your score."
+msgstr "কয়েক সেকেন্ডে আপনার FairCreditScore তৈরি করুন। একটি ব্যাংক স্টেটমেন্ট আপলোড করুন এবং দেখুন কী আপনার স্কোরকে সাহায্য করেছে বা ক্ষতি করেছে।"
+
+msgid "Operations console for partner banks and NBFCs &mdash; onboard customers, generate scores on their behalf."
+msgstr "অংশীদার ব্যাংক ও NBFC-এর জন্য অপারেশনস কনসোল &mdash; গ্রাহকদের অন্তর্ভুক্ত করুন, তাঁদের পক্ষে স্কোর তৈরি করুন।"
+
+msgid "Share data once via the RBI-licensed Account Aggregator framework. No screen scraping, no document hassle."
+msgstr "RBI-লাইসেন্সপ্রাপ্ত অ্যাকাউন্ট অ্যাগ্রিগেটর কাঠামোর মাধ্যমে একবার ডেটা শেয়ার করুন। কোনও স্ক্রিন স্ক্র্যাপিং নেই, কোনও নথির ঝামেলা নেই।"
+
+msgid "Every score comes with a SHAP-style breakdown of what helped or hurt &mdash; no black box."
+msgstr "প্রতিটি স্কোরের সাথে কী সাহায্য করেছে বা ক্ষতি করেছে তার একটি SHAP-শৈলীর বিশ্লেষণ থাকে &mdash; কোনও ব্ল্যাক বক্স নেই।"
+
+msgid "Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL was never built for."
+msgstr "গিগ কর্মী, কিরানা দোকান, বেতন-ডেবিট ব্যবহারকারী এবং CIBIL যাঁদের জন্য কখনও তৈরি হয়নি তাঁদের সবার জন্য তৈরি।"
+
+msgid "Invalid username or password."
+msgstr "ভুল ব্যবহারকারীর নাম বা পাসওয়ার্ড।"
+
+msgid "Username"
+msgstr "ব্যবহারকারীর নাম"
+
+msgid "Password"
+msgstr "পাসওয়ার্ড"
+
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "অ্যাকাউন্ট নেই? <a href=\"%(signup_url)s\">একটি তৈরি করুন</a>।"
+
+msgid "English"
+msgstr "ইংরেজি"
+
+msgid "Hindi"
+msgstr "হিন্দি"
+
+msgid "Bengali"
+msgstr "বাংলা"
+
+msgid "Marathi"
+msgstr "মারাঠি"
+
+msgid "Telugu"
+msgstr "তেলুগু"

@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="card" style="max-width: 540px; margin: 0 auto;">
+  <h2>Upload a document</h2>
+  <p class="muted small">Accepted: PDF, JPG, PNG (max 10 MB). Examples: PAN card, Aadhaar card, salary slip, bank statement.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button class="btn" type="submit">Upload</button>
+    <a class="btn secondary" href="{% url 'customer_dashboard' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

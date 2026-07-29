@@ -1,0 +1,7 @@
+Model,Accuracy,Precision,Recall,F1-Score,ROC-AUC
+Logistic Regression,94.50%,80.00%,28.57%,42.11%,0.6482
+Random Forest,92.50%,44.44%,28.57%,34.78%,0.6225
+Gradient Boosting,93.50%,57.14%,28.57%,38.10%,0.6275
+LightGBM,94.50%,80.00%,28.57%,42.11%,0.6559
+xGBoost,94.50%,80.00%,28.57%,42.11%,0.6148
+Extra Trees,94.00%,66.67%,28.57%,40.00%,0.6628
