@@ -1,0 +1,31 @@
+# Render Blueprint Specification for FairCreditAI
+services:
+  - type: web
+    name: fair-credit-ai
+    env: python
+    # Build Command installs dependencies and collects static files
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    # Start Command runs gunicorn
+    startCommand: "gunicorn faircredit.wsgi --log-file -"
+    # Specify the Python version to use
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.15"
+      - key: DJANGO_DEBUG
+        value: "0" # Turn off debug mode in production
+      - key: DJANGO_SECRET_KEY
+        generateValue: true # Render will generate a secure random secret key automatically
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "*" # You can restrict this to your-app-name.onrender.com once deployed
+      - key: DATABASE_URL
+        fromDatabase:
+          name: faircredit-db
+          property: connectionString
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: "https://fair-credit-ai.onrender.com" # Replace this with your actual Render URL
+
+databases:
+  - name: faircredit-db
+    databaseName: faircredit
+    user: faircredit_user
+    plan: free # Uses Render's free PostgreSQL tier
