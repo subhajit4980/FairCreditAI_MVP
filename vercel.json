@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "faircredit/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "faircredit/wsgi.py"
+    }
+  ]
+}
