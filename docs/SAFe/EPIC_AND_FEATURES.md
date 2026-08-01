@@ -20,7 +20,7 @@ prototype. Naming convention: `FCS-EPIC-NNN`, `FCS-FEAT-NNN`, `US-NNN`.
 > financial behaviour, **the** FairCreditScore platform powered by
 > FairCreditAI **is a** consent-based, RBI Account Aggregator–compliant
 > alternative credit scoring engine **that** produces an explainable
-> 300–900 score in seconds. **Unlike** traditional bureaus that grade only
+> alternative credit score in seconds. **Unlike** traditional bureaus that grade only
 > past borrowing, **our solution** grades cash-flow health, payment
 > discipline, savings behaviour, and digital footprint.
 
@@ -28,8 +28,7 @@ prototype. Naming convention: `FCS-EPIC-NNN`, `FCS-FEAT-NNN`, `US-NNN`.
 
 1. (WSJF-1) A new customer can sign up, provide AA consent, upload PAN +
    Aadhaar, and receive a FairCreditScore in <60 seconds.
-2. (WSJF-2) The score is explainable — it surfaces the top 3 positive and
-   top 3 negative factors per the canonical algorithm spec.
+2. (WSJF-2) The score is explainable — it surfaces the top strengths and key improvement areas from the alternative Credit AI Model.
 3. (WSJF-3) Operations staff can verify uploaded documents and inspect any
    customer's score history.
 4. (WSJF-4) Administrators can manage user roles, see platform KPIs, and
@@ -100,21 +99,13 @@ prototype. Naming convention: `FCS-EPIC-NNN`, `FCS-FEAT-NNN`, `US-NNN`.
 - **Dependencies:** FCS-FEAT-001.
 - **Caveat:** see `aa-setu-approach.md` — flow is real, data is mocked.
 
-### `FCS-FEAT-004` — FairCreditScore generation (dual algorithm)
+### `FCS-FEAT-004` — FairCreditScore generation (AI Model)
 
 - **Parent epic:** FCS-EPIC-001
 - **PI:** PI-1 (synthetic) → PI-3 (XGBoost+SHAP on real data)
-- **Description:** Customer can generate a 300–900 score using either the
-  prototype baseline heuristic or the canonical weighted spec from
-  `documents/fairCreditAI-business-idea1.jpeg`.
+- **Description:** Customer can generate a 1–100 score using the alternative-data Credit AI Model.
 - **Acceptance criteria:**
-  - Given a customer, when they POST `/me/score/generate/` with
-    `algorithm=canonical`, then a `ScoreReport(algorithm=canonical)` row is
-    created with `score = round(300 + (alt × 6))`.
-  - Given a customer, when they POST with `algorithm=baseline`, then
-    `ScoreReport(algorithm=baseline)` is created using the prototype
-    formula. Both flows succeed for the same customer with different
-    numeric outputs.
+  - Given a customer, when they POST `/me/score/generate/`, then a `ScoreReport(algorithm=ai_model)` row is created with a score between 1 and 100 based on the Cashflow AI underwriting engine.
 - **Dependencies:** FCS-FEAT-003 (consent, optional bonus).
 
 ### `FCS-FEAT-005` — Operations console
@@ -239,18 +230,10 @@ prototype. Naming convention: `FCS-EPIC-NNN`, `FCS-FEAT-NNN`, `US-NNN`.
 
 ### Under FCS-FEAT-004 (Scoring)
 
-- **US-009 — Generate baseline score**
-  - As a customer, I want to generate a score using the prototype heuristic
-    so I can see my number quickly.
-  - **Given** the dashboard, **when** I select Baseline and click Generate,
-    **then** I land on `/me/score/<id>/` with a 300–900 dial.
-
-- **US-010 — Generate canonical score**
-  - As a customer, I want to generate a score using the canonical algorithm
-    spec so I can see the spec-compliant version.
-  - **Given** the dashboard, **when** I select Canonical and click Generate,
-    **then** I land on `/me/score/<id>/` and the algorithm badge says
-    "Canonical (weighted spec)".
+- **US-009 — Generate AI alternative credit score**
+  - As a customer, I want to generate a score using the Credit AI Model so I can see my alternative creditworthiness.
+  - **Given** the dashboard, **when** I click Get my Credit Score,
+    **then** I land on `/me/score/<id>/` with a 1–100 dial.
 
 - **US-011 — View score breakdown**
   - As a customer, I want to see what helped and hurt my score so I can

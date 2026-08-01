@@ -10,8 +10,7 @@
 FairCreditScore is a Django prototype of an alternative credit-scoring
 platform for India. It walks an end-to-end borrower flow — sign-up, document
 upload, RBI-Account-Aggregator-style consent, score generation, score
-explanation, and a JSON lender API — using the seven features and the
-canonical algorithm specified in `documents/fairCreditAI-business-idea1.jpeg`.
+explanation, and a JSON lender API — using our alternative-data Credit AI Model.
 The data behind the score is currently synthetic (per-user seeded RNG); the
 flow is real. See `aa-setu-approach.md` for what's mocked vs. wired.
 
@@ -33,19 +32,19 @@ fair-credit-ai-sajal-bhadra/
 │   ├── models.py                        User, CustomerProfile, Document, AAConsent, ScoreReport, AuditLog
 │   ├── views.py                         Auth, customer / ops / admin / wiki / lender API
 │   ├── forms.py                         Signup, profile, document upload, staff user
-│   ├── scoring.py                       FairCreditAI: baseline + canonical algorithms
+│   ├── scoring.py                       FairCreditAI alternative-data credit scoring engine
 │   ├── urls.py                          App routes
 │   ├── admin.py                         Vanilla Django admin registration
 │   └── management/commands/seed_demo.py Seeds admin / ops / four personas
 ├── templates/core/                      Server-rendered HTML
 ├── static/css/app.css                   Single responsive stylesheet
-├── documents/                           BRD + competitor analysis + canonical algorithm sheet
+├── documents/                           BRD + competitor analysis
 ├── docs/
 │   ├── SAFe/EPIC_AND_FEATURES.md        Epic, features, user stories, PI plan
 │   └── FairCreditScore_Architecture/
 │       ├── SystemArchitecture.md        9-section architecture doc
 │       └── diagrams/                    PlantUML .puml + rendered .png
-├── scoring-algorithm.md                 Canonical algorithm spec + current implementation
+
 ├── aa-setu-approach.md                  Honest write-up of mock vs. live AA path
 ├── features.md                          Running log of major features (built + planned)
 ├── bugs-fixed.md                        Running log of bugs identified + resolved
@@ -63,7 +62,7 @@ fair-credit-ai-sajal-bhadra/
 | `CustomerProfile` | `user (1-1)`, `full_name`, `monthly_income`, `aadhaar_last4` | Per-customer profile data |
 | `Document` | `customer`, `doc_type`, `file`, `status`, `reviewed_by`, `notes` | Uploaded ID/income document (PAN, Aadhaar, bank statement, salary slip) |
 | `AAConsent` | `customer`, `handle (unique)`, `aa_provider`, `fi_types`, `status`, `approved_at`, `revoked_at` | Account Aggregator consent artifact |
-| `ScoreReport` | `customer`, `algorithm`, `score (300–900)`, `band`, 7 feature floats, `top_positive_factors` (JSON), `top_negative_factors` (JSON), `recommended_loan_amount` | Generated FairCreditScore record |
+| `ScoreReport` | `customer`, `algorithm`, `score (1–100)`, `band`, 7 feature floats, `top_positive_factors` (JSON), `top_negative_factors` (JSON), `recommended_loan_amount` | Generated FairCreditScore record |
 | `AuditLog` | `actor`, `action`, `target`, `detail`, `timestamp` | Append-only audit trail |
 
 ---
@@ -75,10 +74,8 @@ fair-credit-ai-sajal-bhadra/
    `media/documents/YYYY/MM/`.
 3. Customer initiates AA consent → 32-char handle + `AAConsent(status=pending)`.
 4. Customer approves consent on the mock review screen → `status=active`.
-5. Customer clicks **Generate my score**, picking either *Baseline*
-   (prototype heuristic) or *Canonical* (`300 + alt × 6` per the JPEG):
-   - `core/scoring.py::generate_score(user, algorithm)` synthesises the
-     seven features, computes the score, records SHAP-style top factors.
+5. Customer clicks **Generate my score**:
+   - `core/scoring.py::generate_score(user)` processes transaction history, computes the AI credit score (1-100), and records SHAP-style factors.
 6. Customer views the score detail page (dial + factors + raw features).
 7. Operations user reviews uploaded documents (approve / reject + notes).
 8. Lender partner GETs `/api/lender/score/<customer_id>/` → JSON.
@@ -88,17 +85,16 @@ fair-credit-ai-sajal-bhadra/
 Customer ─ POST /me/score/generate/ ──► generate_my_score()
                                           │
                                           ▼
-                              core.scoring.generate_score(user, algorithm)
+                              core.scoring.generate_score(user)
                                           │
-            baseline ◄────dispatch────► canonical
-              │                            │
-              ▼                            ▼
-  base + tuned multipliers           300 + (Σ subscore × weight) × 6
-              │                            │
-              └──────────► ScoreReport ◄───┘
-                                │
-                                ▼
-                         /me/score/<pk>/   (dial + SHAP factors)
+                                          ▼
+                             AI Credit Scoring Model (1-100)
+                                          │
+                                          ▼
+                                     ScoreReport
+                                          │
+                                          ▼
+                                 /me/score/<pk>/
 ```
 
 ---
@@ -183,7 +179,7 @@ Open `http://127.0.0.1:8000`.
 | `/me/consent/<handle>/` | Review consent (mock Setu Bridge screen) |
 | `/me/consent/<handle>/approve/` (POST) | Approve consent (mock OTP `123456`) |
 | `/me/consent/<handle>/revoke/` (POST) | Revoke an active consent |
-| `/me/score/generate/` (POST `algorithm=baseline\|canonical`) | Generate a new score |
+| `/me/score/generate/` (POST) | Generate a new score |
 | `/me/score/<id>/` | Score detail (dial + SHAP-style factors + raw features) |
 
 ## Lender API
@@ -224,10 +220,10 @@ Limit: 10 MB per file. Validation enforced in `core.forms.DocumentUploadForm.cle
 |---|---|
 | Single Django app `core` | Prototype is small enough that splitting into multiple apps would be premature ceremony. |
 | Custom `User` with role enum | Cleaner than three proxy models; lets the same view base reuse Django auth. |
-| Two scoring algorithms behind one dispatcher | Lets us surface the canonical spec (per JPEG) without ripping out the prototype heuristic. Pick per request via radio toggle. |
+| Single Credit AI Model scoring | Standardized alternative-data scoring model on a 1-100 scale. |
 | Mock AA flow rather than live Setu | Setu sandbox needs registered credentials + a public webhook — out of scope for a first build. The state machine and UX are real. See `aa-setu-approach.md`. |
 | WhiteNoise for static | Removes the need for an extra static-asset host on Heroku; works with `CompressedManifestStaticFilesStorage`. |
-| Markdown wiki as its own admin route | `documents/` is the source of truth for the BRD and the canonical algorithm — admins should be able to read it without repo access. Path traversal is blocked. |
+| Markdown wiki as its own admin route | `documents/` is the source of truth for the BRD — admins should be able to read it without repo access. Path traversal is blocked. |
 | Synthetic scoring seeded by `user.id` | Makes each persona reproducible across sessions for consistent demo behaviour. |
 | Mobile-first responsive CSS | The target borrower is UPI-active and phone-only. 320 px is the floor. |
 
@@ -267,7 +263,7 @@ Limit: 10 MB per file. Validation enforced in `core.forms.DocumentUploadForm.cle
 
 - **Spec:** `documents/FairCreditScore_BRD-v4.md`,
   `documents/FairCreditScore_Prototype_Build_Guide-v4.md`
-- **Algorithm:** `scoring-algorithm.md` (canonical + current implementation)
+- **Algorithm:** Alternative Credit Scoring Model (1-100)
 - **AA integration:** `aa-setu-approach.md` (mock vs. live Setu)
 - **SAFe artifacts:** `docs/SAFe/EPIC_AND_FEATURES.md`
 - **Architecture:** `docs/FairCreditScore_Architecture/SystemArchitecture.md` + `diagrams/*.png`

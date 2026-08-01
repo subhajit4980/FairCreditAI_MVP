@@ -11,7 +11,7 @@ the prototype as of PI-1.
 
 ### 1.2 Scope
 Covers the customer, operations, and administrator web flows; the
-FairCreditAI scoring engine (baseline + canonical); the Account
+FairCreditAI scoring engine (AI Model 1-100); the Account
 Aggregator consent state machine (mocked); the lender API; the admin
 wiki; and the deployment posture (Heroku-friendly).
 
@@ -70,7 +70,7 @@ state change.
 
 | Pattern | Where | Why |
 |---|---|---|
-| Strategy | `core/scoring.py::generate_score(algorithm=...)` | Two scoring algorithms (baseline / canonical) selectable per request |
+| Strategy | `core/scoring.py::generate_score()` | Alternate credit AI Model scoring engine |
 | Decorator | `customer_required`, `ops_required`, `admin_required` | Role gating without leaking to URLs |
 | Repository (light) | Django ORM querysets in views | Persistence cleanly separated from domain math |
 | Idempotent state machine | `AAConsent` (`pending → active → revoked/expired`), `Document` (`uploaded → verified/rejected`) | Predictable flow, safe to retry |
@@ -84,7 +84,7 @@ state change.
 2. Customer uploads PAN PDF on `/me/documents/upload/` → `Document(status=uploaded)` row + file in `media/`.
 3. Customer initiates AA consent on `/me/consent/initiate/` → 32-char handle + `AAConsent(status=pending)`.
 4. Customer approves consent → `AAConsent(status=active)`.
-5. Customer clicks "Generate my score" → `generate_score` called with `algorithm=baseline|canonical`. Engine reads consent + verified-doc counts (baseline only), produces `ScoreReport`.
+5. Customer clicks "Generate my score" → `generate_score` called to produce `ScoreReport` using the alternative-data AI Credit Model.
 6. Customer views `/me/score/<id>/`, sees the dial + SHAP-style factors.
 7. Operations user reviews uploaded documents, approves/rejects with notes.
 8. Lender partner GETs `/api/lender/score/<customer_id>/` → JSON.
@@ -107,7 +107,7 @@ state change.
 | GET | `/me/consent/<handle>/` | customer | Review consent |
 | POST | `/me/consent/<handle>/approve/` | customer | Approve consent |
 | POST | `/me/consent/<handle>/revoke/` | customer | Revoke consent |
-| POST | `/me/score/generate/` | customer | Generate score (algorithm=baseline\|canonical) |
+| POST | `/me/score/generate/` | customer | Generate score |
 | GET | `/me/score/<pk>/` | customer | Score detail |
 | GET | `/ops/` | ops/admin | Ops dashboard |
 | GET | `/ops/documents/?status=` | ops/admin | Doc queue |
@@ -289,7 +289,7 @@ pytest --cov=core --cov-report=html
 | Operation | Latency |
 |---|---|
 | Score generation (synthetic, baseline) | ~1 ms |
-| Score generation (synthetic, canonical) | ~1 ms |
+| Score generation (synthetic, AI Model) | ~1 ms |
 | Wiki markdown render (BRD-v4, ~12 kB) | <30 ms |
 | Document upload (5 MB PDF) | dominated by network I/O |
 

@@ -36,7 +36,7 @@ package "Application (Django views)" <<Application>> {
 }
 
 package "Domain" <<Domain>> {
-  [core.scoring\nbaseline + canonical] as Scoring
+  [core.scoring\nCredit AI Model] as Scoring
 }
 
 package "Infrastructure" <<Infrastructure>> {
@@ -76,10 +76,9 @@ Admin --> DjAdmin
 DjAdmin --> ORM
 
 note right of Scoring
-  Two algorithms:
-  - baseline (heuristic)
-  - canonical (300 + alt × 6)
-  per documents/business-idea1.jpeg
+  Alternative Credit Scoring:
+  - AI Credit Model (1-100 scale)
+  - Underwriting Decision Engine
 end note
 
 note bottom of Audit

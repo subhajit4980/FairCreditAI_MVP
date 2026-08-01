@@ -37,9 +37,8 @@ package "Application" <<Application>> {
 }
 
 package "Domain" <<Domain>> {
-  [core.scoring\n_score_baseline] as ScoreB
-  [core.scoring\n_score_canonical] as ScoreC
-  [core.scoring\ngenerate_score (dispatcher)] as ScoreD
+  [core.scoring\ngenerate_score] as ScoreD
+  [core.scoring\n_score_ai_model] as ScoreAI
 }
 
 package "Models" <<Models>> {
@@ -74,8 +73,7 @@ VAdmin --> ORM
 VWiki --> MD : markdown(...)
 VLender --> ORM
 
-ScoreD --> ScoreB
-ScoreD --> ScoreC
+ScoreD --> ScoreAI
 ScoreD --> MScore
 ScoreD --> MConsent
 ScoreD --> MDoc
@@ -97,11 +95,10 @@ VWiki --> WikiIdx
 VWiki --> WikiPage
 
 note right of ScoreD
-  Strategy pattern: caller picks
-  algorithm via POST field;
-  dispatcher whitelists against
-  ALGORITHMS tuple before calling
-  the correct private function.
+  Runs the Cashflow AI Model to 
+  underwrite and score the customer.
+  Produces standard and explainable
+  factor statements.
 end note
 
 @enduml

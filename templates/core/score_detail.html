@@ -315,24 +315,39 @@
 
 <!-- Main Score & Band Widget -->
 <div class="grid cols-2" style="margin-bottom: 24px;">
-  <div class="card score-dial">
-    <div class="num">{{ report.score }}</div>
-    <div class="range">out of 1 – 100</div>
-    <div class="score-bar"><div class="marker" style="left: {{ report.score }}%;"></div></div>
-    <div class="band-label">{{ report.get_band_display }}</div>
-    <p class="muted small" style="margin-top:14px;">
-      Generated {{ report.generated_at|date:"d M Y, H:i" }}
-      · <span class="badge info">Alternative Credit Score</span>
-    </p>
-  </div>
+  {% if report.ai_assessment.insufficient_history %}
+    <div class="card score-dial" style="border-top: 4px solid #ef4444; background: #fffafb; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <div style="font-size: 40px; margin-bottom: 8px;">⚠️</div>
+      <div class="band-label" style="color: #ef4444; font-weight: 800; font-size: 18px;">Score Unavailable</div>
+      <p class="muted small" style="margin-top: 14px; line-height: 1.5; color: #7f1d1d; max-width: 280px; margin-left: auto; margin-right: auto;">
+        Underwriting policy requires a minimum of 180 days (6 months) of continuous transaction history.
+        Your statement covers only <strong>{{ report.ai_assessment.days_range }} days</strong>.
+      </p>
+    </div>
+  {% else %}
+    <div class="card score-dial">
+      <div class="num">{{ report.score }}</div>
+      <div class="range">out of 1 – 100</div>
+      <div class="score-bar"><div class="marker" style="left: {{ report.score }}%;"></div></div>
+      <div class="band-label">{{ report.get_band_display }}</div>
+      <p class="muted small" style="margin-top:14px;">
+        Generated {{ report.generated_at|date:"d M Y, H:i" }}
+        · <span class="badge info">Alternative Credit Score</span>
+      </p>
+    </div>
+  {% endif %}
   
   <div class="card">
     <h3>Profile &amp; Scoring Summary</h3>
     <table class="ml-meta-table" style="margin-top:10px;">
       <tr><td>CustomerID Reference</td><td><code>{{ report.customer.username }}</code></td></tr>
       <tr><td>Scoring Engine</td><td>{{ report.get_algorithm_display }}</td></tr>
-      <tr><td>Risk Grade classification</td><td><strong>{{ report.band|upper }}</strong></td></tr>
-      {% if report.recommended_loan_amount %}
+      {% if report.ai_assessment.insufficient_history %}
+        <tr><td>Risk Grade classification</td><td><span style="color: #ef4444; font-weight: 700;">UNAVAILABLE</span></td></tr>
+      {% else %}
+        <tr><td>Risk Grade classification</td><td><strong>{{ report.band|upper }}</strong></td></tr>
+      {% endif %}
+      {% if report.recommended_loan_amount and not report.ai_assessment.insufficient_history %}
         <tr><td>Recommended Loan Amount</td><td><strong>₹{{ report.recommended_loan_amount|floatformat:0 }}</strong></td></tr>
       {% endif %}
     </table>
@@ -584,17 +599,70 @@
   </div>
 </div>
 
+{% if report.ai_assessment.sanitization_stats or report.ai_assessment.Sanitization_Stats %}
+{% with stats=report.ai_assessment.sanitization_stats|default:report.ai_assessment.Sanitization_Stats %}
+<div class="card" style="margin-top: 18px;">
+  <h3>Anti-Gaming Sanitization Summary</h3>
+  <p class="muted small">We filter out non-income inflows and self-transfers to analyze your true cashflow stability.</p>
+  <table class="ml-meta-table" style="margin-top:12px; width: 100%;">
+    <thead>
+      <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Sanitization Category</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Treatment</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Txns Affected</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: right;">Amount Excluded</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 10px 4px; font-weight: 600;">Self-Transfers &amp; Wallet Loads (Inflow)</td>
+        <td style="padding: 10px 4px;"><span class="badge danger" style="background:#fee2e2; color:#ef4444; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">EXCLUDED</span></td>
+        <td style="padding: 10px 4px; text-align: center;">{{ stats.self_transfer_credits_count|default:0 }}</td>
+        <td style="padding: 10px 4px; text-align: right; font-weight: 600;">₹{{ stats.self_transfer_credits_amount|default:0|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 4px; font-weight: 600;">Self-Transfers &amp; Wallet Loads (Outflow)</td>
+        <td style="padding: 10px 4px;"><span class="badge danger" style="background:#fee2e2; color:#ef4444; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">EXCLUDED</span></td>
+        <td style="padding: 10px 4px; text-align: center;">{{ stats.self_transfer_debits_count|default:0 }}</td>
+        <td style="padding: 10px 4px; text-align: right; font-weight: 600;">₹{{ stats.self_transfer_debits_amount|default:0|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 4px; font-weight: 600;">Loan Disbursements &amp; Paylater Credits</td>
+        <td style="padding: 10px 4px;"><span class="badge danger" style="background:#fee2e2; color:#ef4444; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">EXCLUDED</span></td>
+        <td style="padding: 10px 4px; text-align: center;">{{ stats.loan_credits_count|default:0 }}</td>
+        <td style="padding: 10px 4px; text-align: right; font-weight: 600;">₹{{ stats.loan_credits_amount|default:0|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 4px; font-weight: 600;">Cash Deposits (Discounted 50%)</td>
+        <td style="padding: 10px 4px;"><span class="badge warn" style="background:#fef3c7; color:#d97706; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">DISCOUNTED</span></td>
+        <td style="padding: 10px 4px; text-align: center;">{{ stats.cash_deposit_credits_count|default:0 }}</td>
+        <td style="padding: 10px 4px; text-align: right; font-weight: 600;">₹{{ stats.cash_deposit_credits_amount|default:0|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 4px; font-weight: 600;">Winsorized Large Inflow Spikes</td>
+        <td style="padding: 10px 4px;"><span class="badge info" style="background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">CAPPED</span></td>
+        <td style="padding: 10px 4px; text-align: center;">{{ stats.winsorized_credits_count|default:0 }}</td>
+        <td style="padding: 10px 4px; text-align: right; font-weight: 600;">₹{{ stats.winsorized_credits_amount|default:0|floatformat:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endwith %}
+{% endif %}
+
 {% if report.ai_assessment %}
 {{ report.ai_assessment|json_script:"ai-assessment-data" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   (function() {
     const data = JSON.parse(document.getElementById('ai-assessment-data').textContent);
-    const trends = data.monthly_trends || [];
+    const trends = data.monthly_trends || data.Monthly_Trends || [];
     if (!trends.length) return;
     
     const labels = trends.map(t => t.month);
+    const rawCredits = trends.map(t => t.raw_credit !== undefined ? t.raw_credit : t.credit);
     const credits = trends.map(t => t.credit);
+    const rawDebits = trends.map(t => t.raw_debit !== undefined ? t.raw_debit : t.debit);
     const debits = trends.map(t => t.debit);
     
     const ctx = document.getElementById('cashflowChart').getContext('2d');
@@ -604,16 +672,30 @@
         labels: labels,
         datasets: [
           {
-            label: 'Inflow (Credit)',
+            label: 'Original Inflow',
+            data: rawCredits,
+            backgroundColor: 'rgba(34, 197, 94, 0.3)',
+            borderColor: 'rgba(34, 197, 94, 0.6)',
+            borderWidth: 1
+          },
+          {
+            label: 'Sanitized Inflow',
             data: credits,
-            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+            backgroundColor: 'rgba(34, 197, 94, 0.85)',
             borderColor: 'rgb(34, 197, 94)',
             borderWidth: 1
           },
           {
-            label: 'Outflow (Debit)',
+            label: 'Original Outflow',
+            data: rawDebits,
+            backgroundColor: 'rgba(239, 68, 68, 0.3)',
+            borderColor: 'rgba(239, 68, 68, 0.6)',
+            borderWidth: 1
+          },
+          {
+            label: 'Sanitized Outflow',
             data: debits,
-            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+            backgroundColor: 'rgba(239, 68, 68, 0.85)',
             borderColor: 'rgb(239, 68, 68)',
             borderWidth: 1
           }

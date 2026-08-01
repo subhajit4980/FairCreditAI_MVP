@@ -40,12 +40,24 @@ def categorize_narration(narr: str) -> str:
         return "SHADOW_EMI"
     return "OTHERS"
 
+def get_counterparty_signature(narr: str) -> str:
+    if not isinstance(narr, str):
+        return "UNKNOWN"
+    narr = narr.upper()
+    # Extract UPI VPA if present
+    upi_match = re.search(r"([A-Z0-9.\-_]+@[A-Z]{2,})", narr)
+    if upi_match:
+        return upi_match.group(1)
+    # Clean special characters and keep the first two significant words
+    cleaned = re.sub(r"[^A-Z\s]", " ", narr)
+    words = [w for w in cleaned.split() if len(w) > 2]
+    return " ".join(words[:2]) if words else "OTHERS"
+
 def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFrame]:
     """Parse CSV or Excel file into a standardized DataFrame."""
     name = filename.lower()
     
     if name.endswith((".xlsx", ".xls")):
-        # Excel
         if name.endswith(".xlsx"):
             from openpyxl import load_workbook
             wb = load_workbook(file_path_or_stream, read_only=True, data_only=True)
@@ -66,10 +78,8 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
             
         df = pd.DataFrame(rows[1:], columns=rows[0])
     else:
-        # CSV
         if hasattr(file_path_or_stream, "read"):
             raw = file_path_or_stream.read()
-            # Restore pointer if stream
             if hasattr(file_path_or_stream, "seek"):
                 file_path_or_stream.seek(0)
         else:
@@ -97,7 +107,6 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
         body = "\n".join(lines[header_idx:])
         df = pd.read_csv(io.StringIO(body))
 
-    # Rename columns to standard ones
     df.columns = [str(c).lower().strip() for c in df.columns]
     
     col_mapping = {}
@@ -113,10 +122,17 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
         elif any(k in col for k in DESC_KEYS):
             col_mapping[col] = "Narration"
             
+    # Fallback: if 'Date' wasn't mapped, but there is some date column (like value date), map it
+    if "Date" not in col_mapping.values():
+        for col in df.columns:
+            if any(k in col for k in DATE_KEYS):
+                col_mapping[col] = "Date"
+                break
+
     df = df.rename(columns=col_mapping)
+
     required = ["Date", "Withdrawal Amount", "Deposit Amount", "Closing Balance", "Narration"]
     
-    # Fill missing columns with default/zero
     for r in required:
         if r not in df.columns:
             if r == "Narration":
@@ -127,15 +143,43 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
     return df[required]
 
 def extract_advanced_features(df: pd.DataFrame) -> dict:
-    """Run full feature engineering on standard DataFrame."""
+    """Run production-grade credit and fraud feature engineering on standard DataFrame."""
     tx = df.copy()
     for col in ["Withdrawal Amount", "Deposit Amount", "Closing Balance"]:
         if col in tx.columns:
-            if tx[col].dtype == object:
+            if not pd.api.types.is_numeric_dtype(tx[col]):
                 tx[col] = tx[col].astype(str).str.replace(r"[^\d.\-]", "", regex=True)
             tx[col] = pd.to_numeric(tx[col], errors="coerce").fillna(0.0)
         
-    tx["Date"] = pd.to_datetime(tx["Date"], errors="coerce")
+    # Auto-detect date format from the series to resolve ambiguous formats (like 4/1/2026)
+    date_strs = tx["Date"].astype(str).str.strip()
+    has_day_first = False
+    has_month_first = False
+    for val in date_strs:
+        if not val or val.lower() in ["nan", "nat", ""]:
+            continue
+        parts = re.split(r"[/\- ]", val)
+        if len(parts) >= 2:
+            try:
+                p1 = int(float(parts[0]))
+                p2 = int(float(parts[1]))
+                if p1 < 100 and p2 < 100:
+                    if p1 > 12 and p2 <= 12:
+                        has_day_first = True
+                        break
+                    if p2 > 12 and p1 <= 12:
+                        has_month_first = True
+                        break
+            except ValueError:
+                continue
+
+    if has_month_first:
+        tx["Date"] = pd.to_datetime(date_strs, dayfirst=False, errors="coerce")
+    elif has_day_first:
+        tx["Date"] = pd.to_datetime(date_strs, dayfirst=True, errors="coerce")
+    else:
+        tx["Date"] = pd.to_datetime(date_strs, errors="coerce")
+        
     tx = tx.dropna(subset=["Date"]).sort_values("Date")
     
     if tx.empty:
@@ -144,148 +188,247 @@ def extract_advanced_features(df: pd.DataFrame) -> dict:
     tx["year_month"] = tx["Date"].dt.to_period("M").astype(str)
     tx["is_debit"] = tx["Withdrawal Amount"].gt(0)
     tx["is_credit"] = tx["Deposit Amount"].gt(0)
-    tx["debit_amt"] = np.where(tx["is_debit"], tx["Withdrawal Amount"], 0.0)
-    tx["credit_amt"] = np.where(tx["is_credit"], tx["Deposit Amount"], 0.0)
-    tx["amount"] = np.where(tx["is_credit"], tx["Deposit Amount"], tx["Withdrawal Amount"])
+    
+    desc_upper = tx["Narration"].astype(str).str.upper()
+    
+    # 1. ANTI-GAMING SANITIZATION
+    # A. Exclude P2P Self-Transfers & Wallet Loads
+    is_self = desc_upper.str.contains(
+        r"\bSELF\b|\bOWN A/C\b|\bOWN ACCOUNT\b|\bINTERNAL\b|\bMY OWN\b|\bWALLET LOAD\b|\bTO WALLET\b",
+        regex=True
+    )
+    
+    # B. Exclude Loan Disbursements from Income credits
+    is_loan = desc_upper.str.contains(
+        r"LOAN|DISB|FINANCE|DISBURSEMENT|CREDIT LINE|ADVANCE|PAYLATER|CASHE|KREDITBEE|LEND",
+        regex=True
+    )
+    
+    # C. Identify Cash Deposits to discount
+    is_cash_dep = desc_upper.str.contains(r"CASH DEP|CASH DEPOSIT|CDM|CASH IN", regex=True)
+    
+    # Compute base credit amounts
+    raw_credit = tx["Deposit Amount"].values
+    sanitized_credit = np.copy(raw_credit)
+    
+    # Apply self-transfer & loan disbursement exclusions
+    sanitized_credit[is_self] = 0.0
+    sanitized_credit[is_loan] = 0.0
+    
+    # Apply 50% discount to Cash Deposits
+    sanitized_credit[is_cash_dep] = sanitized_credit[is_cash_dep] * 0.50
+    
+    # D. Winsorize Large Credit Inflow Spikes (> 99th Percentile with a ₹50,000 floor)
+    credit_txns = sanitized_credit[sanitized_credit > 0]
+    winsorize_limit = float(np.percentile(credit_txns, 99)) if len(credit_txns) > 0 else 50000.0
+    winsorize_limit = max(50000.0, winsorize_limit)
+    sanitized_credit[sanitized_credit > winsorize_limit] = winsorize_limit
+    
+    # Apply self-transfer exclusions to debits
+    raw_debit = tx["Withdrawal Amount"].values
+    sanitized_debit = np.copy(raw_debit)
+    sanitized_debit[is_self] = 0.0
+    
+    tx["credit_amt"] = sanitized_credit
+    tx["debit_amt"] = sanitized_debit
+    tx["amount"] = np.where(tx["is_credit"], sanitized_credit, sanitized_debit)
     tx["category_parsed"] = tx["Narration"].apply(categorize_narration)
     
     # Monthly aggregations
     monthly = tx.groupby("year_month").agg(
         monthly_income=("credit_amt", "sum"),
-        monthly_expense=("debit_amt", "sum")
+        monthly_expense=("debit_amt", "sum"),
+        raw_income=("Deposit Amount", "sum"),
+        raw_expense=("Withdrawal Amount", "sum")
     ).reset_index()
     monthly["monthly_savings"] = monthly.monthly_income - monthly.monthly_expense
-    
+    print("Monthly income and expense aggregation completed for Customer ID:\n", monthly)
+
     total_txns = len(tx)
     period_months = max(1.0, float(tx["year_month"].nunique()))
+    days_range = (tx["Date"].max() - tx["Date"].min()).days
     
-    # Aggregates
-    transaction_frequency = float(total_txns / period_months)
-    average_transaction_amount = float(tx["amount"].mean())
-    median_transaction_amount = float(tx["amount"].median())
-    largest_deposit = float(tx["Deposit Amount"].max())
-    largest_withdrawal = float(tx["Withdrawal Amount"].max())
-    average_balance = float(tx["Closing Balance"].mean())
-    minimum_balance = float(tx["Closing Balance"].min())
-    maximum_balance = float(tx["Closing Balance"].max())
-    balance_variance = float(tx["Closing Balance"].var()) if total_txns > 1 else 0.0
-    
-    std_amount = tx["amount"].std(ddof=0) if total_txns else 0.0
-    mean_amount = tx["amount"].mean() if total_txns else 0.0
-    transaction_consistency = float(1 / (1 + std_amount / (mean_amount + 1)))
-    
+    # 2. FEATURE EXTRACTION
     average_monthly_income = float(monthly["monthly_income"].mean())
     average_monthly_expense = float(monthly["monthly_expense"].mean())
     monthly_savings = float(monthly["monthly_savings"].mean())
     
-    std_income = monthly["monthly_income"].std(ddof=0) if len(monthly) >= 2 else 0.0
-    mean_income = monthly["monthly_income"].mean()
-    income_consistency = float(1 / (1 + std_income / (mean_income + 1))) if mean_income > 0 else 0.7
+    # Weighted Income Recurrence Index (I_RI)
+    monthly_recurrence = []
+    tx["month_str"] = tx["Date"].dt.to_period("M").astype(str)
+    for _, group in tx.groupby("month_str"):
+        credit_days = group.loc[group["credit_amt"] > 0, "Date"].dt.date.nunique()
+        monthly_recurrence.append(min(1.0, credit_days / 4.0))
+    income_recurrence = float(np.mean(monthly_recurrence)) if monthly_recurrence else 0.70
     
-    std_expense = monthly["monthly_expense"].std(ddof=0) if len(monthly) >= 2 else 0.0
-    mean_expense = monthly["monthly_expense"].mean()
-    expense_stability = float(1 / (1 + std_expense / (mean_expense + 1))) if mean_expense > 0 else 0.7
-    
+    # Income Concentration Coefficient (I_CC)
+    credit_tx = tx[tx["is_credit"] & ~is_self & ~is_loan].copy()
+    if not credit_tx.empty:
+        credit_tx["counterparty"] = credit_tx["Narration"].apply(get_counterparty_signature)
+        grouped = credit_tx.groupby("counterparty")["credit_amt"].sum()
+        total_sanitized = grouped.sum()
+        if total_sanitized > 0:
+            proportions = grouped / total_sanitized
+            hhi = float((proportions ** 2).sum())
+            income_concentration = 1.0 - hhi
+        else:
+            income_concentration = 0.0
+    else:
+        income_concentration = 0.0
+        
+    # Average Daily Balance (ADB)
+    try:
+        daily_series = tx.set_index("Date")["Closing Balance"].resample("D").last().ffill()
+        average_daily_balance = float(daily_series.mean()) if not daily_series.empty else 0.0
+        
+        # Balance Retention Ratio (B_RR)
+        balance_retention_ratio = (
+            min(2.0, average_daily_balance / average_monthly_income)
+            if average_monthly_income > 0
+            else 0.0
+        )
+        # Low Balance Frequency (L_BF)
+        low_bal_days = (daily_series < 500.0).sum() if not daily_series.empty else 0
+        total_days = len(daily_series) if not daily_series.empty else 1
+        low_balance_frequency = float(low_bal_days / total_days)
+    except Exception:
+        # Fallback if resample fails due to duplicate index or format issues
+        average_daily_balance = float(tx["Closing Balance"].mean())
+        balance_retention_ratio = min(2.0, average_daily_balance / average_monthly_income) if average_monthly_income > 0 else 0.0
+        low_balance_frequency = float((tx["Closing Balance"] < 500.0).sum() / len(tx))
+        
+    # Exclude self-transfer volume for HHI & spends
     total_income = float(tx["credit_amt"].sum())
     total_expense = float(tx["debit_amt"].sum())
     
+    # Categorized expenditures
     essential_expense = float(tx.loc[tx["category_parsed"].isin(["UTILITIES_BILLS", "GROCERY"]), "debit_amt"].sum())
     discretionary_expense = float(tx.loc[tx["category_parsed"].isin(["FOOD_DELIVERY", "ECOMMERCE_SHOPPING", "TRAVEL_MOBILITY"]), "debit_amt"].sum())
-    atm_withdrawals = float(tx.loc[tx["category_parsed"] == "ATM_CASH", "debit_amt"].sum())
     emi_payments = float(tx.loc[tx["category_parsed"] == "SHADOW_EMI", "debit_amt"].sum())
-    investment_amount = float(tx.loc[tx["category_parsed"] == "INVESTMENTS_SIP", "debit_amt"].sum())
-    salary_credits = float(tx.loc[tx["category_parsed"] == "SALARY", "credit_amt"].sum())
     
-    expense_ratio = float(total_expense / total_income) if total_income > 0 else 1.0
+    # Ratios
     savings_ratio = float(monthly_savings / average_monthly_income) if average_monthly_income > 0 else 0.0
-    
-    essential_expense_ratio = float(essential_expense / total_expense) if total_expense > 0 else 0.0
+    foir = (emi_payments / period_months) / (average_monthly_income + 1)
     discretionary_expense_ratio = float(discretionary_expense / total_expense) if total_expense > 0 else 0.0
-    atm_cash_ratio = float(atm_withdrawals / total_expense) if total_expense > 0 else 0.0
-    investment_ratio = float(investment_amount / total_income) if total_income > 0 else 0.0
-    salary_ratio = float(salary_credits / total_income) if total_income > 0 else 0.0
     
-    financial_buffer = float(max(0.0, minimum_balance) / average_monthly_expense) if average_monthly_expense > 0 else 0.0
-    income_stability_index = float(income_consistency * 0.6 + expense_stability * 0.4)
-    
-    # Heuristics for baseline algorithm compatibility
+    # Bounces & Mandates
     bounces = 0
     upi_txns = 0
-    for idx, row in tx.iterrows():
+    for _, row in tx.iterrows():
         desc = str(row["Narration"]).lower()
         if any(k in desc for k in BOUNCE_KEYWORDS):
             bounces += 1
         if any(k in desc for k in UPI_KEYWORDS):
             upi_txns += 1
             
-    distinct_counterparties = len(tx["Narration"].astype(str).str.lower().str.split().str[:4].str.join(" ").dropna().unique())
-    
-    # 0..1 versions of payment timeliness & digital engagement
     bounces_per_month = bounces / period_months
-    payment_timeliness = max(0.0, min(1.0, 0.95 - bounces_per_month * 0.20))
+    payment_timeliness = max(0.0, min(1.0, 1.0 - bounces_per_month * 0.20))
     bounce_rate = min(1.0, bounces / total_txns) if total_txns else 0.0
     
-    upi_share = upi_txns / total_txns if total_txns else 0.0
-    diversity = min(1.0, distinct_counterparties / 30.0)
-    digital_engagement = max(0.0, min(1.0, 0.6 * upi_share + 0.4 * diversity))
+    # Digital Transactions Breadth & Spend Diversity
+    distinct_counterparties = len(tx["Narration"].astype(str).str.lower().str.split().str[:4].str.join(" ").dropna().unique())
+    counterparty_breadth = min(1.0, distinct_counterparties / 30.0)
+    
+    # Self-Transfer Fraud checks
+    self_transfer_credits = tx.loc[is_self & tx["is_credit"], "Deposit Amount"].sum()
+    total_raw_credits = tx["Deposit Amount"].sum()
+    self_transfer_ratio = float(self_transfer_credits / total_raw_credits) if total_raw_credits > 0 else 0.0
+
+    # Count & amount removed calculations
+    is_credit = tx["is_credit"]
+    is_debit = tx["is_debit"]
+    
+    self_cred_mask = is_self & is_credit
+    self_deb_mask = is_self & is_debit
+    loan_cred_mask = is_loan & is_credit & ~is_self
+    cash_cred_mask = is_cash_dep & is_credit & ~is_self & ~is_loan
+    
+    # Winsorization details
+    pre_winsorized = np.copy(raw_credit)
+    pre_winsorized[is_self] = 0.0
+    pre_winsorized[is_loan] = 0.0
+    pre_winsorized[is_cash_dep] = pre_winsorized[is_cash_dep] * 0.50
+    
+    winsorized_mask = (pre_winsorized > winsorize_limit) & (pre_winsorized > 0)
+    winsorized_diff = np.maximum(0.0, pre_winsorized - sanitized_credit)
+    
+    sanitization_stats = {
+        "self_transfer_credits_count": int(self_cred_mask.sum()),
+        "self_transfer_credits_amount": round(float(tx.loc[self_cred_mask, "Deposit Amount"].sum()), 2),
+        "self_transfer_debits_count": int(self_deb_mask.sum()),
+        "self_transfer_debits_amount": round(float(tx.loc[self_deb_mask, "Withdrawal Amount"].sum()), 2),
+        "loan_credits_count": int(loan_cred_mask.sum()),
+        "loan_credits_amount": round(float(tx.loc[loan_cred_mask, "Deposit Amount"].sum()), 2),
+        "cash_deposit_credits_count": int(cash_cred_mask.sum()),
+        "cash_deposit_credits_amount": round(float(tx.loc[cash_cred_mask, "Deposit Amount"].sum() * 0.5), 2),
+        "winsorized_credits_count": int(winsorized_mask.sum()),
+        "winsorized_credits_amount": round(float(winsorized_diff.sum()), 2),
+    }
     
     monthly_trends = []
     for _, row in monthly.iterrows():
         monthly_trends.append({
             "month": str(row["year_month"]),
             "credit": round(float(row["monthly_income"]), 2),
-            "debit": round(float(row["monthly_expense"]), 2)
+            "debit": round(float(row["monthly_expense"]), 2),
+            "raw_credit": round(float(row["raw_income"]), 2),
+            "raw_debit": round(float(row["raw_expense"]), 2)
         })
-    
+        
     return {
         "monthly_trends": monthly_trends,
-        # Core 21 cashflow features
-        "transaction_frequency": round(transaction_frequency, 1),
-        "average_transaction_amount": round(average_transaction_amount, 2),
-        "median_transaction_amount": round(median_transaction_amount, 2),
-        "largest_deposit": round(largest_deposit, 2),
-        "largest_withdrawal": round(largest_withdrawal, 2),
-        "average_balance": round(average_balance, 2),
-        "minimum_balance": round(minimum_balance, 2),
-        "maximum_balance": round(maximum_balance, 2),
-        "balance_variance": round(balance_variance, 2),
-        "transaction_consistency": round(transaction_consistency, 4),
-        "average_monthly_income": round(average_monthly_income, 2),
-        "income_consistency": round(income_consistency, 4),
-        "average_monthly_expense": round(average_monthly_expense, 2),
-        "monthly_savings": round(monthly_savings, 2),
-        "expense_stability": round(expense_stability, 4),
-        "total_income": round(total_income, 2),
-        "total_expense": round(total_expense, 2),
-        "expense_ratio": round(expense_ratio, 4),
-        "savings_ratio": round(savings_ratio, 4),
-        "financial_buffer": round(financial_buffer, 4),
-        "income_stability_index": round(income_stability_index, 4),
-        
-        # Intermediate / Diagnostic columns
-        "essential_expense": round(essential_expense, 2),
-        "discretionary_expense": round(discretionary_expense, 2),
-        "atm_withdrawals": round(atm_withdrawals, 2),
-        "emi_payments": round(emi_payments, 2),
-        "investment_amount": round(investment_amount, 2),
-        "salary_credits": round(salary_credits, 2),
-        "essential_expense_ratio": round(essential_expense_ratio, 4),
-        "discretionary_expense_ratio": round(discretionary_expense_ratio, 4),
-        "atm_cash_ratio": round(atm_cash_ratio, 4),
-        "investment_ratio": round(investment_ratio, 4),
-        "salary_ratio": round(salary_ratio, 4),
-        
-        # Compatibility features
-        "payment_timeliness": round(payment_timeliness, 3),
-        "bounce_rate": round(bounce_rate, 4),
-        "digital_engagement": round(digital_engagement, 3),
-        
-        # Extra stats for database parsed notes
+        "sanitization_stats": sanitization_stats,
         "txn_count": total_txns,
         "period_months": float(period_months),
-        "monthly_avg_inflow": round(average_monthly_income, 2),
-        "monthly_avg_outflow": round(average_monthly_expense, 2),
+        "days_range": days_range,
         "bounces": bounces,
+        "bounces_per_month": round(bounces_per_month, 2),
+        "self_transfer_ratio": round(self_transfer_ratio, 4),
+        
+        # Production Features Set
+        "average_monthly_income": round(average_monthly_income, 2),
+        "average_monthly_expense": round(average_monthly_expense, 2),
+        "monthly_savings": round(monthly_savings, 2),
+        "savings_ratio": round(savings_ratio, 4),
+        "income_recurrence": round(income_recurrence, 4),
+        "income_concentration": round(income_concentration, 4),
+        "average_daily_balance": round(average_daily_balance, 2),
+        "balance_retention_ratio": round(balance_retention_ratio, 4),
+        "low_balance_frequency": round(low_balance_frequency, 4),
+        "foir": round(foir, 4),
+        "discretionary_expense_ratio": round(discretionary_expense_ratio, 4),
+        "payment_timeliness": round(payment_timeliness, 4),
+        "counterparty_breadth": round(counterparty_breadth, 4),
+        "bounce_rate": round(bounce_rate, 4),
+        
+        # Compatibility legacy keys (dummy mapping for models consistency)
+        "transaction_frequency": round(total_txns / period_months, 1),
+        "average_transaction_amount": round(tx["amount"].mean() if total_txns else 0.0, 2),
+        "median_transaction_amount": round(tx["amount"].median() if total_txns else 0.0, 2),
+        "largest_deposit": round(tx["Deposit Amount"].max(), 2),
+        "largest_withdrawal": round(tx["Withdrawal Amount"].max(), 2),
+        "average_balance": round(average_daily_balance, 2),
+        "minimum_balance": round(tx["Closing Balance"].min(), 2),
+        "maximum_balance": round(tx["Closing Balance"].max(), 2),
+        "balance_variance": round(tx["Closing Balance"].var() if total_txns > 1 else 0.0, 2),
+        "transaction_consistency": round(0.85, 4),
+        "expense_stability": round(0.85, 4),
+        "total_income": round(total_income, 2),
+        "total_expense": round(total_expense, 2),
+        "expense_ratio": round(total_expense / total_income if total_income > 0 else 1.0, 4),
+        "financial_buffer": round(max(0.0, tx["Closing Balance"].min()) / (average_monthly_expense + 1), 4),
+        "income_stability_index": round(income_recurrence * 0.6 + 0.85 * 0.4, 4),
+        "essential_expense": round(essential_expense, 2),
+        "discretionary_expense": round(discretionary_expense, 2),
+        "atm_withdrawals": round(tx.loc[tx["category_parsed"] == "ATM_CASH", "debit_amt"].sum(), 2),
+        "emi_payments": round(emi_payments, 2),
+        "investment_amount": round(tx.loc[tx["category_parsed"] == "INVESTMENTS_SIP", "debit_amt"].sum(), 2),
+        "salary_credits": round(tx.loc[tx["category_parsed"] == "SALARY", "credit_amt"].sum(), 2),
+        "essential_expense_ratio": round(essential_expense / total_expense if total_expense > 0 else 0.0, 4),
+        "atm_cash_ratio": round(tx.loc[tx["category_parsed"] == "ATM_CASH", "debit_amt"].sum() / total_expense if total_expense > 0 else 0.0, 4),
+        "investment_ratio": round(tx.loc[tx["category_parsed"] == "INVESTMENTS_SIP", "debit_amt"].sum() / total_income if total_income > 0 else 0.0, 4),
+        "salary_ratio": round(tx.loc[tx["category_parsed"] == "SALARY", "credit_amt"].sum() / total_income if total_income > 0 else 0.0, 4),
+        "digital_engagement": round(upi_txns / total_txns if total_txns else 0.0, 3),
         "upi_txns": upi_txns,
         "distinct_counterparties": distinct_counterparties,
     }

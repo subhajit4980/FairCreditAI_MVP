@@ -44,12 +44,7 @@
   <p class="muted small">Uses the most recent parsed AA fetch or upload. Without one we score against a sample profile.</p>
   <form method="post" action="{% url 'ops_generate_score' customer.id %}" style="margin-top: 10px;">
     {% csrf_token %}
-    <label class="small muted" style="display:block; margin-bottom:8px;">Scoring algorithm
-      <select name="algorithm" style="display:block; margin-top:4px;">
-        <option value="canonical" selected>Weighted Score Algorithm (300–900)</option>
-        <option value="ai_model">AI Model (alternative-data, 1–100)</option>
-      </select>
-    </label>
+    <input type="hidden" name="algorithm" value="ai_model">
     <button class="btn" type="submit">Get the Score and Loan Eligibility</button>
   </form>
 </div>

@@ -26,32 +26,8 @@ from .models import AAConsent, BankStatement, Document, ScoreReport
 
 
 # Public algorithm identifiers — kept in sync with ScoreReport.Algorithm.
-BASELINE = "baseline"
-CANONICAL = "canonical"
 AI_MODEL = "ai_model"
 ALGORITHMS = (AI_MODEL,)
-
-# Canonical weights (must sum to 1.0). Source: business-idea1.jpeg.
-CANONICAL_WEIGHTS = {
-    "income_consistency":    0.25,
-    "expense_income_ratio":  0.20,
-    "savings_ratio":         0.15,
-    "payment_timeliness":    0.15,
-    "transaction_frequency": 0.10,
-    "bounce_rate":           0.10,
-    "digital_engagement":    0.05,
-}
-
-# Human-friendly labels for the seven features (used in factor lists).
-FEATURE_LABELS = {
-    "income_consistency":    "Income consistency",
-    "expense_income_ratio":  "Expense / income ratio",
-    "savings_ratio":         "Savings ratio",
-    "payment_timeliness":    "Payment timeliness",
-    "transaction_frequency": "Transaction frequency",
-    "bounce_rate":           "Bounce rate (low is good)",
-    "digital_engagement":    "Digital engagement",
-}
 
 
 def _seeded_random(user_id: int) -> random.Random:
@@ -59,28 +35,7 @@ def _seeded_random(user_id: int) -> random.Random:
     return random.Random(seed)
 
 
-def _band_for(score: int) -> str:
-    if score >= 800:
-        return ScoreReport.Band.EXCELLENT
-    if score >= 740:
-        return ScoreReport.Band.VERY_GOOD
-    if score >= 670:
-        return ScoreReport.Band.GOOD
-    if score >= 580:
-        return ScoreReport.Band.FAIR
-    return ScoreReport.Band.POOR
 
-
-def _recommended_loan(score: int) -> int:
-    if score >= 800:
-        return 1_500_000
-    if score >= 740:
-        return 800_000
-    if score >= 670:
-        return 350_000
-    if score >= 580:
-        return 100_000
-    return 0
 
 
 def _generate_features(customer):
@@ -136,10 +91,32 @@ def _generate_features(customer):
     for m in months:
         credits = round(average_monthly_income * rng.uniform(0.85, 1.15), 2)
         debits = round(credits * expense_ratio * rng.uniform(0.9, 1.1), 2)
-        monthly_trends.append({"month": m, "credit": credits, "debit": debits})
+        raw_credits = round(credits * rng.uniform(1.05, 1.15), 2)
+        raw_debits = round(debits * rng.uniform(1.02, 1.08), 2)
+        monthly_trends.append({
+            "month": m,
+            "credit": credits,
+            "debit": debits,
+            "raw_credit": raw_credits,
+            "raw_debit": raw_debits
+        })
+
+    sanitization_stats = {
+        "self_transfer_credits_count": rng.randint(2, 5),
+        "self_transfer_credits_amount": round(average_monthly_income * rng.uniform(0.04, 0.08), 2),
+        "self_transfer_debits_count": rng.randint(3, 7),
+        "self_transfer_debits_amount": round(average_monthly_expense * rng.uniform(0.03, 0.06), 2),
+        "loan_credits_count": rng.randint(0, 2),
+        "loan_credits_amount": round(average_monthly_income * rng.uniform(0.05, 0.12), 2),
+        "cash_deposit_credits_count": rng.randint(1, 3),
+        "cash_deposit_credits_amount": round(average_monthly_income * rng.uniform(0.02, 0.05), 2),
+        "winsorized_credits_count": rng.randint(0, 1),
+        "winsorized_credits_amount": round(rng.uniform(0, 5000), 2)
+    }
 
     return {
         "monthly_trends": monthly_trends,
+        "sanitization_stats": sanitization_stats,
         "income_consistency": income_consistency,
         "expense_ratio": expense_ratio,
         "savings_ratio": savings_ratio,
@@ -181,120 +158,7 @@ def _generate_features(customer):
 
 
 
-# ---------------------------------------------------------------------------
-# Baseline algorithm (the original prototype formula).
-# ---------------------------------------------------------------------------
 
-def _score_baseline(features, *, has_active_consent, verified_docs, profile_complete):
-    base = 540
-    base += int(features["income_consistency"] * 120)
-    base += int((1 - features["expense_ratio"]) * 80)
-    base += int(features["savings_ratio"] * 120)
-    base += int(features["payment_timeliness"] * 100)
-    base += min(60, int(features["transaction_frequency"] / 3))
-    base -= int(features["bounce_rate"] * 600)
-    base += int(features["digital_engagement"] * 60)
-
-    if has_active_consent:
-        base += 35
-    base += min(30, verified_docs * 10)
-    if profile_complete:
-        base += 15
-
-    score = max(300, min(900, base))
-
-    positives, negatives = [], []
-    if features["income_consistency"] >= 0.8:
-        positives.append({"factor": "Strong, consistent income inflows", "impact": "+45 pts"})
-    elif features["income_consistency"] < 0.65:
-        negatives.append({"factor": "Irregular income pattern", "impact": "-30 pts"})
-
-    if features["savings_ratio"] >= 0.2:
-        positives.append({"factor": "Healthy savings ratio", "impact": "+40 pts"})
-    elif features["savings_ratio"] < 0.1:
-        negatives.append({"factor": "Low savings ratio", "impact": "-25 pts"})
-
-    if features["payment_timeliness"] >= 0.9:
-        positives.append({"factor": "Excellent bill payment timeliness", "impact": "+35 pts"})
-    elif features["payment_timeliness"] < 0.75:
-        negatives.append({"factor": "Occasional late payments", "impact": "-20 pts"})
-
-    if features["bounce_rate"] <= 0.01:
-        positives.append({"factor": "Near-zero cheque/mandate bounces", "impact": "+25 pts"})
-    elif features["bounce_rate"] > 0.04:
-        negatives.append({"factor": "Elevated bounce rate", "impact": "-35 pts"})
-
-    if features["digital_engagement"] >= 0.7:
-        positives.append({"factor": "Strong digital footprint (UPI activity)", "impact": "+20 pts"})
-
-    if not has_active_consent:
-        negatives.append({"factor": "No Account Aggregator consent on file", "impact": "-35 pts"})
-    if verified_docs == 0:
-        negatives.append({"factor": "Identity documents not yet verified", "impact": "-20 pts"})
-
-    return score, positives[:4], negatives[:4]
-
-
-# ---------------------------------------------------------------------------
-# Canonical algorithm (from documents/fairCreditAI-business-idea1.jpeg).
-# ---------------------------------------------------------------------------
-
-def _to_subscores(features):
-    """Project the synthetic feature values onto the 0..100 sub-score scale.
-
-    Each sub-score is oriented so 100 = ideal. ``expense_income_ratio`` and
-    ``bounce_rate`` are inverted because lower raw values are better.
-    """
-    return {
-        "income_consistency":    max(0.0, min(100.0, features["income_consistency"] * 100)),
-        # Expense ratio: 0 expense → 100, 1.0 expense → 0.
-        "expense_income_ratio":  max(0.0, min(100.0, (1 - features["expense_ratio"]) * 100)),
-        # Savings ratio: 0.40 (40%) treated as ideal → 100.
-        "savings_ratio":         max(0.0, min(100.0, features["savings_ratio"] * 250)),
-        "payment_timeliness":    max(0.0, min(100.0, features["payment_timeliness"] * 100)),
-        # Transaction frequency: 100+ transactions/month is the ceiling.
-        "transaction_frequency": max(0.0, min(100.0, features["transaction_frequency"])),
-        # Bounce rate: 0 bounces → 100, 10% → 0.
-        "bounce_rate":           max(0.0, min(100.0, 100 - features["bounce_rate"] * 1000)),
-        "digital_engagement":    max(0.0, min(100.0, features["digital_engagement"] * 100)),
-    }
-
-
-def _score_canonical(features):
-    sub = _to_subscores(features)
-    alt = sum(sub[k] * w for k, w in CANONICAL_WEIGHTS.items())  # 0..100
-    score = round(300 + alt * 6)
-    score = max(300, min(900, score))
-
-    # SHAP-style attributions: each feature's contribution in CIBIL points is
-    # ``subscore * weight * 6``. For "what hurt" we surface the points that
-    # were *missed* relative to a perfect 100 sub-score.
-    contributions = []
-    for key, weight in CANONICAL_WEIGHTS.items():
-        gained = sub[key] * weight * 6
-        missed = (100 - sub[key]) * weight * 6
-        contributions.append((key, sub[key], gained, missed))
-
-    pos_sorted = sorted(contributions, key=lambda r: r[2], reverse=True)
-    neg_sorted = sorted(contributions, key=lambda r: r[3], reverse=True)
-
-    positives = [
-        {
-            "factor": f"{FEATURE_LABELS[key]} (sub-score {sub_val:.0f}/100)",
-            "impact": f"+{gained:.0f} pts",
-        }
-        for (key, sub_val, gained, _missed) in pos_sorted[:3]
-        if gained >= 5
-    ]
-    negatives = [
-        {
-            "factor": f"{FEATURE_LABELS[key]} below target ({sub_val:.0f}/100)",
-            "impact": f"-{missed:.0f} pts",
-        }
-        for (key, sub_val, _gained, missed) in neg_sorted[:3]
-        if missed >= 5
-    ]
-    return score, positives, negatives
 
 
 # ---------------------------------------------------------------------------
@@ -431,34 +295,16 @@ def generate_score(customer, algorithm: str = AI_MODEL) -> ScoreReport:
 
     features, source = _features_for(customer)
 
-    has_active_consent = AAConsent.objects.filter(
-        customer=customer, status=AAConsent.Status.ACTIVE
-    ).exists()
-    verified_docs = Document.objects.filter(
-        customer=customer, status=Document.Status.VERIFIED
-    ).count()
-    profile = getattr(customer, "profile", None)
-    profile_complete = bool(profile and profile.monthly_income)
+    score, positives, negatives, recommended_loan, assessment = _score_ai_model(
+        features, customer=customer
+    )
+    band = _ai_band(score)
 
-    assessment = {}
-    if algorithm == AI_MODEL:
-        score, positives, negatives, recommended_loan, assessment = _score_ai_model(
-            features, customer=customer
-        )
-        band = _ai_band(score)
-    elif algorithm == CANONICAL:
-        score, positives, negatives = _score_canonical(features)
-        band = _band_for(score)
-        recommended_loan = _recommended_loan(score)
-    else:
-        score, positives, negatives = _score_baseline(
-            features,
-            has_active_consent=has_active_consent,
-            verified_docs=verified_docs,
-            profile_complete=profile_complete,
-        )
-        band = _band_for(score)
-        recommended_loan = _recommended_loan(score)
+    if not assessment:
+        assessment = {
+            "monthly_trends": features.get("monthly_trends", []),
+            "sanitization_stats": features.get("sanitization_stats", {})
+        }
 
     return ScoreReport.objects.create(
         customer=customer,

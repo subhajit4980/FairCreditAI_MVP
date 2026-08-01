@@ -35,7 +35,7 @@ from .models import (
     User,
 )
 from .parsers import parse_csv_statement, parse_excel_statement
-from .scoring import ALGORITHMS, BASELINE, CANONICAL, AI_MODEL, generate_score
+from .scoring import ALGORITHMS, AI_MODEL, generate_score
 
 
 def _audit(actor, action, target="", detail=""):

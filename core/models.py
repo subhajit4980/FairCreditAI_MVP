@@ -120,8 +120,6 @@ class ScoreReport(models.Model):
         EXCELLENT = "excellent", "Excellent"
 
     class Algorithm(models.TextChoices):
-        BASELINE = "baseline", "Baseline (prototype heuristic)"
-        CANONICAL = "canonical", "Weighted Score Algorithm"
         AI_MODEL = "ai_model", "AI Model (alternative-data, 1-100)"
 
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="scores")

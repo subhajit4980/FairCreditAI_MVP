@@ -42,15 +42,13 @@ Customer -> UI : POST /me/consent/<handle>/approve/
 UI -> Views : consent_approve()
 Views -> ORM : status=active, approved_at=now()
 
-== 4. Score generation (canonical) ==
-Customer -> UI : POST /me/score/generate/\n(algorithm=canonical)
+== 4. Score generation ==
+Customer -> UI : POST /me/score/generate/
 UI -> Views : generate_my_score()
-Views -> Scoring : generate_score(user, "canonical")
+Views -> Scoring : generate_score(user)
 Scoring -> Scoring : _generate_features(seeded RNG)
-Scoring -> Scoring : _to_subscores(...) → 0..100
-Scoring -> Scoring : alt = Σ subscore × weight
-Scoring -> Scoring : score = round(300 + alt × 6)
-Scoring -> ORM : ScoreReport(...)
+Scoring -> Scoring : _score_ai_model(...) → 1..100
+Scoring -> ORM : ScoreReport(algorithm=ai_model)
 ORM -> DB : INSERT
 Views --> UI : 302 → /me/score/<id>/
 UI --> Customer : Dial + SHAP-style factors

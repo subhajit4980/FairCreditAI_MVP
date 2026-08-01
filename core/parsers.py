@@ -35,6 +35,11 @@ UPI_KEYWORDS = ("upi", "imps", "neft", "rtgs", "gpay", "phonepe", "paytm", "goog
 
 
 def _pick(row_lower: dict, candidates) -> str:
+    # First look for exact match
+    for c in candidates:
+        if c in row_lower:
+            return row_lower[c]
+    # Then look for substring match
     for c in candidates:
         for k in row_lower:
             if c in k:
@@ -58,12 +63,21 @@ def _to_date(raw: str) -> Optional[datetime]:
     if not raw:
         return None
     raw = raw.strip()
+    # Strip any time component (e.g. 2025-01-01 08:37:36 -> 2025-01-01)
+    date_part = raw.split()[0].split('T')[0]
     for fmt in DATE_FORMATS:
         try:
-            return datetime.strptime(raw, fmt)
+            return datetime.strptime(date_part, fmt)
         except ValueError:
             continue
+    # Fallback to pandas if standard formats do not match
+    try:
+        import pandas as pd
+        return pd.to_datetime(raw).to_pydatetime()
+    except Exception:
+        pass
     return None
+
 
 
 def parse_csv_statement(text: str) -> Optional[dict]:
@@ -78,14 +92,18 @@ def parse_csv_statement(text: str) -> Optional[dict]:
         if df is not None:
             features = extract_advanced_features(df)
             if features:
-                meta_keys = ["txn_count", "period_months", "monthly_avg_inflow", "monthly_avg_outflow", "bounces", "upi_txns", "distinct_counterparties"]
+                meta_keys = [
+                    "txn_count", "period_months", "monthly_avg_inflow", "monthly_avg_outflow",
+                    "average_monthly_income", "average_monthly_expense", "bounces", "upi_txns",
+                    "distinct_counterparties"
+                ]
                 parsed_features = {k: v for k, v in features.items() if k not in meta_keys}
                 return {
                     "features": parsed_features,
                     "txn_count": features["txn_count"],
                     "period_months": features["period_months"],
-                    "monthly_avg_inflow": features["monthly_avg_inflow"],
-                    "monthly_avg_outflow": features["monthly_avg_outflow"],
+                    "monthly_avg_inflow": features.get("monthly_avg_inflow", features.get("average_monthly_income", 0.0)),
+                    "monthly_avg_outflow": features.get("monthly_avg_outflow", features.get("average_monthly_expense", 0.0)),
                     "bounces": features["bounces"],
                     "upi_txns": features["upi_txns"],
                     "distinct_counterparties": features["distinct_counterparties"],
