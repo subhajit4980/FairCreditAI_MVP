@@ -11,15 +11,31 @@ DEBIT_KEYS = ["withdrawal amt", "withdrawal", "debit amt", "debit", "dr amount",
 CREDIT_KEYS = ["deposit amt", "deposit", "credit amt", "credit", "cr amount", "cr"]
 DESC_KEYS = ["description", "narration", "particulars", "transaction details", "details", "remarks"]
 BAL_KEYS = ["closing balance", "balance", "running balance"]
+AMOUNT_KEYS = ["amount", "txn amount", "transaction amount"]
+CATEGORY_KEYS = ["category", "type", "txn type", "transaction type"]
 
 # Heuristic keywords for baseline algorithms compatibility
 BOUNCE_KEYWORDS = ["bounce", "return", "fail", "reject", "insufficient", "rtn", "rev"]
 UPI_KEYWORDS = ["upi", "imps", "neft", "rtgs", "gpay", "phonepe", "paytm", "googlepay"]
 
-def categorize_narration(narr: str) -> str:
+def categorize_narration(narr: str, bank_category: str = "") -> str:
     if not isinstance(narr, str):
-        return "OTHERS"
+        narr = ""
     narr_upper = narr.upper()
+    cat_upper = bank_category.upper().strip() if isinstance(bank_category, str) else ""
+
+    # If the bank provides a category label, use it as a high-priority signal
+    if cat_upper:
+        if re.search(r"\bLOAN\b|\bEMI\b|\bFINANCE\b", cat_upper):
+            return "SHADOW_EMI"
+        if re.search(r"\bSELF\s*TRANSFER\b|\bOWN\s*ACCOUNT\b", cat_upper):
+            return "SELF_TRANSFER"
+        if re.search(r"\bSALARY\b|\bPAYROLL\b", cat_upper):
+            return "SALARY"
+        if re.search(r"\bATM\b|\bCASH\b", cat_upper):
+            return "ATM_CASH"
+
+    # Fallback to narration-based keyword matching
     if re.search(r"SALARY|NETSALARY|PAYROLL", narr_upper):
         return "SALARY"
     if re.search(r"ZERODHA|GROWW|MFAUTOPAY|PAYTMMONEY|MUTUAL|SIP", narr_upper):
@@ -36,7 +52,7 @@ def categorize_narration(narr: str) -> str:
         return "TRAVEL_MOBILITY"
     if re.search(r"ATM-WDL|CASH|NFS", narr_upper):
         return "ATM_CASH"
-    if re.search(r"EMI|LOAN|BAJAJFINSERV|HOMEEMI|PERSONALEMI", narr_upper):
+    if re.search(r"EMI|LOAN|BAJAJFINSERV|BAJAJFINANCE|HOMEEMI|PERSONALEMI|FINANCEAUTOPAY", narr_upper):
         return "SHADOW_EMI"
     return "OTHERS"
 
@@ -98,9 +114,10 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
         header_idx = 0
         for i, line in enumerate(lines[:30]):
             low = line.lower()
-            if any(d in low for d in DATE_KEYS) and (
-                any(d in low for d in DEBIT_KEYS) or any(c in low for c in CREDIT_KEYS)
-            ):
+            has_date = any(d in low for d in DATE_KEYS)
+            has_debit_credit = (any(d in low for d in DEBIT_KEYS) or any(c in low for c in CREDIT_KEYS))
+            has_amount = any(a in low for a in AMOUNT_KEYS)
+            if has_date and (has_debit_credit or has_amount):
                 header_idx = i
                 break
         
@@ -110,17 +127,23 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
     df.columns = [str(c).lower().strip() for c in df.columns]
     
     col_mapping = {}
+    amount_col = None
     for col in df.columns:
         if any(k in col for k in DATE_KEYS) and "value" not in col:
             col_mapping[col] = "Date"
+        elif any(k in col for k in DESC_KEYS):
+            # Check description BEFORE debit/credit to prevent 'cr' in 'description' false match
+            col_mapping[col] = "Narration"
         elif any(k in col for k in DEBIT_KEYS):
             col_mapping[col] = "Withdrawal Amount"
         elif any(k in col for k in CREDIT_KEYS):
             col_mapping[col] = "Deposit Amount"
         elif any(k in col for k in BAL_KEYS):
             col_mapping[col] = "Closing Balance"
-        elif any(k in col for k in DESC_KEYS):
-            col_mapping[col] = "Narration"
+        elif any(k in col for k in CATEGORY_KEYS) and col not in col_mapping:
+            col_mapping[col] = "Category"
+        elif any(k in col for k in AMOUNT_KEYS) and col not in col_mapping:
+            amount_col = col
             
     # Fallback: if 'Date' wasn't mapped, but there is some date column (like value date), map it
     if "Date" not in col_mapping.values():
@@ -131,6 +154,19 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
 
     df = df.rename(columns=col_mapping)
 
+    # Handle single "Amount" column: split into Withdrawal/Deposit based on sign
+    has_separate_debit_credit = (
+        "Withdrawal Amount" in df.columns and "Deposit Amount" in df.columns
+        and not (df["Withdrawal Amount"].astype(str).str.strip().isin(["", "0", "0.0", "nan"]).all()
+                 and df["Deposit Amount"].astype(str).str.strip().isin(["", "0", "0.0", "nan"]).all())
+    )
+    if not has_separate_debit_credit and amount_col is not None:
+        # Parse the single amount column: negative = debit, positive = credit
+        amt_series = df[amount_col].astype(str).str.replace(r"[^\d.\-]", "", regex=True)
+        amt_numeric = pd.to_numeric(amt_series, errors="coerce").fillna(0.0)
+        df["Withdrawal Amount"] = amt_numeric.clip(upper=0).abs()
+        df["Deposit Amount"] = amt_numeric.clip(lower=0)
+
     required = ["Date", "Withdrawal Amount", "Deposit Amount", "Closing Balance", "Narration"]
     
     for r in required:
@@ -139,8 +175,16 @@ def parse_to_dataframe(file_path_or_stream, filename: str) -> Optional[pd.DataFr
                 df[r] = "OTHERS"
             else:
                 df[r] = 0.0
+
+    # Include Category column if available (for downstream categorization)
+    output_cols = required[:]
+    if "Category" in df.columns:
+        output_cols.append("Category")
+    else:
+        df["Category"] = ""
+        output_cols.append("Category")
                 
-    return df[required]
+    return df[output_cols]
 
 def extract_advanced_features(df: pd.DataFrame) -> dict:
     """Run production-grade credit and fraud feature engineering on standard DataFrame."""
@@ -190,19 +234,24 @@ def extract_advanced_features(df: pd.DataFrame) -> dict:
     tx["is_credit"] = tx["Deposit Amount"].gt(0)
     
     desc_upper = tx["Narration"].astype(str).str.upper()
+    cat_upper = tx["Category"].astype(str).str.upper().str.strip() if "Category" in tx.columns else pd.Series("", index=tx.index)
     
     # 1. ANTI-GAMING SANITIZATION
-    # A. Exclude P2P Self-Transfers & Wallet Loads
-    is_self = desc_upper.str.contains(
+    # A. Exclude P2P Self-Transfers & Wallet Loads (check both narration and bank category)
+    is_self_narr = desc_upper.str.contains(
         r"\bSELF\b|\bOWN A/C\b|\bOWN ACCOUNT\b|\bINTERNAL\b|\bMY OWN\b|\bWALLET LOAD\b|\bTO WALLET\b",
         regex=True
     )
+    is_self_cat = cat_upper.str.contains(r"\bSELF\s*TRANSFER\b", regex=True, na=False)
+    is_self = is_self_narr | is_self_cat
     
-    # B. Exclude Loan Disbursements from Income credits
-    is_loan = desc_upper.str.contains(
-        r"LOAN|DISB|FINANCE|DISBURSEMENT|CREDIT LINE|ADVANCE|PAYLATER|CASHE|KREDITBEE|LEND",
+    # B. Exclude Loan Disbursements from Income credits (check both narration and bank category)
+    is_loan_narr = desc_upper.str.contains(
+        r"\bLOAN\b|DISB|FINANCE|DISBURSEMENT|CREDIT LINE|ADVANCE|PAYLATER|CASHE|KREDITBEE|LEND|FINANCEAUTOPAY",
         regex=True
     )
+    is_loan_cat = cat_upper.str.contains(r"\bLOAN\b", regex=True, na=False)
+    is_loan = is_loan_narr | is_loan_cat
     
     # C. Identify Cash Deposits to discount
     is_cash_dep = desc_upper.str.contains(r"CASH DEP|CASH DEPOSIT|CDM|CASH IN", regex=True)
@@ -232,7 +281,9 @@ def extract_advanced_features(df: pd.DataFrame) -> dict:
     tx["credit_amt"] = sanitized_credit
     tx["debit_amt"] = sanitized_debit
     tx["amount"] = np.where(tx["is_credit"], sanitized_credit, sanitized_debit)
-    tx["category_parsed"] = tx["Narration"].apply(categorize_narration)
+    tx["category_parsed"] = tx.apply(
+        lambda r: categorize_narration(r["Narration"], r.get("Category", "")), axis=1
+    )
     
     # Monthly aggregations
     monthly = tx.groupby("year_month").agg(

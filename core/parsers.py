@@ -24,6 +24,8 @@ DEBIT_KEYS = ("withdrawal amt", "withdrawal", "debit amt", "debit", "dr amount",
 CREDIT_KEYS = ("deposit amt", "deposit", "credit amt", "credit", "cr amount", "cr")
 DESC_KEYS = ("description", "narration", "particulars", "transaction details", "details", "remarks")
 BAL_KEYS = ("closing balance", "balance", "running balance")
+AMOUNT_KEYS = ("amount", "txn amount", "transaction amount")
+CATEGORY_KEYS = ("category", "type", "txn type", "transaction type")
 
 DATE_FORMATS = (
     "%d-%m-%Y", "%d/%m/%Y", "%d-%b-%Y", "%d-%B-%Y", "%Y-%m-%d", "%m/%d/%Y",
@@ -32,6 +34,7 @@ DATE_FORMATS = (
 
 BOUNCE_KEYWORDS = ("bounce", "return", "fail", "reject", "insufficient", "rtn", "rev")
 UPI_KEYWORDS = ("upi", "imps", "neft", "rtgs", "gpay", "phonepe", "paytm", "googlepay")
+LOAN_KEYWORDS = ("loan", "emi", "financeautopay", "bajajfinance", "bajajfinserv")
 
 
 def _pick(row_lower: dict, candidates) -> str:
@@ -48,13 +51,14 @@ def _pick(row_lower: dict, candidates) -> str:
 
 
 def _to_amount(raw: str) -> float:
+    """Parse a string amount into a float, preserving the sign."""
     if not raw:
         return 0.0
     s = re.sub(r"[^0-9.\-]", "", raw)
     if not s or s in (".", "-", "-."):
         return 0.0
     try:
-        return abs(float(s))
+        return float(s)
     except ValueError:
         return 0.0
 
@@ -113,39 +117,58 @@ def parse_csv_statement(text: str) -> Optional[dict]:
 
     # Some banks emit a few preamble lines before the header — find the header
     # by scanning for a line that contains either a date column synonym AND
-    # one of debit/credit.
+    # one of debit/credit or a unified amount column.
     lines = text.splitlines()
     header_idx = 0
     for i, line in enumerate(lines[:30]):
         low = line.lower()
-        if any(d in low for d in DATE_KEYS) and (
-            any(d in low for d in DEBIT_KEYS) or any(c in low for c in CREDIT_KEYS)
-        ):
+        has_date = any(d in low for d in DATE_KEYS)
+        has_debit_credit = (any(d in low for d in DEBIT_KEYS) or any(c in low for c in CREDIT_KEYS))
+        has_amount = any(a in low for a in AMOUNT_KEYS)
+        if has_date and (has_debit_credit or has_amount):
             header_idx = i
             break
     body = "\n".join(lines[header_idx:])
 
     reader = csv.DictReader(io.StringIO(body))
     txns = []
+
+    # Check if headers have separate debit/credit or a single amount column
+    fieldnames = [f.lower().strip() for f in (reader.fieldnames or []) if f]
+    has_separate = (
+        any(any(d in f for d in DEBIT_KEYS) for f in fieldnames)
+        or any(any(c in f for c in CREDIT_KEYS) for f in fieldnames)
+    )
+    has_single_amount = not has_separate and any(any(a in f for a in AMOUNT_KEYS) for f in fieldnames)
+
     for raw in reader:
         if not raw:
             continue
         row = {(k or "").lower().strip(): (v or "").strip() for k, v in raw.items() if k}
         if not row:
             continue
-        debit = _to_amount(_pick(row, DEBIT_KEYS))
-        credit = _to_amount(_pick(row, CREDIT_KEYS))
+
+        if has_single_amount:
+            # Single amount column: negative = debit, positive = credit
+            raw_amt = _to_amount(_pick(row, AMOUNT_KEYS))
+            debit = abs(raw_amt) if raw_amt < 0 else 0.0
+            credit = raw_amt if raw_amt > 0 else 0.0
+        else:
+            debit = abs(_to_amount(_pick(row, DEBIT_KEYS)))
+            credit = abs(_to_amount(_pick(row, CREDIT_KEYS)))
+
         date = _to_date(_pick(row, DATE_KEYS))
         desc = _pick(row, DESC_KEYS).lower()
+        category = _pick(row, CATEGORY_KEYS).lower()
         if not date or (debit == 0 and credit == 0):
             continue
-        txns.append({"date": date, "debit": debit, "credit": credit, "desc": desc})
+        txns.append({"date": date, "debit": debit, "credit": credit, "desc": desc, "category": category})
 
     if not txns:
         return None
 
     by_month = defaultdict(lambda: {
-        "credits": [], "debits": [], "bounces": 0, "upi": 0, "counterparties": set(), "txn_count": 0,
+        "credits": [], "debits": [], "bounces": 0, "upi": 0, "loan": 0, "counterparties": set(), "txn_count": 0,
     })
     for t in txns:
         ym = (t["date"].year, t["date"].month)
@@ -155,10 +178,14 @@ def parse_csv_statement(text: str) -> Optional[dict]:
             bucket["credits"].append(t["credit"])
         if t["debit"] > 0:
             bucket["debits"].append(t["debit"])
-        if any(k in t["desc"] for k in BOUNCE_KEYWORDS):
+        # Combined text for keyword matching: description + category
+        combined = t["desc"] + " " + t["category"]
+        if any(k in combined for k in BOUNCE_KEYWORDS):
             bucket["bounces"] += 1
-        if any(k in t["desc"] for k in UPI_KEYWORDS):
+        if any(k in combined for k in UPI_KEYWORDS):
             bucket["upi"] += 1
+        if any(k in combined for k in LOAN_KEYWORDS):
+            bucket["loan"] += 1
         counterparty = " ".join(t["desc"].split()[:4])
         if counterparty:
             bucket["counterparties"].add(counterparty)
