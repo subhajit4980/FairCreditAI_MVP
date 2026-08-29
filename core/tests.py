@@ -85,3 +85,93 @@ class AiModelPersistenceTests(TestCase):
         )
         report = generate_score(user, algorithm=AI_MODEL)
         self.assertEqual(report.ai_assessment["monthly_income_used"], 20186)
+
+
+from core.ml.obligations import clean_narration_signature, extract_lender_name, detect_obligations
+import pandas as pd
+
+class ObligationDetectionTests(TestCase):
+    def test_clean_narration_signature(self):
+        self.assertEqual(clean_narration_signature("ACH DEBIT BAJAJ FINANCE 12345"), "BAJAJ FINANCE")
+        self.assertEqual(clean_narration_signature("UPI/DR/MUTHOOT/9827349@PAYTM"), "MUTHOOT PAYTM")
+
+    def test_extract_lender_name(self):
+        self.assertEqual(extract_lender_name("ACH DEBIT BAJAJ FINSERV"), "Bajaj Finance")
+        self.assertEqual(extract_lender_name("ACH DEBIT CHOLA FINANCE"), "Cholamandalam Finance")
+
+    def test_detect_obligations_paid_and_bounced(self):
+        dates = [
+            "2026-01-05", "2026-02-05", "2026-03-05", "2026-04-05", "2026-05-05",
+            "2026-02-06",
+            "2026-01-10", "2026-05-20"
+        ]
+        withdrawals = [
+            3500.0, 3500.0, 3500.0, 3500.0, 3500.0,
+            295.0,
+            100.0, 500.0
+        ]
+        deposits = [0.0] * len(dates)
+        narrations = [
+            "ACH DR BAJAJ FINANCE EMI 1",
+            "ACH DR BAJAJ FINANCE EMI 2",
+            "ACH DR BAJAJ FINANCE EMI 3",
+            "ACH DR BAJAJ FINANCE EMI 4",
+            "ACH DR BAJAJ FINANCE EMI 5",
+            "BAJAJ FINANCE EMI BOUNCE CHARGES",
+            "UPI TO TEA SHOP",
+            "ATM CASH WITHDRAWAL"
+        ]
+        balances = [10000.0] * len(dates)
+        
+        df = pd.DataFrame({
+            "Date": pd.to_datetime(dates),
+            "Withdrawal Amount": withdrawals,
+            "Deposit Amount": deposits,
+            "Narration": narrations,
+            "Closing Balance": balances
+        })
+        
+        obligations = detect_obligations(df)
+        self.assertEqual(len(obligations), 1)
+        o = obligations[0]
+        self.assertEqual(o["lender"], "Bajaj Finance")
+        self.assertEqual(o["amount"], 3500.0)
+        self.assertEqual(o["preferred_day"], 5)
+        self.assertEqual(o["status"], "Active")
+        self.assertEqual(len(o["payment_timeline"]), 5)
+        
+    def test_detect_obligations_bounced_only(self):
+        dates = [
+            "2026-01-05", "2026-02-05", "2026-03-05",
+            "2026-03-10"
+        ]
+        withdrawals = [
+            3500.0, 295.0, 3500.0,
+            100.0
+        ]
+        deposits = [0.0] * len(dates)
+        narrations = [
+            "ACH DR BAJAJ FINANCE EMI",
+            "BAJAJ FINANCE RETURN/BOUNCE",
+            "ACH DR BAJAJ FINANCE EMI",
+            "UPI SHOP"
+        ]
+        balances = [10000.0] * len(dates)
+        
+        df = pd.DataFrame({
+            "Date": pd.to_datetime(dates),
+            "Withdrawal Amount": withdrawals,
+            "Deposit Amount": deposits,
+            "Narration": narrations,
+            "Closing Balance": balances
+        })
+        
+        obligations = detect_obligations(df)
+        self.assertEqual(len(obligations), 1)
+        o = obligations[0]
+        self.assertEqual(o["status"], "Bounced")
+        timeline = o["payment_timeline"]
+        self.assertEqual(timeline[0]["status"], "Paid")
+        self.assertEqual(timeline[1]["status"], "Bounced")
+        self.assertEqual(timeline[2]["status"], "Paid")
+

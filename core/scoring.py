@@ -23,6 +23,7 @@ import hashlib
 import random
 
 from .models import AAConsent, BankStatement, Document, ScoreReport
+from core.ml.obligations import get_day_suffix
 
 
 # Public algorithm identifiers — kept in sync with ScoreReport.Algorithm.
@@ -85,6 +86,67 @@ def _generate_features(customer):
     atm_cash_ratio = round(atm_withdrawals / (total_expense + 1), 4)
     investment_ratio = round(investment_amount / (total_income + 1), 4)
     salary_ratio = round(salary_credits / (total_income + 1), 4)
+
+    # Synthetic obligations generator
+    detected_obligations = []
+    if rng.random() > 0.3:
+        amt = round(rng.uniform(1500, 8000), -2)
+        day = rng.randint(2, 7)
+        total_payments = rng.randint(4, 6)
+        pct = (amt / average_monthly_income) * 100.0 if average_monthly_income > 0 else 0.0
+        detected_obligations.append({
+            "lender": "Bajaj Finance",
+            "signature": "ACH BAJAJ FIN",
+            "amount": float(amt),
+            "frequency": "Monthly",
+            "preferred_day": day,
+            "preferred_day_display": get_day_suffix(day),
+            "total_payments": total_payments,
+            "total_paid": float(amt * total_payments),
+            "first_payment_date": "05-01-2026",
+            "last_payment_date": "05-05-2026",
+            "status": "Active" if rng.random() > 0.2 else "Completed",
+            "explainable_reason": f"Classified as recurring monthly obligation to Bajaj Finance. Identified {total_payments} payments of average ₹{amt:,.0f} spaced by ~30 days on the {get_day_suffix(day)}.",
+            "factor_insights": f"Regular EMI of ₹{amt:,.0f} to Bajaj Finance consumes {pct:.1f}% of your monthly income (₹{average_monthly_income:,.0f}). Repayment status: Active.",
+            "payment_timeline": [
+                {"month": "Jan 2026", "date": f"0{day}-01-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "Feb 2026", "date": f"0{day}-02-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "Mar 2026", "date": f"0{day}-03-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "Apr 2026", "date": f"0{day}-04-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "May 2026", "date": f"0{day}-05-2026", "amount": float(amt), "status": "Paid"},
+            ][:total_payments]
+        })
+    if rng.random() > 0.6:
+        amt = round(rng.uniform(5000, 15000), -2)
+        day = rng.randint(1, 5)
+        total_payments = rng.randint(3, 5)
+        pct = (amt / average_monthly_income) * 100.0 if average_monthly_income > 0 else 0.0
+        detected_obligations.append({
+            "lender": "HDFC Bank",
+            "signature": "ACH HDFC LOAN",
+            "amount": float(amt),
+            "frequency": "Monthly",
+            "preferred_day": day,
+            "preferred_day_display": get_day_suffix(day),
+            "total_payments": total_payments,
+            "total_paid": float(amt * total_payments),
+            "first_payment_date": "02-02-2026",
+            "last_payment_date": "02-05-2026",
+            "status": "Active",
+            "explainable_reason": f"Classified as recurring monthly obligation to HDFC Bank. Identified {total_payments} payments of average ₹{amt:,.0f} spaced by ~30 days on the {get_day_suffix(day)}.",
+            "factor_insights": f"Regular EMI of ₹{amt:,.0f} to HDFC Bank consumes {pct:.1f}% of your monthly income (₹{average_monthly_income:,.0f}). Repayment status: Active.",
+            "payment_timeline": [
+                {"month": "Feb 2026", "date": f"0{day}-02-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "Mar 2026", "date": f"0{day}-03-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "Apr 2026", "date": f"0{day}-04-2026", "amount": float(amt), "status": "Paid"},
+                {"month": "May 2026", "date": f"0{day}-05-2026", "amount": float(amt), "status": "Paid"},
+            ][:total_payments]
+        })
+
+    active_synthetic_emi = sum(o["amount"] for o in detected_obligations if o["status"] == "Active")
+    foir = active_synthetic_emi / (average_monthly_income + 1)
+    if detected_obligations:
+        emi_payments = sum(o["total_paid"] for o in detected_obligations)
 
     monthly_trends = []
     months = ["Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026"]
@@ -154,6 +216,8 @@ def _generate_features(customer):
         "atm_cash_ratio": atm_cash_ratio,
         "investment_ratio": investment_ratio,
         "salary_ratio": salary_ratio,
+        "foir": round(foir, 4),
+        "detected_obligations": detected_obligations,
     }
 
 

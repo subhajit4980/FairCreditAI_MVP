@@ -171,7 +171,16 @@ def predict_alternative_credit(customer: User, cashflow_features: dict) -> Tuple
     # 5. UNDERWRITING DECISION ENGINE & KNOCKOUT RULES
     effective_income = monthly_income * (income_recurrence ** 1.5)
     monthly_expense = cashflow_features.get("expense_ratio", 0.5) * effective_income
-    existing_emi = cashflow_features.get("emi_payments", 0.0) / 12.0
+    detected_obligations = cashflow_features.get("detected_obligations", [])
+    active_obligations = [o for o in detected_obligations if o["status"] == "Active"]
+    total_active_monthly_emi = sum(o["amount"] for o in active_obligations)
+    
+    if total_active_monthly_emi > 0:
+        existing_emi = total_active_monthly_emi
+        foir = total_active_monthly_emi / (monthly_income + 1)
+    else:
+        existing_emi = cashflow_features.get("emi_payments", 0.0) / 12.0
+        
     available_disposable_income = effective_income - monthly_expense - existing_emi
     
     ko_triggered = False
@@ -356,12 +365,16 @@ def predict_alternative_credit(customer: User, cashflow_features: dict) -> Tuple
         "Max_Approved_Limit": max_approved_loan,
         "Recommended_Loan_Amount": recommended_loan,
         "Interest_Rate": tier["base_rate"],
+        "Total_Active_EMI": int(total_active_monthly_emi),
+        "Active_Obligations_Count": len(active_obligations),
+        "Bounced_Obligations_Count": sum(1 for o in detected_obligations if o["status"] == "Bounced"),
         "Business_Explanation": biz_explanation,
         "Customer_Explanation": customer_explanation,
         "Actionable_Recommendations": categorized_recommendations,
         "Monthly_Trends": cashflow_features.get("monthly_trends", []),
         "Sanitization_Stats": cashflow_features.get("sanitization_stats", {}),
-
+        "Detected_Obligations": detected_obligations,
+ 
         "ai_credit_score": score,
         "insufficient_history": insufficient_history,
         "days_range": int(days_range),
@@ -376,11 +389,15 @@ def predict_alternative_credit(customer: User, cashflow_features: dict) -> Tuple
         "recommended_loan_amount": recommended_loan,
         "interest_rate": tier["base_rate"],
         "monthly_income_used": int(monthly_income),
+        "total_active_emi": int(total_active_monthly_emi),
+        "active_obligations_count": len(active_obligations),
+        "bounced_obligations_count": sum(1 for o in detected_obligations if o["status"] == "Bounced"),
         "business_explanation": biz_explanation,
         "customer_explanation": customer_explanation,
         "actionable_recommendations": categorized_recommendations,
         "monthly_trends": cashflow_features.get("monthly_trends", []),
         "sanitization_stats": cashflow_features.get("sanitization_stats", {}),
+        "detected_obligations": detected_obligations,
     }
     print(f"Assessment generated for customer '{cust_id}': {json.dumps(assessment, indent=2)}")
     return score, positives, negatives, recommended_loan, assessment

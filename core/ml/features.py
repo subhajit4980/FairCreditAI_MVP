@@ -304,11 +304,30 @@ def extract_advanced_features(df: pd.DataFrame) -> dict:
     # Categorized expenditures
     essential_expense = float(tx.loc[tx["category_parsed"].isin(["UTILITIES_BILLS", "GROCERY"]), "debit_amt"].sum())
     discretionary_expense = float(tx.loc[tx["category_parsed"].isin(["FOOD_DELIVERY", "ECOMMERCE_SHOPPING", "TRAVEL_MOBILITY"]), "debit_amt"].sum())
-    emi_payments = float(tx.loc[tx["category_parsed"] == "SHADOW_EMI", "debit_amt"].sum())
+    
+    # Automated EMI/Obligation Detection
+    from core.ml.obligations import detect_obligations
+    detected_obligations = detect_obligations(df)
+    active_obligations = [o for o in detected_obligations if o["status"] == "Active"]
+    total_active_monthly_emi = sum(o["amount"] for o in active_obligations)
+    
+    # Update factor_insights with actual monthly income consumption
+    for o in detected_obligations:
+        pct = (o["amount"] / average_monthly_income * 100.0) if average_monthly_income > 0 else 0.0
+        o["factor_insights"] = (
+            f"Regular EMI of ₹{o['amount']:,.0f} to {o['lender']} consumes {pct:.1f}% of your "
+            f"monthly income (₹{average_monthly_income:,.0f}). Repayment status: {o['status']}."
+        )
+        
+    detected_emi_total = sum(o["total_paid"] for o in detected_obligations)
+    if detected_emi_total > 0:
+        emi_payments = detected_emi_total
+    else:
+        emi_payments = float(tx.loc[tx["category_parsed"] == "SHADOW_EMI", "debit_amt"].sum())
     
     # Ratios
     savings_ratio = float(monthly_savings / average_monthly_income) if average_monthly_income > 0 else 0.0
-    foir = (emi_payments / period_months) / (average_monthly_income + 1)
+    foir = total_active_monthly_emi / (average_monthly_income + 1)
     discretionary_expense_ratio = float(discretionary_expense / total_expense) if total_expense > 0 else 0.0
     
     # Bounces & Mandates
@@ -431,4 +450,5 @@ def extract_advanced_features(df: pd.DataFrame) -> dict:
         "digital_engagement": round(upi_txns / total_txns if total_txns else 0.0, 3),
         "upi_txns": upi_txns,
         "distinct_counterparties": distinct_counterparties,
+        "detected_obligations": detected_obligations,
     }

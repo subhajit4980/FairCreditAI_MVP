@@ -303,6 +303,125 @@
   .observation-list li::marker {
     color: var(--fc-primary);
   }
+  
+  /* Obligations & EMI Styles */
+  .obligation-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .obligation-summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .obligation-summary-card .lbl {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+  .obligation-summary-card .val {
+    font-size: 22px;
+    font-weight: 800;
+    margin-top: 6px;
+    color: #1e293b;
+  }
+  .timeline-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+  }
+  .timeline-dot.paid { background-color: #22c55e; }
+  .timeline-dot.bounced { background-color: #ef4444; }
+  .timeline-dot.missed { background-color: #94a3b8; }
+  
+  .timeline-dot .tooltip {
+    visibility: hidden;
+    width: 110px;
+    background-color: #334155;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 6px;
+    position: absolute;
+    z-index: 10;
+    bottom: 135%;
+    left: 50%;
+    margin-left: -55px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 9px;
+    line-height: 1.3;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .timeline-dot:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  .xai-info-box {
+    background-color: #f8fafc;
+    border-left: 4px solid #3b82f6;
+    padding: 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #334155;
+    margin-top: 8px;
+  }
+  .xai-info-box strong {
+    color: #1e293b;
+  }
+  .badge-status {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-status.active { background-color: #dcfce7; color: #15803d; }
+  .badge-status.completed { background-color: #f1f5f9; color: #475569; }
+  .badge-status.bounced { background-color: #fee2e2; color: #b91c1c; }
+  
+  /* Custom Obligations Table Styles to avoid inheriting right-alignment */
+  .obligations-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  .obligations-table tr th {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .obligations-table tr td {
+    padding: 12px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    vertical-align: top;
+    text-align: left;
+    font-weight: normal;
+  }
 </style>
 
 <div class="detail-nav">
@@ -588,6 +707,109 @@
 
 {% endif %}
 
+{% endwith %}
+{% endif %}
+
+<!-- Automated EMI & Obligation Detection Card -->
+{% if report.ai_assessment.detected_obligations or report.ai_assessment.Detected_Obligations %}
+{% with obligations=report.ai_assessment.detected_obligations|default:report.ai_assessment.Detected_Obligations %}
+<div class="card" style="margin-top: 18px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h3 style="margin: 0;">Automated EMI &amp; Obligation Detection</h3>
+    <span class="portal-badge underwriter" style="margin: 0; background: linear-gradient(135deg, #10b981, #059669); font-size: 10px;">Explainable AI Active</span>
+  </div>
+  <p class="muted small" style="margin-bottom: 18px;">Our algorithm automatically scans transactional patterns in the bank statement to detect repeating debits representing active loans or recurring commitments.</p>
+  
+  <!-- KPI Metrics Grid -->
+  <div class="obligation-summary-grid">
+    <div class="obligation-summary-card">
+      <div class="lbl">Total Monthly Commitments</div>
+      <div class="val" style="color: #ef4444;">₹{{ report.ai_assessment.total_active_emi|default:report.ai_assessment.Total_Active_EMI|default:0|floatformat:0 }}</div>
+    </div>
+    <div class="obligation-summary-card">
+      <div class="lbl">Fixed Obligation to Income (FOIR)</div>
+      <div class="val">
+        {% if report.ai_assessment.foir %}
+          {% widthratio report.ai_assessment.foir 1 100 %}%
+        {% else %}
+          {% widthratio report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis.Debt_to_Income_Ratio_FOIR 1 100 %}%
+        {% endif %}
+      </div>
+    </div>
+    <div class="obligation-summary-card">
+      <div class="lbl">Active Obligations</div>
+      <div class="val">{{ report.ai_assessment.active_obligations_count|default:report.ai_assessment.Active_Obligations_Count|default:0 }}</div>
+    </div>
+    <div class="obligation-summary-card">
+      <div class="lbl">Bounced Mandates (ECS)</div>
+      <div class="val" style="color: {% if report.ai_assessment.bounced_obligations_count|default:report.ai_assessment.Bounced_Obligations_Count|default:0 > 0 %}#ef4444{% else %}#22c55e{% endif %};">
+        {{ report.ai_assessment.bounced_obligations_count|default:report.ai_assessment.Bounced_Obligations_Count|default:0 }}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Detailed Obligations Table -->
+  <div class="table-wrap">
+    <table class="obligations-table" style="width: 100%;">
+      <thead>
+        <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">Lender / Commitment</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">EMI Amount</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Preferred Date / Freq</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Status</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">Payment Timeline (Last 6 Months)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in obligations %}
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 12px 12px; vertical-align: top; text-align: left;">
+            <div style="font-weight: 600; color: #1e293b;">{{ o.lender }}</div>
+            <div class="muted" style="font-size: 11px; font-family: monospace;">{{ o.signature }}</div>
+          </td>
+          <td style="padding: 12px 12px; font-weight: 700; color: #1e293b; vertical-align: top; text-align: left;">
+            ₹{{ o.amount|floatformat:0 }}
+          </td>
+          <td style="padding: 12px 12px; text-align: center; vertical-align: top;">
+            <div style="font-weight: 600; color: #334155;">{{ o.preferred_day_display|default:o.preferred_day|default:"--" }} of Month</div>
+            <div class="muted" style="font-size: 11px;">{{ o.frequency }}</div>
+          </td>
+          <td style="padding: 12px 12px; text-align: center; vertical-align: top;">
+            <span class="badge-status {{ o.status|lower }}">{{ o.status }}</span>
+          </td>
+          <td style="padding: 12px 12px; vertical-align: top; text-align: left;">
+            <div style="font-size: 12px; color: #475569; font-weight: normal; text-align: left; display: block; margin-bottom: 4px;">
+              Payments: <strong>{{ o.total_payments }}</strong> | Total: <strong>₹{{ o.total_paid|floatformat:0 }}</strong>
+            </div>
+            
+            <!-- Timeline Visual -->
+            <div class="timeline-dots">
+              {% for t in o.payment_timeline %}
+                <span class="timeline-dot {{ t.status|lower }}">
+                  <span class="tooltip">
+                    {{ t.month }}<br>
+                    {{ t.date }}<br>
+                    ₹{{ t.amount|floatformat:0 }} ({{ t.status }})
+                  </span>
+                </span>
+              {% endfor %}
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="5" style="padding: 0 4px 12px 4px; border-bottom: 1px solid #e2e8f0;">
+            <div class="xai-info-box">
+              <strong>🤖 AI Decision Explanation:</strong> {{ o.explainable_reason }}
+              <br>
+              <strong>📈 Factor-Level Insight:</strong> {{ o.factor_insights }}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endwith %}
 {% endif %}
 

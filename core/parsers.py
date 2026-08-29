@@ -213,6 +213,7 @@ def parse_csv_statement(text: str) -> Optional[dict]:
             "transaction_frequency": round(transaction_frequency, 1),
             "bounce_rate":           round(bounce_rate, 3),
             "digital_engagement":    round(digital_engagement, 3),
+            "detected_obligations":  [],
         },
         "txn_count": total_txns,
         "period_months": float(period_months),
