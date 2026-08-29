@@ -269,7 +269,10 @@ def generate_my_score(request):
 @login_required
 def score_detail(request, pk):
     if request.user.is_admin_role or request.user.is_ops_role:
+        visible_customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
         report = get_object_or_404(ScoreReport, pk=pk)
+        if report.customer.role == User.Role.CUSTOMER and report.customer.onboarded_by is None:
+            raise Http404("not found")
     else:
         report = get_object_or_404(ScoreReport, pk=pk, customer=request.user)
     return render(request, "core/score_detail.html", {"report": report})
@@ -279,11 +282,12 @@ def score_detail(request, pk):
 
 @ops_required
 def ops_dashboard(request):
-    pending_docs = Document.objects.filter(status=Document.Status.UPLOADED).count()
-    active_consents = AAConsent.objects.filter(status=AAConsent.Status.ACTIVE).count()
-    pending_consents = AAConsent.objects.filter(status=AAConsent.Status.PENDING).count()
-    total_customers = User.objects.filter(role=User.Role.CUSTOMER).count()
-    recent_scores = ScoreReport.objects.select_related("customer")[:10]
+    visible_customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    pending_docs = Document.objects.filter(status=Document.Status.UPLOADED, customer__in=visible_customers).count()
+    active_consents = AAConsent.objects.filter(status=AAConsent.Status.ACTIVE, customer__in=visible_customers).count()
+    pending_consents = AAConsent.objects.filter(status=AAConsent.Status.PENDING, customer__in=visible_customers).count()
+    total_customers = visible_customers.count()
+    recent_scores = ScoreReport.objects.filter(customer__in=visible_customers).select_related("customer")[:10]
     return render(
         request,
         "core/ops_dashboard.html",
@@ -300,14 +304,16 @@ def ops_dashboard(request):
 @ops_required
 def ops_documents(request):
     status = request.GET.get("status", "uploaded")
-    docs = Document.objects.select_related("customer").filter(status=status).order_by("-uploaded_at")
+    visible_customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    docs = Document.objects.select_related("customer").filter(status=status, customer__in=visible_customers).order_by("-uploaded_at")
     return render(request, "core/ops_documents.html", {"documents": docs, "status": status})
 
 
 @ops_required
 @require_POST
 def ops_review_document(request, pk):
-    doc = get_object_or_404(Document, pk=pk)
+    visible_customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    doc = get_object_or_404(Document, pk=pk, customer__in=visible_customers)
     decision = request.POST.get("decision")
     notes = request.POST.get("notes", "").strip()
     if decision == "approve":
@@ -329,10 +335,10 @@ def ops_review_document(request, pk):
 @ops_required
 def ops_customers(request):
     q = request.GET.get("q", "").strip()
-    customers = User.objects.filter(role=User.Role.CUSTOMER)
+    customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
     if q:
         customers = customers.filter(
-            Q(username__icontains=q) | Q(email__icontains=q) | Q(mobile__icontains=q) | Q(pan__icontains=q)
+            Q(username__icontains=q) | Q(email__icontains=q) | Q(mobile__icontains=q) | Q(pan__icontains=q) | Q(profile__full_name__icontains=q)
         )
     customers = customers.annotate(
         score_count=Count("scores"), doc_count=Count("documents", distinct=True)
@@ -342,7 +348,7 @@ def ops_customers(request):
 
 @ops_required
 def ops_customer_detail(request, pk):
-    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER)
+    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER, onboarded_by__isnull=False)
     return render(
         request,
         "core/ops_customer_detail.html",
@@ -357,12 +363,34 @@ def ops_customer_detail(request, pk):
 
 
 @ops_required
+def ops_edit_customer_profile(request, pk):
+    """Operations edits/completes a customer's profile details."""
+    visible_customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    customer = get_object_or_404(visible_customers, pk=pk)
+    profile, _ = CustomerProfile.objects.get_or_create(user=customer)
+    if request.method == "POST":
+        form = CustomerProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            _audit(request.user, "ops_profile_update", target=customer.id)
+            messages.success(request, f"Profile for '{customer.username}' updated.")
+            return redirect("ops_customer_detail", pk=customer.id)
+    else:
+        form = CustomerProfileForm(instance=profile)
+    return render(
+        request,
+        "core/ops_edit_customer_profile.html",
+        {"form": form, "customer": customer}
+    )
+
+
+@ops_required
 def ops_create_customer(request):
     """Operations onboards a new customer account on their behalf."""
     if request.method == "POST":
         form = CustomerSignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(onboarded_by=request.user)
             _audit(request.user, "ops_created_customer", target=user.id, detail=user.username)
             messages.success(request, f"Customer '{user.username}' created.")
             return redirect("ops_customer_detail", pk=user.id)
@@ -373,7 +401,7 @@ def ops_create_customer(request):
 
 @ops_required
 def ops_upload_bank_statement(request, pk):
-    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER)
+    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER, onboarded_by__isnull=False)
     if request.method == "POST":
         form = BankStatementUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -463,7 +491,7 @@ def ops_fetch_aa(request, pk):
     active consent. The synthetic generator stands in until those credentials
     are wired up. See aa-setu-approach.md.
     """
-    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER)
+    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER, onboarded_by__isnull=False)
     csv_text = _synthetic_aa_csv(customer)
     parsed = parse_csv_statement(csv_text)
     bs = BankStatement(
@@ -509,7 +537,7 @@ def ops_fetch_aa(request, pk):
 @require_POST
 def ops_generate_score(request, pk):
     """Operations generates a score for a customer on their behalf."""
-    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER)
+    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER, onboarded_by__isnull=False)
     algorithm = request.POST.get("algorithm", AI_MODEL)
     if algorithm not in ALGORITHMS:
         algorithm = AI_MODEL
@@ -535,18 +563,25 @@ def ops_generate_score(request, pk):
 
 @admin_required
 def admin_dashboard(request):
+    visible_users = User.objects.filter(
+        Q(role__in=[User.Role.ADMIN, User.Role.OPS]) |
+        Q(is_superuser=True) |
+        Q(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    )
     stats = {
-        "total_users": User.objects.count(),
-        "customers": User.objects.filter(role=User.Role.CUSTOMER).count(),
-        "ops_users": User.objects.filter(role=User.Role.OPS).count(),
-        "admins": User.objects.filter(Q(role=User.Role.ADMIN) | Q(is_superuser=True)).distinct().count(),
-        "documents": Document.objects.count(),
-        "verified_docs": Document.objects.filter(status=Document.Status.VERIFIED).count(),
-        "active_consents": AAConsent.objects.filter(status=AAConsent.Status.ACTIVE).count(),
-        "scores_generated": ScoreReport.objects.count(),
-        "avg_score": int(ScoreReport.objects.aggregate(a=Avg("score"))["a"] or 0),
+        "total_users": visible_users.count(),
+        "customers": visible_users.filter(role=User.Role.CUSTOMER).count(),
+        "ops_users": visible_users.filter(role=User.Role.OPS).count(),
+        "admins": visible_users.filter(Q(role=User.Role.ADMIN) | Q(is_superuser=True)).distinct().count(),
+        "documents": Document.objects.filter(customer__in=visible_users).count(),
+        "verified_docs": Document.objects.filter(status=Document.Status.VERIFIED, customer__in=visible_users).count(),
+        "active_consents": AAConsent.objects.filter(status=AAConsent.Status.ACTIVE, customer__in=visible_users).count(),
+        "scores_generated": ScoreReport.objects.filter(customer__in=visible_users).count(),
+        "avg_score": int(ScoreReport.objects.filter(customer__in=visible_users).aggregate(a=Avg("score"))["a"] or 0),
     }
-    recent_audit = AuditLog.objects.select_related("actor")[:20]
+    recent_audit = AuditLog.objects.filter(
+        Q(actor__isnull=True) | Q(actor__in=visible_users)
+    ).select_related("actor")[:20]
     return render(
         request,
         "core/admin_dashboard.html",
@@ -556,17 +591,29 @@ def admin_dashboard(request):
 
 @admin_required
 def admin_users(request):
-    users = User.objects.all().order_by("-date_joined")
+    visible_users = User.objects.filter(
+        Q(role__in=[User.Role.ADMIN, User.Role.OPS]) |
+        Q(is_superuser=True) |
+        Q(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    )
+    users = visible_users.order_by("-date_joined")
     return render(request, "core/admin_users.html", {"users": users})
 
 
 @admin_required
 def admin_user_edit(request, pk=None):
-    user = get_object_or_404(User, pk=pk) if pk else None
+    visible_users = User.objects.filter(
+        Q(role__in=[User.Role.ADMIN, User.Role.OPS]) |
+        Q(is_superuser=True) |
+        Q(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    )
+    user = get_object_or_404(visible_users, pk=pk) if pk else None
     if request.method == "POST":
         form = StaffUserForm(request.POST, instance=user)
         if form.is_valid():
-            saved = form.save()
+            if not user:
+                form.instance.onboarded_by = request.user
+            saved = form.save(commit=True)
             _audit(request.user, "user_saved", target=saved.id)
             messages.success(request, "User saved.")
             return redirect("admin_users")
@@ -577,7 +624,14 @@ def admin_user_edit(request, pk=None):
 
 @admin_required
 def admin_audit(request):
-    logs = AuditLog.objects.select_related("actor")[:300]
+    visible_users = User.objects.filter(
+        Q(role__in=[User.Role.ADMIN, User.Role.OPS]) |
+        Q(is_superuser=True) |
+        Q(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    )
+    logs = AuditLog.objects.filter(
+        Q(actor__isnull=True) | Q(actor__in=visible_users)
+    ).select_related("actor")[:300]
     return render(request, "core/admin_audit.html", {"logs": logs})
 
 

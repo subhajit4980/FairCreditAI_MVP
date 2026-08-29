@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block content %}
+<a class="small" href="{% url 'ops_customer_detail' customer.id %}">&larr; Back to customer details</a>
+<div class="card" style="max-width: 640px; margin: 16px auto 0;">
+  <h2>Edit Profile: {{ customer.username }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button class="btn" type="submit">Save</button>
+    <a class="btn secondary" href="{% url 'ops_customer_detail' customer.id %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

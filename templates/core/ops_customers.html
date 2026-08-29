@@ -17,7 +17,7 @@
       <tbody>
         {% for c in customers %}
           <tr>
-            <td><a href="{% url 'ops_customer_detail' c.id %}">{{ c.username }}</a><br><span class="small muted">{{ c.email }}</span></td>
+            <td><a href="{% url 'ops_customer_detail' c.id %}">{% if c.profile.full_name %}{{ c.profile.full_name }} ({{ c.username }}){% else %}{{ c.username }}{% endif %}</a><br><span class="small muted">{{ c.email }}</span></td>
             <td>{{ c.mobile|default:"—" }}</td>
             <td>{{ c.pan|default:"—" }}</td>
             <td>{{ c.doc_count }}</td>

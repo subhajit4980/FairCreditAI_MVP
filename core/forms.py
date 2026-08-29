@@ -14,12 +14,13 @@ class CustomerSignupForm(UserCreationForm):
         model = User
         fields = ("username", "full_name", "mobile", "pan", "email", "password1", "password2")
 
-    def save(self, commit=True):
+    def save(self, commit=True, onboarded_by=None):
         user = super().save(commit=False)
         user.role = User.Role.CUSTOMER
         user.mobile = self.cleaned_data["mobile"]
         user.pan = (self.cleaned_data.get("pan") or "").upper()
         user.email = self.cleaned_data.get("email") or ""
+        user.onboarded_by = onboarded_by
         if commit:
             user.save()
             CustomerProfile.objects.create(user=user, full_name=self.cleaned_data["full_name"])
@@ -36,6 +37,7 @@ class CustomerProfileForm(forms.ModelForm):
             "education",
             "address",
             "occupation",
+            "monthly_income",
             "aadhaar_last4",
         )
         widgets = {
@@ -74,17 +76,32 @@ class BankStatementUploadForm(forms.ModelForm):
 
 
 class StaffUserForm(forms.ModelForm):
+    full_name = forms.CharField(max_length=120, required=False, help_text="For customers, this will be saved to their profile.")
     password = forms.CharField(widget=forms.PasswordInput, required=False, help_text="Leave blank to keep existing password.")
 
     class Meta:
         model = User
-        fields = ("username", "email", "role", "is_active", "mobile")
+        fields = ("username", "full_name", "email", "role", "is_active", "mobile")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.role == User.Role.CUSTOMER:
+            try:
+                self.fields["full_name"].initial = self.instance.profile.full_name
+            except CustomerProfile.DoesNotExist:
+                pass
 
     def save(self, commit=True):
         user = super().save(commit=False)
         pw = self.cleaned_data.get("password")
         if pw:
             user.set_password(pw)
+        
+        full_name = self.cleaned_data.get("full_name") or ""
         if commit:
             user.save()
+            if user.role == User.Role.CUSTOMER:
+                profile, _ = CustomerProfile.objects.get_or_create(user=user)
+                profile.full_name = full_name
+                profile.save()
         return user

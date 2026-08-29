@@ -11,6 +11,9 @@ class User(AbstractUser):
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.CUSTOMER)
     mobile = models.CharField(max_length=15, blank=True)
     pan = models.CharField(max_length=10, blank=True)
+    onboarded_by = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="onboarded_users"
+    )
 
     @property
     def is_admin_role(self):

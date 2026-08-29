@@ -4,6 +4,22 @@
 <h1 style="margin-top:8px;">{{ customer.username }}</h1>
 <p class="small muted">{{ customer.email }} · {{ customer.mobile }} · PAN {{ customer.pan|default:"—" }}</p>
 
+<div class="card" style="margin-bottom: 20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h3 style="margin:0;">Profile Details</h3>
+    <a class="btn small" href="{% url 'ops_edit_customer_profile' customer.id %}">Edit Profile</a>
+  </div>
+  <div class="grid cols-2" style="margin-top:12px; row-gap: 8px;">
+    <div><strong>Full Name:</strong> {{ customer.profile.full_name|default:"—" }}</div>
+    <div><strong>Date of Birth:</strong> {{ customer.profile.date_of_birth|default:"—" }}</div>
+    <div><strong>Gender:</strong> {{ customer.profile.gender|default:"—" }}</div>
+    <div><strong>Education:</strong> {{ customer.profile.education|default:"—" }}</div>
+    <div><strong>Occupation:</strong> {{ customer.profile.occupation|default:"—" }}</div>
+    <div><strong>Monthly Income:</strong> {% if customer.profile.monthly_income %}₹{{ customer.profile.monthly_income }}{% else %}—{% endif %}</div>
+    <div style="grid-column: span 2;"><strong>Address:</strong> {{ customer.profile.address|default:"—" }}</div>
+  </div>
+</div>
+
 {% if bank_statements %}
 <div class="card">
   <h3>Bank statements &amp; AA fetches</h3>
