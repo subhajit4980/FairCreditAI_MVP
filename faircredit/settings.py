@@ -155,3 +155,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
+FINBOX_UAT_BASE_URL = os.environ.get("FINBOX_UAT_BASE_URL", "https://apis-uat.bankconnect.finbox.in")
+FINBOX_PROD_BASE_URL = os.environ.get("FINBOX_PROD_BASE_URL", "https://apis.bankconnect.finbox.in")
+FINBOX_UAT_API_KEY = os.environ.get("FINBOX_UAT_API_KEY", "VUWvcQZ4TRi3Ylpvazah2CuamS0xUxxi6zFmPb8w")
+FINBOX_UAT_SERVER_HASH = os.environ.get("FINBOX_UAT_SERVER_HASH", "a8017c902a444b7f8613fa88e2013034")
+FINBOX_PROD_API_KEY = os.environ.get("FINBOX_PROD_API_KEY", "wOK0Ra3Sn0QGmPl02cNl3qLfkhyaeXxNjQa0c0PC")
+FINBOX_PROD_SERVER_HASH = os.environ.get("FINBOX_PROD_SERVER_HASH", "d0ddf3f57aaa463bbb4e87809c1d0edb")

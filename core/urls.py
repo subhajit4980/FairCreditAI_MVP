@@ -32,6 +32,7 @@ urlpatterns = [
     path("ops/customers/<int:pk>/profile/edit/", views.ops_edit_customer_profile, name="ops_edit_customer_profile"),
     path("ops/customers/<int:pk>/bank-statement/upload/", views.ops_upload_bank_statement, name="ops_upload_bank_statement"),
     path("ops/customers/<int:pk>/fetch-aa/", views.ops_fetch_aa, name="ops_fetch_aa"),
+    path("ops/customers/<int:pk>/fetch-aa/callback/", views.ops_aa_callback, name="ops_aa_callback"),
     path("ops/customers/<int:pk>/generate-score/", views.ops_generate_score, name="ops_generate_score"),
 
     # Administrator

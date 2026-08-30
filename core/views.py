@@ -14,6 +14,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Avg, Count, Q
 from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
@@ -34,7 +35,7 @@ from .models import (
     ScoreReport,
     User,
 )
-from .parsers import parse_csv_statement, parse_excel_statement
+from .parsers import parse_csv_statement, parse_excel_statement, parse_xml_statement, parse_finbox_transactions_json
 from .scoring import ALGORITHMS, AI_MODEL, generate_score
 
 
@@ -142,9 +143,30 @@ def upload_document(request):
 @customer_required
 @require_POST
 def initiate_consent(request):
-    """Mock Setu Bridge consent initiation: creates a pending consent + redirect URL."""
+    """Initiates consent via Finbox, falls back to mock if Finbox fails."""
+    from core.finbox import FinboxClient
+    client = FinboxClient()
+    res = client.create_session(request.user.username, request.user.email)
+    if res and res.get("RetStatus") == "SUCCESS":
+        handle = res["tclStatementID"]
+        redirect_url = res["redirectUrl"]
+        consent = AAConsent.objects.create(
+            customer=request.user,
+            handle=handle,
+            status=AAConsent.Status.PENDING,
+            aa_provider="Finbox BankConnect"
+        )
+        _audit(request.user, "consent_initiated_finbox", target=consent.id)
+        return redirect(redirect_url)
+    
+    # Fallback to local mock consent screen
     handle = secrets.token_hex(16)
-    consent = AAConsent.objects.create(customer=request.user, handle=handle)
+    consent = AAConsent.objects.create(
+        customer=request.user,
+        handle=handle,
+        status=AAConsent.Status.PENDING,
+        aa_provider="Finbox BankConnect (Mock Fallback)"
+    )
     _audit(request.user, "consent_initiated", target=consent.id)
     return redirect("consent_review", handle=handle)
 
@@ -484,52 +506,161 @@ def _synthetic_aa_csv(customer) -> str:
 @ops_required
 @require_POST
 def ops_fetch_aa(request, pk):
-    """Mock Account Aggregator fetch: synthesises a 6-month UPI+bank CSV,
-    parses it through the same pipeline, and stores the result.
-
-    In production this view would call Setu's data-fetch APIs against an
-    active consent. The synthetic generator stands in until those credentials
-    are wired up. See aa-setu-approach.md.
-    """
+    """Initiates AA fetch via Finbox and redirects the user to the consent screen."""
     customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    
+    from core.finbox import FinboxClient
+    client = FinboxClient()
+    return_url = request.build_absolute_uri(reverse('ops_aa_callback', args=[pk]))
+    res = client.create_session(customer.username, customer.email, return_url=return_url)
+    
+    if res and res.get("RetStatus") == "SUCCESS":
+        handle = res["tclStatementID"]
+        redirect_url = res["redirectUrl"]
+        consent = AAConsent.objects.create(
+            customer=customer,
+            handle=handle,
+            status=AAConsent.Status.PENDING,
+            aa_provider="Finbox BankConnect"
+        )
+        _audit(request.user, "ops_consent_initiated", target=consent.id)
+        return redirect(redirect_url)
+        
+    # Mock Fallback if Finbox fails
     csv_text = _synthetic_aa_csv(customer)
     parsed = parse_csv_statement(csv_text)
+    
     bs = BankStatement(
         customer=customer,
         uploaded_by=request.user,
         source=BankStatement.Source.AA_FETCH,
     )
-    filename = f"aa_fetch_{customer.username}_{int(timezone.now().timestamp())}.csv"
+    filename = f"aa_fetch_mock_{customer.username}_{int(timezone.now().timestamp())}.csv"
     bs.file.save(filename, ContentFile(csv_text.encode("utf-8")), save=False)
+    
     if parsed:
         bs.parsed_features = parsed["features"]
         bs.txn_count = parsed["txn_count"]
         bs.period_months = parsed["period_months"]
         bs.parsed_at = timezone.now()
         bs.parse_notes = (
-            f"AA fetch: {parsed['txn_count']} txns over ~{parsed['period_months']:.1f} months. "
+            f"Mock fetch: {parsed['txn_count']} txns over ~{parsed['period_months']:.1f} months. "
             f"avg inflow ₹{parsed['monthly_avg_inflow']:.0f}/mo, "
             f"avg outflow ₹{parsed['monthly_avg_outflow']:.0f}/mo, "
             f"bounces={parsed['bounces']}, upi_txns={parsed['upi_txns']}, "
             f"counterparties={parsed['distinct_counterparties']}."
         )
     else:
-        bs.parse_notes = "AA fetch failed to parse."
+        bs.parse_notes = "Fetch failed to parse."
+        
     bs.save()
     _audit(
         request.user,
-        "ops_aa_fetch",
+        "ops_aa_fetch_mock",
         target=bs.id,
         detail=f"customer={customer.username}; {bs.parse_notes}",
     )
+    
     if parsed:
-        messages.success(
-            request,
-            f"Fetched UPI & bank transactions for {customer.username} via Account Aggregator: "
-            f"{bs.txn_count} txns over {bs.period_months:.1f} months.",
-        )
+        messages.success(request, f"Fetched transactions for {customer.username} via Account Aggregator (Simulated Mock Fallback): {bs.txn_count} txns.")
     else:
-        messages.warning(request, f"AA fetch completed but parser failed: {bs.parse_notes}")
+        messages.warning(request, f"Fetch completed but parser failed: {bs.parse_notes}")
+        
+    return redirect("ops_customer_detail", pk=customer.id)
+
+
+@ops_required
+def ops_aa_callback(request, pk):
+    """Callback view when Finbox redirects back after consent flow."""
+    customer = get_object_or_404(User, pk=pk, role=User.Role.CUSTOMER, onboarded_by__isnull=False)
+    consent = customer.consents.filter(status=AAConsent.Status.PENDING).order_by("-created_at").first()
+    
+    if not consent:
+        messages.error(request, "No pending consent found to process.")
+        return redirect("ops_customer_detail", pk=customer.id)
+
+    from core.finbox import FinboxClient
+    client = FinboxClient()
+    
+    parsed = None
+    xml_text = None
+    tx_res = None
+    
+    # 1. Try UAT session progress status to get direct XML response first
+    progress_res = client.fetch_session_progress_status(consent.handle)
+    if progress_res and progress_res.get("Response"):
+        xml_text = progress_res["Response"]
+        parsed = parse_xml_statement(xml_text)
+        if parsed:
+            consent.status = AAConsent.Status.ACTIVE
+            consent.save()
+    
+    # 2. Try to fetch parsed transactions directly (JSON format)
+    if not parsed:
+        tx_res = client.fetch_transactions(consent.handle)
+        if tx_res and "transactions" in tx_res:
+            parsed = parse_finbox_transactions_json(tx_res)
+            if parsed:
+                consent.status = AAConsent.Status.ACTIVE
+                consent.save()
+                
+    # 3. Fall back to raw AA S3 XML download if transactions JSON is unavailable
+    if not parsed:
+        res = client.fetch_raw_aa(consent.handle)
+        if res and "statements" in res:
+            for stmt in res["statements"]:
+                download_url = stmt.get("url") or stmt.get("pdf_url")
+                if download_url:
+                    xml_text = client.download_xml(download_url)
+                    if xml_text:
+                        parsed = parse_xml_statement(xml_text)
+                        if parsed:
+                            consent.status = AAConsent.Status.ACTIVE
+                            consent.save()
+                            break
+
+    if not parsed:
+        consent.status = AAConsent.Status.REVOKED
+        consent.save()
+        messages.error(request, "Failed to retrieve or parse Account Aggregator data from Finbox.")
+        return redirect("ops_customer_detail", pk=customer.id)
+
+    bs = BankStatement(
+        customer=customer,
+        uploaded_by=request.user,
+        source=BankStatement.Source.AA_FETCH,
+    )
+    
+    if xml_text:
+        filename = f"aa_fetch_{customer.username}_{int(timezone.now().timestamp())}.xml"
+        bs.file.save(filename, ContentFile(xml_text.encode("utf-8")), save=False)
+    else:
+        import json
+        filename = f"aa_fetch_{customer.username}_{int(timezone.now().timestamp())}.json"
+        bs.file.save(filename, ContentFile(json.dumps(tx_res).encode("utf-8")), save=False)
+
+    bs.parsed_features = parsed["features"]
+    bs.txn_count = parsed["txn_count"]
+    bs.period_months = parsed["period_months"]
+    bs.parsed_at = timezone.now()
+    prefix = "Finbox AA JSON " if not xml_text else "Finbox AA XML "
+    bs.parse_notes = (
+        f"{prefix}fetch: {parsed['txn_count']} txns over ~{parsed['period_months']:.1f} months. "
+        f"avg inflow ₹{parsed['monthly_avg_inflow']:.0f}/mo, "
+        f"avg outflow ₹{parsed['monthly_avg_outflow']:.0f}/mo, "
+        f"bounces={parsed['bounces']}, upi_txns={parsed['upi_txns']}, "
+        f"counterparties={parsed['distinct_counterparties']}."
+    )
+    
+    bs.save()
+    _audit(
+        request.user,
+        "ops_aa_fetch_callback",
+        target=bs.id,
+        detail=f"customer={customer.username}; {bs.parse_notes}",
+    )
+    
+    messages.success(request, f"Fetched transactions for {customer.username} via Account Aggregator (Finbox): {bs.txn_count} txns.")
     return redirect("ops_customer_detail", pk=customer.id)
 
 

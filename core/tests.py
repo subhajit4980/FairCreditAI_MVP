@@ -483,6 +483,169 @@ class OpsDashboardVisibilityTests(TestCase):
         self.assertEqual(user.profile.full_name, "Admin Onboarded FullName")
 
 
+from unittest.mock import patch
+from core.parsers import parse_rebit_xml_to_df
+
+class FinboxIntegrationTests(TestCase):
+    def test_parse_rebit_xml_to_df(self):
+        xml_content = """<?xml version="1.0" encoding="utf-8"?>
+        <Account linkedAccRef="123" maskedAccNumber="XXXX1234" type="deposit" version="2.0.0">
+            <Profile><Holders><Holder name="Test User"/></Holders></Profile>
+            <Summary accountType="SAVINGS" balanceDateTime="2026-08-01" currentBalance="10000.00"/>
+            <Transactions startDate="2026-01-01" endDate="2026-06-30">
+                <Transaction txnId="TXN1" type="DEBIT" valueDate="2026-02-15" amount="500.00" narration="ATM WDL" currentBalance="9500.00"/>
+                <Transaction txnId="TXN2" type="CREDIT" valueDate="2026-02-20" amount="5000.00" narration="SALARY" currentBalance="14500.00"/>
+            </Transactions>
+        </Account>
+        """
+        df = parse_rebit_xml_to_df(xml_content)
+        self.assertIsNotNone(df)
+        self.assertEqual(len(df), 2)
+        # Check column names
+        self.assertIn("Date", df.columns)
+        self.assertIn("Withdrawal Amount", df.columns)
+        self.assertIn("Deposit Amount", df.columns)
+        self.assertIn("Narration", df.columns)
+        
+        # Check values
+        self.assertEqual(df.loc[0, "Withdrawal Amount"], 500.00)
+        self.assertEqual(df.loc[0, "Narration"], "ATM WDL")
+        self.assertEqual(df.loc[1, "Deposit Amount"], 5000.00)
+        self.assertEqual(df.loc[1, "Narration"], "SALARY")
+
+    @patch("requests.post")
+    def test_initiate_consent_redirects_to_finbox(self, mock_post):
+        # Mock successful Finbox create session API response
+        class MockResponse:
+            status_code = 200
+            def json(self):
+                return {
+                    "RetStatus": "SUCCESS",
+                    "tclStatementID": "test-finbox-session-id",
+                    "redirectUrl": "https://bankconnectclientuat.finbox.in/session_id=test-finbox-session-id"
+                }
+        mock_post.return_value = MockResponse()
+
+        # Log in as a customer
+        customer = User.objects.create_user(username="customer_user", password="password")
+        customer.role = User.Role.CUSTOMER
+        customer.save()
+        self.client.login(username="customer_user", password="password")
+
+        # Post initiate consent
+        response = self.client.post(reverse("initiate_consent"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "https://bankconnectclientuat.finbox.in/session_id=test-finbox-session-id")
+
+        # Verify consent created in pending status with handle set to session id
+        consent = customer.consents.first()
+        self.assertEqual(consent.handle, "test-finbox-session-id")
+        self.assertEqual(consent.status, AAConsent.Status.PENDING)
+
+    @patch("requests.post")
+    def test_initiate_consent_fallback_on_api_error(self, mock_post):
+        # Mock API error response
+        mock_post.side_effect = Exception("API offline")
+
+        # Log in as a customer
+        customer = User.objects.create_user(username="customer_user2", password="password")
+        customer.role = User.Role.CUSTOMER
+        customer.save()
+        self.client.login(username="customer_user2", password="password")
+
+        # Post initiate consent (should fall back to local mock page)
+        response = self.client.post(reverse("initiate_consent"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/me/consent/", response.url)
+
+        # Verify consent created with standard mock fallback handle
+        consent = customer.consents.first()
+        self.assertEqual(consent.status, AAConsent.Status.PENDING)
+
+    def test_parse_finbox_transactions_json(self):
+        from core.parsers import parse_finbox_transactions_json
+        json_data = {
+            "transactions": [
+                {
+                    "transaction_type": "debit",
+                    "transaction_note": "Rent Payment",
+                    "amount": 10000.0,
+                    "date": "2026-08-01 10:00:00",
+                    "balance": 15000.0
+                },
+                {
+                    "transaction_type": "credit",
+                    "transaction_note": "Salary Credit",
+                    "amount": 25000.0,
+                    "date": "2026-08-02 11:00:00",
+                    "balance": 40000.0
+                }
+            ]
+        }
+        res = parse_finbox_transactions_json(json_data)
+        self.assertIsNotNone(res)
+        self.assertEqual(res["txn_count"], 2)
+        self.assertEqual(res["bounces"], 0)
+        self.assertEqual(res["upi_txns"], 0)
+
+    @patch("requests.post")
+    def test_ops_aa_callback_session_progress_uat(self, mock_post):
+        # Setup mock for status progress endpoint returning XML
+        class MockResponse:
+            status_code = 200
+            def json(self):
+                return {
+                    "Response": """<?xml version="1.0" encoding="utf-8"?>
+                    <customerInfo><bank>HDFC</bank></customerInfo>
+                    <aa:Account type="deposit" xmlns:aa="http://api.rebit.org.in/FISchema/deposit">
+                        <aa:Transactions>
+                            <aa:Transaction txnId="TXN123" type="DEBIT" valueDate="2026-03-01T00:00:00" amount="1000.0" narration="UPI" currentBalance="5000.0"/>
+                        </aa:Transactions>
+                    </aa:Account>
+                    """
+                }
+        mock_post.return_value = MockResponse()
+
+        # Log in as operations
+        from core.models import User, AAConsent
+        ops_user = User.objects.create_user(username="ops_tester", password="password")
+        ops_user.role = User.Role.OPS
+        ops_user.save()
+        
+        ops_tester_customer = User.objects.create_user(
+            username="ops_tester_customer",
+            password="password",
+            onboarded_by=ops_user
+        )
+        ops_tester_customer.role = User.Role.CUSTOMER
+        ops_tester_customer.save()
+        
+        consent = AAConsent.objects.create(
+            customer=ops_tester_customer,
+            handle="test-handle",
+            status=AAConsent.Status.PENDING
+        )
+
+        self.client.login(username="ops_tester", password="password")
+        
+        # Trigger ops callback
+        response = self.client.get(reverse("ops_aa_callback", kwargs={"pk": ops_tester_customer.pk}))
+        self.assertEqual(response.status_code, 302)
+
+        # Check DB states
+        consent.refresh_from_db()
+        self.assertEqual(consent.status, AAConsent.Status.ACTIVE)
+        
+        # Verify statement created and is XML
+        statement = ops_tester_customer.bank_statements.first()
+        self.assertIsNotNone(statement)
+        self.assertTrue(statement.file.name.endswith(".xml"))
+        self.assertEqual(statement.txn_count, 1)
+
+
+
+
+
 
 
 

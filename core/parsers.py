@@ -318,3 +318,166 @@ def parse_excel_statement(file_obj: BinaryIO, filename: str) -> Optional[dict]:
     for row in rows:
         writer.writerow(row)
     return parse_csv_statement(buf.getvalue())
+
+
+import xml.etree.ElementTree as ET
+
+def parse_rebit_xml_to_df(xml_content: str) -> Optional[dict]:
+    """Parse ReBIT-compliant Account Aggregator XML into a standardized DataFrame."""
+    try:
+        import re
+        xml_stripped = re.sub(r"<\?xml.*?\?>", "", xml_content)
+        xml_wrapped = f"<root>{xml_stripped}</root>"
+        root = ET.fromstring(xml_wrapped.encode("utf-8"))
+        transactions = []
+        for elem in root.iter():
+            # Match element tag name ignoring namespaces
+            tag_name = elem.tag.split("}")[-1]
+            if tag_name == "Transaction":
+                attrs = elem.attrib
+                txn_type = attrs.get("type", "").upper()
+                amount_str = attrs.get("amount") or "0"
+                amount = float(amount_str)
+                narration = attrs.get("narration") or attrs.get("narrationDescription") or ""
+                
+                # Try multiple possible date attributes
+                txn_date_str = attrs.get("valueDate") or attrs.get("txnDt") or attrs.get("date") or ""
+                
+                balance_str = attrs.get("currentBalance") or attrs.get("balance") or "0"
+                balance = float(balance_str)
+                
+                withdrawal = amount if txn_type == "DEBIT" else 0.0
+                deposit = amount if txn_type == "CREDIT" else 0.0
+                
+                transactions.append({
+                    "Date": txn_date_str,
+                    "Withdrawal Amount": withdrawal,
+                    "Deposit Amount": deposit,
+                    "Narration": narration,
+                    "Closing Balance": balance
+                })
+        
+        if not transactions:
+            return None
+            
+        import pandas as pd
+        df = pd.DataFrame(transactions)
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        df = df.dropna(subset=["Date"])
+        df = df.sort_values(by="Date").reset_index(drop=True)
+        return df
+    except Exception as e:
+        print("XML parse error:", e)
+        return None
+
+
+def parse_xml_statement(xml_content: str) -> Optional[dict]:
+    """Parse a ReBIT XML statement.
+
+    Returns a dict with the raw features and parse stats, or ``None``.
+    """
+    try:
+        from core.ml.features import extract_advanced_features, get_counterparty_signature
+        df = parse_rebit_xml_to_df(xml_content)
+        if df is not None:
+            features = extract_advanced_features(df)
+            if features:
+                txn_count = len(df)
+                period_months = 0.0
+                if txn_count > 1:
+                    days = (df["Date"].max() - df["Date"].min()).days
+                    period_months = max(0.1, days / 30.4)
+                
+                inflows = df[df["Deposit Amount"] > 0]["Deposit Amount"]
+                outflows = df[df["Withdrawal Amount"] > 0]["Withdrawal Amount"]
+                
+                monthly_avg_inflow = float(inflows.sum() / max(0.1, period_months))
+                monthly_avg_outflow = float(outflows.sum() / max(0.1, period_months))
+                bounces = int(df[df["Narration"].str.upper().str.contains("BOUNCE|RETURN|FAIL|REJECT", na=False)].shape[0])
+                upi_txns = int(df[df["Narration"].str.upper().str.contains("UPI|IMPS", na=False)].shape[0])
+                
+                counterparties = set(df["Narration"].apply(get_counterparty_signature))
+                distinct_counterparties = len(counterparties)
+                
+                return {
+                    "features": features,
+                    "txn_count": txn_count,
+                    "period_months": period_months,
+                    "monthly_avg_inflow": monthly_avg_inflow,
+                    "monthly_avg_outflow": monthly_avg_outflow,
+                    "bounces": bounces,
+                    "upi_txns": upi_txns,
+                    "distinct_counterparties": distinct_counterparties,
+                }
+    except Exception as e:
+        print("parse_xml_statement error:", e)
+    return None
+
+
+def parse_finbox_transactions_json(json_data: dict) -> Optional[dict]:
+    """Parse Finbox Transactions JSON response directly into standardized features."""
+    try:
+        txns = json_data.get("transactions", [])
+        if not txns:
+            return None
+        
+        rows = []
+        for t in txns:
+            txn_type = t.get("transaction_type", "").lower()
+            amount = float(t.get("amount", 0.0))
+            narration = t.get("transaction_note") or t.get("description") or ""
+            txn_date = t.get("date", "")
+            balance = float(t.get("balance", 0.0))
+            
+            withdrawal = amount if txn_type == "debit" else 0.0
+            deposit = amount if txn_type == "credit" else 0.0
+            
+            rows.append({
+                "Date": txn_date,
+                "Withdrawal Amount": withdrawal,
+                "Deposit Amount": deposit,
+                "Narration": narration,
+                "Closing Balance": balance
+            })
+            
+        import pandas as pd
+        df = pd.DataFrame(rows)
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        df = df.dropna(subset=["Date"])
+        df = df.sort_values(by="Date").reset_index(drop=True)
+        
+        from core.ml.features import extract_advanced_features, get_counterparty_signature
+        features = extract_advanced_features(df)
+        if features:
+            txn_count = len(df)
+            period_months = 0.0
+            if txn_count > 1:
+                days = (df["Date"].max() - df["Date"].min()).days
+                period_months = max(0.1, days / 30.4)
+            
+            inflows = df[df["Deposit Amount"] > 0]["Deposit Amount"]
+            outflows = df[df["Withdrawal Amount"] > 0]["Withdrawal Amount"]
+            
+            monthly_avg_inflow = float(inflows.sum() / max(0.1, period_months))
+            monthly_avg_outflow = float(outflows.sum() / max(0.1, period_months))
+            bounces = int(df[df["Narration"].str.upper().str.contains("BOUNCE|RETURN|FAIL|REJECT", na=False)].shape[0])
+            upi_txns = int(df[df["Narration"].str.upper().str.contains("UPI|IMPS", na=False)].shape[0])
+            
+            counterparties = set(df["Narration"].apply(get_counterparty_signature))
+            distinct_counterparties = len(counterparties)
+            
+            return {
+                "features": features,
+                "txn_count": txn_count,
+                "period_months": period_months,
+                "monthly_avg_inflow": monthly_avg_inflow,
+                "monthly_avg_outflow": monthly_avg_outflow,
+                "bounces": bounces,
+                "upi_txns": upi_txns,
+                "distinct_counterparties": distinct_counterparties,
+            }
+    except Exception as e:
+        print("parse_finbox_transactions_json error:", e)
+    return None
+
+
