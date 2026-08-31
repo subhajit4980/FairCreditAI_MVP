@@ -12,5 +12,8 @@
     "Interest_Rate": 0.12,
     "Business_Explanation": "Evaluated new borrower 'CUST_00111111'. AI Credit Score: 80/100. Fraud Probability: 1.30%, Probability of Default: 21.07%. Underwriting Decision: REVIEW.",
     "Customer_Explanation": "Your application was evaluated using your bank statement cashflow data. Your alternative AI credit score is 80/100 with a Grade B risk classification.",
-    "Actionable_Recommendations": "Increase your monthly savings cushion above 20% of net monthly income. | Reduce discretionary e-commerce and dining spending to build a cash reserve."
+    "Actionable_Recommendations": "Increase your monthly savings cushion above 20% of net monthly income. | Reduce discretionary e-commerce and dining spending to build a cash reserve.",
+    "income_consistency": 0.846,
+    "expense_ratio": 1.0333,
+    "savings_ratio": -0.0333
 }

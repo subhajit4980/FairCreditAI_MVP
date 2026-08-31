@@ -229,86 +229,12 @@ def _generate_features(customer):
 # AI model algorithm (pure-Python port of fairCreditAiModel/AI_Credit_Score).
 # ---------------------------------------------------------------------------
 
-# PD -> regulatory grade bounds (from the notebook's GRADE_BOUNDS).
-AI_GRADE_BOUNDS = (
-    (0.15, "Grade A"),
-    (0.30, "Grade B"),
-    (0.50, "Grade C"),
-    (0.70, "Grade D"),
-)  # PD above the last bound -> "Grade E".
-
-# Pricing matrix by grade: base annual interest rate + monthly-income multiplier
-# used to size the sanctioned limit (from the notebook's pricing_matrix).
-AI_PRICING_MATRIX = {
-    "Grade A": {"base_rate": 0.105, "multiplier": 8.0},
-    "Grade B": {"base_rate": 0.120, "multiplier": 6.0},
-    "Grade C": {"base_rate": 0.145, "multiplier": 4.0},
-    "Grade D": {"base_rate": 0.180, "multiplier": 2.0},
-    "Grade E": {"base_rate": 0.240, "multiplier": 1.0},
-}
-
-# Grade -> coarse risk type surfaced to the UI (issue #12: Low / Medium / High).
-AI_RISK_TYPE = {
-    "Grade A": "Low",
-    "Grade B": "Low",
-    "Grade C": "Medium",
-    "Grade D": "High",
-    "Grade E": "High",
-}
-
-# Default monthly income (INR) when the profile has none, mirroring the
-# notebook's ``row.get('average_monthly_income', 30000)`` fallback.
-AI_DEFAULT_MONTHLY_INCOME = 30000
-
-
-def _clamp(value, low, high):
-    return max(low, min(high, value))
-
-
-def _pd_proxy(features):
-    """Heuristic probability-of-default in ``[0.02, 0.98]``.
-
-    Stands in for ``credit_model.predict_proba`` (which needs the trained
-    ``.joblib`` pipeline). Higher expense ratio, less consistent income, thin
-    savings, late payments and bounces all push PD up. Weights over the first
-    four terms sum to 0.90 with a 0.10 bounce term on top.
-    """
-    savings_norm = _clamp(features["savings_ratio"] / 0.40, 0.0, 1.0)
-    pd_raw = (
-        0.35 * features["expense_ratio"]
-        + 0.25 * (1 - features["income_consistency"])
-        + 0.20 * (1 - savings_norm)
-        + 0.10 * (1 - features["payment_timeliness"])
-        + 0.10 * _clamp(features["bounce_rate"] * 5, 0.0, 1.0)
-    )
-    return _clamp(pd_raw, 0.02, 0.98)
-
-
-def _fraud_proxy(features):
-    """Heuristic fraud probability in ``[0.01, 0.95]``.
-
-    Stands in for ``fraud_model.predict_proba``. A weak digital footprint
-    (cash-heavy behaviour) and elevated bounces raise suspicion; fraud stays
-    low for the typical clean profile.
-    """
-    fraud_raw = (
-        0.04
-        + 0.10 * (1 - features["digital_engagement"])
-        + 0.10 * _clamp(features["bounce_rate"] * 5, 0.0, 1.0)
-    )
-    return _clamp(fraud_raw, 0.01, 0.95)
-
-
-def _ai_grade(pd_prob):
-    for bound, grade in AI_GRADE_BOUNDS:
-        if pd_prob <= bound:
-            return grade
-    return "Grade E"
+# AI model algorithm (pure-Python port of fairCreditAiModel/AI_Credit_Score) now delegates to core.ml.predictor
 
 
 def _ai_band(score):
     """Map the 0–100 AI score onto the shared five-band scale."""
-    if score >= 80:
+    if score > 80:
         return ScoreReport.Band.EXCELLENT
     if score >= 65:
         return ScoreReport.Band.VERY_GOOD
@@ -375,9 +301,9 @@ def generate_score(customer, algorithm: str = AI_MODEL) -> ScoreReport:
         algorithm=algorithm,
         score=score,
         band=band,
-        income_consistency=features["income_consistency"],
-        expense_ratio=features["expense_ratio"],
-        savings_ratio=features["savings_ratio"],
+        income_consistency=assessment.get("income_consistency", features.get("income_consistency")),
+        expense_ratio=assessment.get("expense_ratio", features.get("expense_ratio")),
+        savings_ratio=assessment.get("savings_ratio", features.get("savings_ratio")),
         payment_timeliness=features["payment_timeliness"],
         transaction_frequency=features["transaction_frequency"],
         bounce_rate=features["bounce_rate"],
