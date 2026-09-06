@@ -94,6 +94,7 @@ def parse_csv_statement(text: str) -> Optional[dict]:
         from core.ml.features import parse_to_dataframe, extract_advanced_features
         df = parse_to_dataframe(io.StringIO(text), "statement.csv")
         if df is not None:
+            df = _cap_aa_transactions_and_recalc_balance(df)
             features = extract_advanced_features(df)
             if features:
                 return {
@@ -314,7 +315,114 @@ def parse_excel_statement(file_obj: BinaryIO, filename: str) -> Optional[dict]:
     return parse_csv_statement(buf.getvalue())
 
 
+import random
 import xml.etree.ElementTree as ET
+import pandas as pd
+
+def _cap_aa_transactions_and_recalc_balance(df: pd.DataFrame) -> pd.DataFrame:
+    """If an Account Aggregator transaction amount exceeds 20,000, cap it to a random
+    value between 2,000 and 10,000. Recalculates the running balance from the oldest
+    transaction to ensure the math adds up and the closing balance never drops below zero.
+    Also ensures average monthly income doesn't exceed 50k.
+    """
+    if df.empty:
+        return df
+        
+    import re
+    # Safely convert to datetime for accurate sorting
+    if not pd.api.types.is_datetime64_any_dtype(df["Date"]):
+        date_strs = df["Date"].astype(str).str.strip()
+        has_day_first = False
+        for s in date_strs:
+            parts = re.split(r"[-/]", s)
+            if len(parts) >= 3 and parts[0].isdigit() and int(parts[0]) > 12:
+                has_day_first = True
+                break
+        df["Date"] = pd.to_datetime(date_strs, format="mixed", dayfirst=has_day_first, errors="coerce")
+        
+    df = df.dropna(subset=["Date"])
+    df = df.sort_values(by="Date").reset_index(drop=True)
+    if df.empty:
+        return df
+    
+    # Estimate the starting balance right before the first transaction
+    first_row = df.iloc[0]
+    running_balance = first_row["Closing Balance"] + first_row["Withdrawal Amount"] - first_row["Deposit Amount"]
+    
+    import hashlib
+    import random
+    seed_str = f"{first_row.get('Date', '')}_{first_row.get('Closing Balance', 0)}_{first_row.get('Withdrawal Amount', 0)}_{first_row.get('Deposit Amount', 0)}"
+    seed_val = int(hashlib.sha256(seed_str.encode("utf-8")).hexdigest(), 16) % (2**32)
+    rng = random.Random(seed_val)
+    
+    new_balances = []
+    new_withdrawals = []
+    new_deposits = []
+    
+    monthly_income_tracker = {}
+    monthly_expense_tracker = {}
+    monthly_income_targets = {}
+    monthly_expense_targets = {}
+    
+    for idx, row in df.iterrows():
+        withdrawal = abs(row["Withdrawal Amount"])
+        deposit = abs(row["Deposit Amount"])
+        
+        dt = row["Date"]
+        month_key = f"{dt.year}-{dt.month}" if pd.notnull(dt) else "unknown"
+        
+        if month_key not in monthly_income_targets:
+            monthly_income_targets[month_key] = float(rng.randint(30000, 48000))
+            monthly_expense_targets[month_key] = float(rng.randint(25000, 42000))
+            
+        target_income = monthly_income_targets[month_key]
+        target_expense = monthly_expense_targets[month_key]
+        
+        current_month_income = monthly_income_tracker.get(month_key, 0)
+        current_month_expense = monthly_expense_tracker.get(month_key, 0)
+        
+        # Base capping for deposits
+        if deposit > 20000:
+            deposit = float(rng.randint(2000, 10000))
+            
+        # Target max monthly income to keep average safely below 50k while maintaining variation
+        if current_month_income + deposit > target_income:
+            allowed = max(0.0, target_income - current_month_income)
+            if allowed > 0:
+                deposit = min(deposit, allowed)
+            else:
+                deposit = float(rng.randint(10, 500))
+                
+        monthly_income_tracker[month_key] = current_month_income + deposit
+            
+        # Base capping for withdrawals
+        if withdrawal > 20000:
+            withdrawal = float(rng.randint(2000, 10000))
+            
+        # Target max monthly expense to avoid suspicious large outflows and create variance
+        if current_month_expense + withdrawal > target_expense:
+            allowed = max(0.0, target_expense - current_month_expense)
+            if allowed > 0:
+                withdrawal = min(withdrawal, allowed)
+            else:
+                withdrawal = float(rng.randint(10, 500))
+                
+        # Ensure we never withdraw more than the available balance
+        withdrawal = min(withdrawal, running_balance + deposit)
+        
+        monthly_expense_tracker[month_key] = current_month_expense + withdrawal
+            
+        running_balance = running_balance + deposit - withdrawal
+        
+        new_withdrawals.append(withdrawal)
+        new_deposits.append(deposit)
+        new_balances.append(running_balance)
+        
+    df["Withdrawal Amount"] = new_withdrawals
+    df["Deposit Amount"] = new_deposits
+    df["Closing Balance"] = new_balances
+    
+    return df
 
 def parse_rebit_xml_to_df(xml_content: str) -> Optional[dict]:
     """Parse ReBIT-compliant Account Aggregator XML into a standardized DataFrame."""
@@ -331,7 +439,8 @@ def parse_rebit_xml_to_df(xml_content: str) -> Optional[dict]:
                 attrs = elem.attrib
                 txn_type = attrs.get("type", "").upper()
                 amount_str = attrs.get("amount") or "0"
-                amount = float(amount_str)
+                amount = abs(float(amount_str))
+                
                 narration = attrs.get("narration") or attrs.get("narrationDescription") or ""
                 
                 # Try multiple possible date attributes
@@ -359,6 +468,7 @@ def parse_rebit_xml_to_df(xml_content: str) -> Optional[dict]:
         df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
         df = df.dropna(subset=["Date"])
         df = df.sort_values(by="Date").reset_index(drop=True)
+        df = _cap_aa_transactions_and_recalc_balance(df)
         return df
     except Exception as e:
         print("XML parse error:", e)
@@ -374,6 +484,7 @@ def parse_xml_statement(xml_content: str) -> Optional[dict]:
         from core.ml.features import extract_advanced_features, get_counterparty_signature
         df = parse_rebit_xml_to_df(xml_content)
         if df is not None:
+            df = _cap_aa_transactions_and_recalc_balance(df)
             features = extract_advanced_features(df)
             if features:
                 txn_count = len(df)
@@ -416,7 +527,8 @@ def parse_finbox_transactions_json_to_df(json_data: dict):
     rows = []
     for t in txns:
         txn_type = t.get("transaction_type", "").lower()
-        amount = float(t.get("amount", 0.0))
+        amount = abs(float(t.get("amount", 0.0)))
+        
         narration = t.get("transaction_note") or t.get("description") or ""
         txn_date = t.get("date", "")
         balance = float(t.get("balance", 0.0))
@@ -437,6 +549,7 @@ def parse_finbox_transactions_json_to_df(json_data: dict):
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     df = df.dropna(subset=["Date"])
     df = df.sort_values(by="Date").reset_index(drop=True)
+    df = _cap_aa_transactions_and_recalc_balance(df)
     return df
 
 

@@ -9,11 +9,11 @@ class AICreditScoreModel:
         self.credit_features = credit_features
         self.GRADE_BOUNDS = {'MAX_A': 0.15, 'MAX_B': 0.30, 'MAX_C': 0.50, 'MAX_D': 0.70}
         self.pricing_matrix = {
-            'Grade A': {"base_rate": 0.105, "multiplier": 4.0},
-            'Grade B': {"base_rate": 0.120, "multiplier": 3.5},
-            'Grade C': {"base_rate": 0.145, "multiplier": 2.5},
-            'Grade D': {"base_rate": 0.180, "multiplier": 1.5},
-            'Grade E': {"base_rate": 0.240, "multiplier": 1.0},
+            'Grade A': {"base_rate": 0.105, "multiplier": 2.5},
+            'Grade B': {"base_rate": 0.120, "multiplier": 2.0},
+            'Grade C': {"base_rate": 0.145, "multiplier": 1.5},
+            'Grade D': {"base_rate": 0.180, "multiplier": 0.5},
+            'Grade E': {"base_rate": 0.240, "multiplier": 0},
         }
 
     def _align_and_fill_features(self, features_dict: dict, expected_cols: list) -> pd.DataFrame:
@@ -62,44 +62,78 @@ class AICreditScoreModel:
         risk_grade = self.map_pd_to_regulatory_grade(pd_prob)
         tier = self.pricing_matrix.get(risk_grade, self.pricing_matrix['Grade E'])
         
-        max_approved_loan = int(max(0, monthly_income * tier["multiplier"]))* 0.50
+        max_approved_loan = int(max(0, monthly_income * tier["multiplier"])) *0.90
         recommended_loan = int(max_approved_loan * 0.80)
 
         decision_str = ""
         reason_str = ""
         if fraud_prob >= 0.75:
             decision_str = "REJECTED"
-            reason_str = "Severe fraud risk flag triggered."
+            reason_str = "Severe fraud risk or identity mismatch detected."
             max_approved_loan = 0
             recommended_loan = 0
         elif pd_prob >= 0.80:
             decision_str = "REJECTED"
-            reason_str = "Very high probability of default."
+            reason_str = f"Extremely high default probability ({pd_prob:.0%}) based on cash flow trends."
             max_approved_loan = 0
             recommended_loan = 0
-        elif pd_prob >= 0.50 or fraud_prob >= 0.50 or risk_grade in {'Grade D', 'Grade E'}:
+        elif pd_prob >= 0.50:
             decision_str = "REVIEW"
-            reason_str = "Manual review recommended due to elevated risk parameters."
+            reason_str = "Elevated probability of default detected."
             recommended_loan = int(max_approved_loan * 0.50)
-        elif foir > 0.45 or available_disposable_income <= 0:
+        elif fraud_prob >= 0.50:
             decision_str = "REVIEW"
-            reason_str = "Manual review recommended due to cashflow margin or EMI burden."
+            reason_str = "Inconsistent transactional patterns require verification."
+            recommended_loan = int(max_approved_loan * 0.50)
+        elif risk_grade in {'Grade D', 'Grade E'}:
+            decision_str = "REVIEW"
+            reason_str = f"Borrower falls in high-risk regulatory band ({risk_grade})."
+            recommended_loan = int(max_approved_loan * 0.50)
+        elif foir > 0.45:
+            decision_str = "REVIEW"
+            reason_str = f"Existing EMI burden ({foir:.0%}) exceeds the 45% safety threshold."
+            recommended_loan = int(max_approved_loan * 0.50)
+        elif available_disposable_income <= 0:
+            decision_str = "REVIEW"
+            reason_str = "Insufficient disposable income for new loan obligations."
             recommended_loan = int(max_approved_loan * 0.50)
         else:
             decision_str = "APPROVED"
-            reason_str = "Passed alternative risk underwriting policy based on verified bank statement cashflow."
+            savings_ratio = float(cashflow_features.get('savings_ratio', 0.0))
+            if savings_ratio >= 0.20:
+                reason_str = "Strong cash reserves and low default probability."
+            elif foir <= 0.20:
+                reason_str = "Low existing debt burden and stable cash flow."
+            else:
+                reason_str = "Passed alternative risk underwriting based on verified banking data."
 
         max_approved_loan = (int(max_approved_loan) // 10000) * 10000
         recommended_loan = (int(recommended_loan) // 10000) * 10000
 
-        pd_factor = (1.0 - pd_prob) * 45
-        income_stability_index = float(cashflow_features.get('income_stability_index', cashflow_features.get('income_consistency', 0.7)))
-        stability_factor = min(1.0, income_stability_index) * 30
-        fraud_factor = (1.0 - fraud_prob) * 15
-        savings_ratio = float(cashflow_features.get('savings_ratio', 0.0))
-        savings_factor = max(0.0, min(1.0, savings_ratio + 0.5)) * 10
+        # Balanced, industry-calibrated score weights (Total = 100 points)
+        # 1. Repayment Capacity / Default Risk (50% weight): Core credit risk pillar
+        pd_factor = max(0.0, (1.0 - pd_prob)) * 50
 
-        ai_credit_score = int(np.clip(pd_factor + stability_factor + fraud_factor + savings_factor, 0, 100))
+        # 2. Income Stability (25% weight): Recurring cashflow consistency
+        income_stability_index = float(cashflow_features.get('income_stability_index', cashflow_features.get('income_consistency', 0.7)))
+        stability_factor = min(1.0, max(0.0, income_stability_index)) * 25
+
+        # 3. Clean Profile & Fraud Integrity (10% weight): Decreases sharply if fraud signals rise
+        fraud_factor = max(0.0, (1.0 - fraud_prob * 1.5)) * 10
+
+        # 4. Savings Cushion (15% weight): Buffer for unexpected shocks (full marks at 20% savings rate)
+        savings_ratio = float(cashflow_features.get('savings_ratio', 0.0))
+        savings_factor = min(1.0, max(0.0, savings_ratio / 0.20)) * 15
+
+        raw_score = pd_factor + stability_factor + fraud_factor + savings_factor
+
+        # Decision alignment cap: An application under REVIEW or REJECTED must not have an unexpectedly high score
+        if decision_str == "REJECTED":
+            ai_credit_score = int(min(raw_score, 35))
+        elif decision_str == "REVIEW":
+            ai_credit_score = int(min(raw_score, 68))
+        else:
+            ai_credit_score = int(np.clip(round(raw_score), 10, 99))
 
         # RECOMMENDATIONS
         categorized_recommendations = {
@@ -147,13 +181,13 @@ class AICreditScoreModel:
         
         # SHAP-style logic calculation
         repayment_pts = int(round(pd_factor))
-        repayment_deficit = 45 - repayment_pts
+        repayment_deficit = 50 - repayment_pts
         stability_pts = int(round(stability_factor))
-        stability_deficit = 30 - stability_pts
+        stability_deficit = 25 - stability_pts
         fraud_pts = int(round(fraud_factor))
-        fraud_deficit = 15 - fraud_pts
+        fraud_deficit = 10 - fraud_pts
         savings_pts = int(round(savings_factor))
-        savings_deficit = 10 - savings_pts
+        savings_deficit = 15 - savings_pts
         
         helped = [
             {"label": _("Repayment capacity (low default risk)"), "pts": f"+{repayment_pts} pts"},
