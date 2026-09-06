@@ -1,118 +1,570 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: FairCreditScore\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-05 15:14+0530\n"
+"Language: bn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: bn\n"
 
-msgid "Admin"
-msgstr "অ্যাডমিন"
-
-msgid "Users"
-msgstr "ব্যবহারকারী"
-
-msgid "Audit"
-msgstr "নিরীক্ষা"
-
-msgid "Wiki"
-msgstr "উইকি"
-
-msgid "Operations"
-msgstr "পরিচালনা"
-
-msgid "Documents"
-msgstr "নথিপত্র"
-
-msgid "Customers"
-msgstr "গ্রাহক"
-
-msgid "+ New customer"
-msgstr "+ নতুন গ্রাহক"
-
-msgid "My Score"
-msgstr "আমার স্কোর"
-
-msgid "Profile"
-msgstr "প্রোফাইল"
-
-msgid "Sign out"
-msgstr "সাইন আউট"
-
-msgid "Sign in"
-msgstr "সাইন ইন"
-
-msgid "Get my score"
-msgstr "আমার স্কোর নিন"
-
-msgid "Language"
-msgstr "ভাষা"
-
-msgid "Go"
-msgstr "যান"
-
-msgid "Your credit score, made fair."
-msgstr "আপনার ক্রেডিট স্কোর, ন্যায্যভাবে।"
-
-msgid "Individual Customer"
-msgstr "ব্যক্তিগত গ্রাহক"
-
-msgid "Financial Institutions"
-msgstr "আর্থিক প্রতিষ্ঠান"
-
-msgid "Request access"
-msgstr "অ্যাক্সেসের অনুরোধ করুন"
-
-msgid "Consent-based"
-msgstr "সম্মতি-ভিত্তিক"
-
-msgid "Explainable"
-msgstr "ব্যাখ্যাযোগ্য"
-
-msgid "Inclusive"
-msgstr "অন্তর্ভুক্তিমূলক"
-
-msgid "FairCreditScore is an alternative credit scoring platform for the 400+ million Indians who transact every day on UPI but stay invisible to traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator framework."
-msgstr "FairCreditScore হল সেই ৪০ কোটিরও বেশি ভারতীয়ের জন্য একটি বিকল্প ক্রেডিট স্কোরিং প্ল্যাটফর্ম যাঁরা প্রতিদিন UPI-তে লেনদেন করেন কিন্তু প্রথাগত ব্যুরোর কাছে অদৃশ্য থেকে যান। FairCreditAI এবং RBI অ্যাকাউন্ট অ্যাগ্রিগেটর কাঠামো দ্বারা চালিত।"
-
-msgid "Generate your FairCreditScore in seconds. Upload a bank statement and see what helped or hurt your score."
-msgstr "কয়েক সেকেন্ডে আপনার FairCreditScore তৈরি করুন। একটি ব্যাংক স্টেটমেন্ট আপলোড করুন এবং দেখুন কী আপনার স্কোরকে সাহায্য করেছে বা ক্ষতি করেছে।"
-
-msgid "Operations console for partner banks and NBFCs &mdash; onboard customers, generate scores on their behalf."
-msgstr "অংশীদার ব্যাংক ও NBFC-এর জন্য অপারেশনস কনসোল &mdash; গ্রাহকদের অন্তর্ভুক্ত করুন, তাঁদের পক্ষে স্কোর তৈরি করুন।"
-
-msgid "Share data once via the RBI-licensed Account Aggregator framework. No screen scraping, no document hassle."
-msgstr "RBI-লাইসেন্সপ্রাপ্ত অ্যাকাউন্ট অ্যাগ্রিগেটর কাঠামোর মাধ্যমে একবার ডেটা শেয়ার করুন। কোনও স্ক্রিন স্ক্র্যাপিং নেই, কোনও নথির ঝামেলা নেই।"
-
-msgid "Every score comes with a SHAP-style breakdown of what helped or hurt &mdash; no black box."
-msgstr "প্রতিটি স্কোরের সাথে কী সাহায্য করেছে বা ক্ষতি করেছে তার একটি SHAP-শৈলীর বিশ্লেষণ থাকে &mdash; কোনও ব্ল্যাক বক্স নেই।"
-
-msgid "Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL was never built for."
-msgstr "গিগ কর্মী, কিরানা দোকান, বেতন-ডেবিট ব্যবহারকারী এবং CIBIL যাঁদের জন্য কখনও তৈরি হয়নি তাঁদের সবার জন্য তৈরি।"
-
-msgid "Invalid username or password."
-msgstr "ভুল ব্যবহারকারীর নাম বা পাসওয়ার্ড।"
-
-msgid "Username"
-msgstr "ব্যবহারকারীর নাম"
-
-msgid "Password"
-msgstr "পাসওয়ার্ড"
-
-msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
-msgstr "অ্যাকাউন্ট নেই? <a href=\"%(signup_url)s\">একটি তৈরি করুন</a>।"
-
+#: faircredit/settings.py:135
 msgid "English"
 msgstr "ইংরেজি"
 
+#: faircredit/settings.py:136
 msgid "Hindi"
 msgstr "হিন্দি"
 
+#: faircredit/settings.py:137
 msgid "Bengali"
 msgstr "বাংলা"
 
+#: faircredit/settings.py:138
 msgid "Marathi"
 msgstr "মারাঠি"
 
+#: faircredit/settings.py:139
 msgid "Telugu"
 msgstr "তেলুগু"
+
+#: faircredit/settings.py:140
+msgid "Assamese"
+msgstr ""
+
+#: faircredit/settings.py:141
+#, fuzzy
+#| msgid "Marathi"
+msgid "Gujarati"
+msgstr "মারাঠি"
+
+#: faircredit/settings.py:142
+msgid "Kannada"
+msgstr ""
+
+#: faircredit/settings.py:143
+msgid "Kashmiri"
+msgstr ""
+
+#: faircredit/settings.py:144
+msgid "Konkani"
+msgstr ""
+
+#: faircredit/settings.py:145
+msgid "Maithili"
+msgstr ""
+
+#: faircredit/settings.py:146
+msgid "Malayalam"
+msgstr ""
+
+#: faircredit/settings.py:147
+msgid "Nepali"
+msgstr ""
+
+#: faircredit/settings.py:148
+msgid "Odia"
+msgstr ""
+
+#: faircredit/settings.py:149
+msgid "Punjabi"
+msgstr ""
+
+#: faircredit/settings.py:150
+msgid "Sindhi"
+msgstr ""
+
+#: faircredit/settings.py:151
+msgid "Tamil"
+msgstr ""
+
+#: faircredit/settings.py:152
+msgid "Urdu"
+msgstr ""
+
+#: templates/core/_language_switcher.html:8
+msgid "Language"
+msgstr "ভাষা"
+
+#: templates/core/_language_switcher.html:13
+msgid "Go"
+msgstr "যান"
+
+#: templates/core/base.html:287
+msgid "Admin"
+msgstr "অ্যাডমিন"
+
+#: templates/core/base.html:288
+msgid "Users"
+msgstr "ব্যবহারকারী"
+
+#: templates/core/base.html:289
+msgid "Audit"
+msgstr "নিরীক্ষা"
+
+#: templates/core/base.html:290
+msgid "Wiki"
+msgstr "উইকি"
+
+#: templates/core/base.html:292
+msgid "Operations"
+msgstr "পরিচালনা"
+
+#: templates/core/base.html:293
+msgid "Documents"
+msgstr "নথিপত্র"
+
+#: templates/core/base.html:294
+msgid "Customers"
+msgstr "গ্রাহক"
+
+#: templates/core/base.html:295
+#, fuzzy
+#| msgid "+ New customer"
+msgid "+ New Customer"
+msgstr "+ নতুন গ্রাহক"
+
+#: templates/core/base.html:297
+msgid "My Score"
+msgstr "আমার স্কোর"
+
+#: templates/core/base.html:298 templates/core/customer_dashboard.html:67
+msgid "Profile"
+msgstr "প্রোফাইল"
+
+#: templates/core/base.html:311
+msgid "Sign out"
+msgstr "সাইন আউট"
+
+#: templates/core/base.html:314 templates/core/home.html:15
+#: templates/core/home.html:23 templates/core/login.html:5
+#: templates/core/login.html:17
+msgid "Sign in"
+msgstr "সাইন ইন"
+
+#: templates/core/base.html:315
+#, fuzzy
+#| msgid "Get my score"
+msgid "Get My Score"
+msgstr "আমার স্কোর নিন"
+
+#: templates/core/customer_dashboard.html:3
+msgid "My Score · FairCreditScore"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:5
+msgid "Hi"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:10
+msgid "out of 1 – 100"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:14
+msgid "Generated"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:16
+msgid "View breakdown"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:18
+msgid "No score yet"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:19
+msgid "Upload a bank statement and click"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:19
+#: templates/core/customer_dashboard.html:35
+#, fuzzy
+#| msgid "Get my score"
+msgid "Get my Credit Score"
+msgstr "আমার স্কোর নিন"
+
+#: templates/core/customer_dashboard.html:22
+msgid ""
+"Link your bank account via Account Aggregator or upload a statement to score "
+"on real data &mdash; otherwise we fall back to a sample profile."
+msgstr ""
+
+#: templates/core/customer_dashboard.html:25
+msgid "Upload Statement (CSV/XLS)"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:28
+msgid "Fetch via Account Aggregator"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:42
+msgid "Bank statements & AA fetches"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:45
+msgid "When"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:45
+msgid "Source"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:45
+msgid "Txns"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:45
+msgid "Months"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:45
+#: templates/core/customer_dashboard.html:56
+msgid "Parsed"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:45
+msgid "Notes"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:51
+msgid "AA fetch"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:52
+msgid "Upload"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:56
+msgid "Unparsed"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:68
+msgid "Mobile:"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:68
+msgid "PAN:"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:68
+msgid "Income:"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:68
+msgid "mo"
+msgstr ""
+
+#: templates/core/customer_dashboard.html:69
+#, fuzzy
+#| msgid "Profile"
+msgid "Edit profile"
+msgstr "প্রোফাইল"
+
+#: templates/core/home.html:5
+msgid "Your credit score, made fair."
+msgstr "আপনার ক্রেডিট স্কোর, ন্যায্যভাবে।"
+
+#: templates/core/home.html:6
+msgid ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+msgstr ""
+"FairCreditScore হল সেই ৪০ কোটিরও বেশি ভারতীয়ের জন্য একটি বিকল্প ক্রেডিট স্কোরিং "
+"প্ল্যাটফর্ম যাঁরা প্রতিদিন UPI-তে লেনদেন করেন কিন্তু প্রথাগত ব্যুরোর কাছে অদৃশ্য থেকে "
+"যান। FairCreditAI এবং RBI অ্যাকাউন্ট অ্যাগ্রিগেটর কাঠামো দ্বারা চালিত।"
+
+#: templates/core/home.html:11
+msgid "Individual Customer"
+msgstr "ব্যক্তিগত গ্রাহক"
+
+#: templates/core/home.html:12
+msgid ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+msgstr ""
+"কয়েক সেকেন্ডে আপনার FairCreditScore তৈরি করুন। একটি ব্যাংক স্টেটমেন্ট আপলোড করুন "
+"এবং দেখুন কী আপনার স্কোরকে সাহায্য করেছে বা ক্ষতি করেছে।"
+
+#: templates/core/home.html:14
+msgid "Get my score"
+msgstr "আমার স্কোর নিন"
+
+#: templates/core/home.html:20
+msgid "Financial Institutions"
+msgstr "আর্থিক প্রতিষ্ঠান"
+
+#: templates/core/home.html:21
+msgid ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+msgstr ""
+"অংশীদার ব্যাংক ও NBFC-এর জন্য অপারেশনস কনসোল &mdash; গ্রাহকদের অন্তর্ভুক্ত করুন, "
+"তাঁদের পক্ষে স্কোর তৈরি করুন।"
+
+#: templates/core/home.html:24
+msgid "Request access"
+msgstr "অ্যাক্সেসের অনুরোধ করুন"
+
+#: templates/core/home.html:31
+msgid "Consent-based"
+msgstr "সম্মতি-ভিত্তিক"
+
+#: templates/core/home.html:32
+msgid ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen "
+"scraping, no document hassle."
+msgstr ""
+"RBI-লাইসেন্সপ্রাপ্ত অ্যাকাউন্ট অ্যাগ্রিগেটর কাঠামোর মাধ্যমে একবার ডেটা শেয়ার করুন। "
+"কোনও স্ক্রিন স্ক্র্যাপিং নেই, কোনও নথির ঝামেলা নেই।"
+
+#: templates/core/home.html:35
+msgid "Explainable"
+msgstr "ব্যাখ্যাযোগ্য"
+
+#: templates/core/home.html:36
+msgid ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash; "
+"no black box."
+msgstr ""
+"প্রতিটি স্কোরের সাথে কী সাহায্য করেছে বা ক্ষতি করেছে তার একটি SHAP-শৈলীর বিশ্লেষণ "
+"থাকে &mdash; কোনও ব্ল্যাক বক্স নেই।"
+
+#: templates/core/home.html:39
+msgid "Inclusive"
+msgstr "অন্তর্ভুক্তিমূলক"
+
+#: templates/core/home.html:40
+msgid ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+msgstr ""
+"গিগ কর্মী, কিরানা দোকান, বেতন-ডেবিট ব্যবহারকারী এবং CIBIL যাঁদের জন্য কখনও তৈরি "
+"হয়নি তাঁদের সবার জন্য তৈরি।"
+
+#: templates/core/login.html:8
+msgid "Invalid username or password."
+msgstr "ভুল ব্যবহারকারীর নাম বা পাসওয়ার্ড।"
+
+#: templates/core/login.html:10
+msgid "Username"
+msgstr "ব্যবহারকারীর নাম"
+
+#: templates/core/login.html:14
+msgid "Password"
+msgstr "পাসওয়ার্ড"
+
+#: templates/core/login.html:20
+#, python-format
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "অ্যাকাউন্ট নেই? <a href=\"%(signup_url)s\">একটি তৈরি করুন</a>।"
+
+#: templates/core/score_detail.html:469
+msgid "Back to customer details"
+msgstr ""
+
+#: templates/core/score_detail.html:471
+msgid "Back to dashboard"
+msgstr ""
+
+#: templates/core/score_detail.html:477
+msgid "Download Transactions (Excel)"
+msgstr ""
+
+#: templates/core/score_detail.html:487
+msgid "Score Unavailable"
+msgstr ""
+
+#: templates/core/score_detail.html:507
+msgid "Profile &amp; Scoring Summary"
+msgstr ""
+
+#: templates/core/score_detail.html:530
+msgid "Underwriter / Admin Portal View"
+msgstr ""
+
+#: templates/core/score_detail.html:546
+msgid "Regulatory Grade"
+msgstr ""
+
+#: templates/core/score_detail.html:550
+msgid "Approved Limit"
+msgstr ""
+
+#: templates/core/score_detail.html:554
+msgid "Recommended Amount"
+msgstr ""
+
+#: templates/core/score_detail.html:558 templates/core/score_detail.html:695
+msgid "Base Interest Rate"
+msgstr ""
+
+#: templates/core/score_detail.html:564
+msgid "Model Inferred Risk Indicators &amp; Attributions"
+msgstr ""
+
+#: templates/core/score_detail.html:569
+msgid "Probability of Default (PD)"
+msgstr ""
+
+#: templates/core/score_detail.html:587
+msgid "Fraud Probability Indicator"
+msgstr ""
+
+#: templates/core/score_detail.html:605
+msgid "Detailed Underwriting Financial Breakdown"
+msgstr ""
+
+#: templates/core/score_detail.html:610
+msgid "Calculated Monthly Income (Verified Statement/Profile)"
+msgstr ""
+
+#: templates/core/score_detail.html:614
+msgid "Calculated Monthly Expense"
+msgstr ""
+
+#: templates/core/score_detail.html:618
+#, python-format
+msgid "FOIR %% (Debt Obligations / Monthly Income)"
+msgstr ""
+
+#: templates/core/score_detail.html:622
+msgid "Available Surplus Disposable Income"
+msgstr ""
+
+#: templates/core/score_detail.html:626
+msgid "Income Stability Score"
+msgstr ""
+
+#: templates/core/score_detail.html:630
+msgid "Savings Ratio"
+msgstr ""
+
+#: templates/core/score_detail.html:634
+msgid "Essential vs. Discretionary Expense Split"
+msgstr ""
+
+#: templates/core/score_detail.html:647
+msgid "Underwriter Key Observations"
+msgstr ""
+
+#: templates/core/score_detail.html:661
+msgid "Borrower Dashboard"
+msgstr ""
+
+#: templates/core/score_detail.html:687
+msgid "Max Approved Limit"
+msgstr ""
+
+#: templates/core/score_detail.html:691
+msgid "Recommended Loan"
+msgstr ""
+
+#: templates/core/score_detail.html:703
+msgid "👍 Key Strengths"
+msgstr ""
+
+#: templates/core/score_detail.html:714
+msgid "💡 Key Improvement Areas"
+msgstr ""
+
+#: templates/core/score_detail.html:728
+msgid "Personalized Cashflow Recommendations"
+msgstr ""
+
+#: templates/core/score_detail.html:748
+msgid "Recommended Next Steps"
+msgstr ""
+
+#: templates/core/score_detail.html:766
+msgid "Automated EMI &amp; Obligation Detection"
+msgstr ""
+
+#: templates/core/score_detail.html:774
+msgid "Total Monthly Commitments"
+msgstr ""
+
+#: templates/core/score_detail.html:778
+msgid "Fixed Obligation to Income (FOIR)"
+msgstr ""
+
+#: templates/core/score_detail.html:788
+msgid "Active Obligations"
+msgstr ""
+
+#: templates/core/score_detail.html:792
+msgid "Bounced Mandates (ECS)"
+msgstr ""
+
+#: templates/core/score_detail.html:804
+msgid "Lender / Commitment"
+msgstr ""
+
+#: templates/core/score_detail.html:805
+msgid "EMI Amount"
+msgstr ""
+
+#: templates/core/score_detail.html:806
+msgid "Preferred Date / Freq"
+msgstr ""
+
+#: templates/core/score_detail.html:807
+msgid "Status"
+msgstr ""
+
+#: templates/core/score_detail.html:808
+msgid "Payment Timeline (Last 6 Months)"
+msgstr ""
+
+#: templates/core/score_detail.html:866
+msgid "Monthly Cashflow Trends"
+msgstr ""
+
+#: templates/core/score_detail.html:875
+msgid "Anti-Gaming Sanitization Summary"
+msgstr ""
+
+#: templates/core/score_detail.html:880
+msgid "Sanitization Category"
+msgstr ""
+
+#: templates/core/score_detail.html:881
+msgid "Treatment"
+msgstr ""
+
+#: templates/core/score_detail.html:882
+msgid "Txns Affected"
+msgstr ""
+
+#: templates/core/score_detail.html:883
+msgid "Amount Excluded"
+msgstr ""
+
+#: templates/core/score_detail.html:1010
+msgid "Underlying cashflow features"
+msgstr ""
+
+#: templates/core/score_detail.html:1013
+msgid "Income consistency"
+msgstr ""
+
+#: templates/core/score_detail.html:1014
+msgid "Savings ratio"
+msgstr ""
+
+#: templates/core/score_detail.html:1015
+msgid "Payment timeliness"
+msgstr ""
+
+#: templates/core/score_detail.html:1016
+msgid "Transaction frequency (per month)"
+msgstr ""
+
+#: templates/core/score_detail.html:1017
+msgid "Bounce rate"
+msgstr ""
+
+#: templates/core/score_detail.html:1018
+msgid "Digital engagement"
+msgstr ""

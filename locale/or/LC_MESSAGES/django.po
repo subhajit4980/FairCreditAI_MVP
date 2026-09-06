@@ -1,0 +1,428 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: FairCreditScore\n"
+"Language: or\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "English"
+msgstr "ଇଂରାଜୀ |"
+
+msgid "Hindi"
+msgstr "ହିନ୍ଦୀ"
+
+msgid "Bengali"
+msgstr "ବଙ୍ଗାଳୀ"
+
+msgid "Marathi"
+msgstr "ମରାଠୀ"
+
+msgid "Telugu"
+msgstr "ତେଲୁଗୁ"
+
+msgid "Assamese"
+msgstr "ଆସାମୀୟ |"
+
+msgid "Gujarati"
+msgstr "Gujarati"
+
+msgid "Kannada"
+msgstr "କନ୍ନଡ |"
+
+msgid "Kashmiri"
+msgstr "କାଶ୍ମୀରୀ"
+
+msgid "Konkani"
+msgstr "କନକାନି"
+
+msgid "Maithili"
+msgstr "ମ ith ଥୀଲି |"
+
+msgid "Malayalam"
+msgstr "ମାଲାୟାଲମ୍"
+
+msgid "Nepali"
+msgstr "ନେପାଳୀ"
+
+msgid "Odia"
+msgstr "ଓଡିଆ"
+
+msgid "Punjabi"
+msgstr "ପଞ୍ଜାବୀ |"
+
+msgid "Sindhi"
+msgstr "ସିନ୍ଧି |"
+
+msgid "Tamil"
+msgstr "ତାମିଲ୍ |"
+
+msgid "Urdu"
+msgstr "ଉର୍ଦ୍ଦୁ"
+
+msgid "Language"
+msgstr "ଭାଷା"
+
+msgid "Go"
+msgstr "ଯାଅ |"
+
+msgid "Admin"
+msgstr "ଆଡମିନି"
+
+msgid "Users"
+msgstr "ଉପଯୋଗକର୍ତ୍ତାଗଣ |"
+
+msgid "Audit"
+msgstr "ଅଡିଟ୍ କରନ୍ତୁ |"
+
+msgid "Wiki"
+msgstr "ୱିକି"
+
+msgid "Operations"
+msgstr "Operations"
+
+msgid "Documents"
+msgstr "ଡକ୍ୟୁମେଣ୍ଟ୍ |"
+
+msgid "Customers"
+msgstr "ଗ୍ରାହକ"
+
+msgid "+ New Customer"
+msgstr "+ ନୂତନ ଗ୍ରାହକ |"
+
+msgid "My Score"
+msgstr "My Score"
+
+msgid "Profile"
+msgstr "ପ୍ରୋଫାଇଲ୍"
+
+msgid "Sign out"
+msgstr "ସାଇନ୍ ଆଉଟ୍ କରନ୍ତୁ |"
+
+msgid "Sign in"
+msgstr "ସାଇନ୍ ଇନ୍ କରନ୍ତୁ |"
+
+msgid "Get My Score"
+msgstr "ମୋ ସ୍କୋର ପାଆନ୍ତୁ |"
+
+msgid "My Score · FairCreditScore"
+msgstr "ମୋ ସ୍କୋର · ଫେୟାର କ୍ରେଡିଟ୍ ସ୍କୋର୍ |"
+
+msgid "Hi"
+msgstr "ହାଏ"
+
+msgid "out of 1 – 100"
+msgstr "1 - 100 ମଧ୍ୟରୁ"
+
+msgid "Generated"
+msgstr "Generated"
+
+msgid "View breakdown"
+msgstr "View breakdown"
+
+msgid "No score yet"
+msgstr "No score yet"
+
+msgid "Upload a bank statement and click"
+msgstr "ଏକ ବ୍ୟାଙ୍କ ଷ୍ଟେଟମେଣ୍ଟ ଅପଲୋଡ୍ କରନ୍ତୁ ଏବଂ କ୍ଲିକ୍ କରନ୍ତୁ |"
+
+msgid "Get my Credit Score"
+msgstr "ମୋର କ୍ରେଡିଟ୍ ସ୍କୋର ପାଆନ୍ତୁ |"
+
+msgid ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+msgstr ""
+"ଆକାଉଣ୍ଟ୍ ଏଗ୍ରିଗେଟର୍ ମାଧ୍ୟମରେ ଆପଣଙ୍କର ବ୍ୟାଙ୍କ ଆକାଉଣ୍ଟକୁ ଲିଙ୍କ୍ କରନ୍ତୁ କିମ୍ବା "
+"ପ୍ରକୃତ ତଥ୍ୟ ଉପରେ ସ୍କୋର କରିବାକୁ ଏକ ଷ୍ଟେଟମେଣ୍ଟ ଅପଲୋଡ୍ କରନ୍ତୁ & mdash; ଅନ୍ୟଥା "
+"ଆମେ ଏକ ନମୁନା ପ୍ରୋଫାଇଲକୁ ଫେରିବା |"
+
+msgid "Upload Statement (CSV/XLS)"
+msgstr "Upload Statement (CSV/XLS)"
+
+msgid "Fetch via Account Aggregator"
+msgstr "Fetch via Account Aggregator"
+
+msgid "Bank statements & AA fetches"
+msgstr "ବ୍ୟାଙ୍କ ଷ୍ଟେଟମେଣ୍ଟ ଏବଂ ଏଏ ଫେଚ୍ |"
+
+msgid "When"
+msgstr "କେତେବେଳେ"
+
+msgid "Source"
+msgstr "Source"
+
+msgid "Txns"
+msgstr "Txns"
+
+msgid "Months"
+msgstr "ମାସଗୁଡିକ"
+
+msgid "Parsed"
+msgstr "Parsed"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "AA fetch"
+msgstr "AA fetch"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Unparsed"
+msgstr "ଅନାବଶ୍ୟକ |"
+
+msgid "Mobile:"
+msgstr "ମୋବାଇଲ୍:"
+
+msgid "PAN:"
+msgstr "PAN:"
+
+msgid "Income:"
+msgstr "Income:"
+
+msgid "mo"
+msgstr "mo"
+
+msgid "Edit profile"
+msgstr "ପ୍ରୋଫାଇଲ୍ ସଂପାଦନ କରନ୍ତୁ |"
+
+msgid "Your credit score, made fair."
+msgstr "ତୁମର କ୍ରେଡିଟ୍ ସ୍କୋର, ନ୍ୟାୟଯୁକ୍ତ |"
+
+msgid ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+msgstr ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+
+msgid "Individual Customer"
+msgstr "ବ୍ୟକ୍ତିଗତ ଗ୍ରାହକ"
+
+msgid ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+msgstr ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+
+msgid "Get my score"
+msgstr "Get my score"
+
+msgid "Financial Institutions"
+msgstr "ଆର୍ଥିକ ପ୍ରତିଷ୍ଠାନଗୁଡିକ |"
+
+msgid ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+msgstr ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+
+msgid "Request access"
+msgstr "Request access"
+
+msgid "Consent-based"
+msgstr "Consent-based"
+
+msgid ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+msgstr ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+
+msgid "Explainable"
+msgstr "Explainable"
+
+msgid ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+msgstr ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+
+msgid "Inclusive"
+msgstr "Inclusive"
+
+msgid ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+msgstr ""
+"ଗିଗ୍ ଶ୍ରମିକ, କିରାନା ଦୋକାନ, ବେତନ-ଡେବିଟ୍ ବ୍ୟବହାରକାରୀ ଏବଂ ଯେକ anyone ଣସି CIBIL "
+"ପାଇଁ ନିର୍ମିତ ନୁହେଁ |"
+
+msgid "Invalid username or password."
+msgstr "ଅବ val ଧ ଚାଳକନାମ କିମ୍ବା ପାସୱାର୍ଡ |"
+
+msgid "Username"
+msgstr "Username"
+
+msgid "Password"
+msgstr "ପାସୱାର୍ଡ"
+
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "ଖାତା ନାହିଁ? <a href = \"% (signup_url) s\"> ଗୋଟିଏ ସୃଷ୍ଟି କରନ୍ତୁ </a>।"
+
+msgid "Back to customer details"
+msgstr "Back to customer details"
+
+msgid "Back to dashboard"
+msgstr "ଡ୍ୟାସବୋର୍ଡକୁ ଫେରନ୍ତୁ |"
+
+msgid "Download Transactions (Excel)"
+msgstr "କାରବାର ଡାଉନଲୋଡ୍ କରନ୍ତୁ (Excel)"
+
+msgid "Score Unavailable"
+msgstr "ସ୍କୋର ଉପଲବ୍ଧ ନାହିଁ"
+
+msgid "Profile &amp; Scoring Summary"
+msgstr "ପ୍ରୋଫାଇଲ୍ & amp; ସ୍କୋରିଂ ସାରାଂଶ"
+
+msgid "Underwriter / Admin Portal View"
+msgstr "ଅଣ୍ଡରାଇଟର୍ / ଆଡମିନ୍ ପୋର୍ଟାଲ୍ ଭ୍ୟୁ |"
+
+msgid "Regulatory Grade"
+msgstr "ନିୟାମକ ଗ୍ରେଡ୍"
+
+msgid "Approved Limit"
+msgstr "ଅନୁମୋଦିତ ସୀମା |"
+
+msgid "Recommended Amount"
+msgstr "ସୁପାରିଶ କରାଯାଇଥିବା ପରିମାଣ"
+
+msgid "Base Interest Rate"
+msgstr "ମୂଳ ସୁଧ ହାର"
+
+msgid "Model Inferred Risk Indicators &amp; Attributions"
+msgstr "ମଡେଲ୍ ଅନୁପଯୁକ୍ତ ବିପଦ ସୂଚକ & amp; ଗୁଣ"
+
+msgid "Probability of Default (PD)"
+msgstr "Probability of Default (PD)"
+
+msgid "Fraud Probability Indicator"
+msgstr "ଜାଲିଆତି ସମ୍ଭାବନା ସୂଚକ |"
+
+msgid "Detailed Underwriting Financial Breakdown"
+msgstr "ଆର୍ଥିକ ଅଘଟଣର ବିସ୍ତୃତ ବିବରଣୀ |"
+
+msgid "Calculated Monthly Income (Verified Statement/Profile)"
+msgstr "ଗଣିତ ମାସିକ ଆୟ (ଯାଞ୍ଚ କରାଯାଇଥିବା ବିବୃତ୍ତି / ପ୍ରୋଫାଇଲ୍)"
+
+msgid "Calculated Monthly Expense"
+msgstr "ଗଣିତ ମାସିକ ଖର୍ଚ୍ଚ |"
+
+msgid "FOIR %% (Debt Obligations / Monthly Income)"
+msgstr "FOIR %% (t ଣ ବାଧ୍ୟତାମୂଳକ / ମାସିକ ଆୟ)"
+
+msgid "Available Surplus Disposable Income"
+msgstr "Available Surplus Disposable Income"
+
+msgid "Income Stability Score"
+msgstr "ଆୟ ସ୍ଥିରତା ସ୍କୋର |"
+
+msgid "Savings Ratio"
+msgstr "ସଞ୍ଚୟ ଅନୁପାତ |"
+
+msgid "Essential vs. Discretionary Expense Split"
+msgstr "Essential vs. Discretionary Expense Split"
+
+msgid "Underwriter Key Observations"
+msgstr "ଅଣ୍ଡରାଇଟର୍ କି ପର୍ଯ୍ୟବେକ୍ଷଣ |"
+
+msgid "Borrower Dashboard"
+msgstr "Orr ଣଗ୍ରହୀ ଡ୍ୟାସବୋର୍ଡ |"
+
+msgid "Max Approved Limit"
+msgstr "ସର୍ବାଧିକ ଅନୁମୋଦିତ ସୀମା |"
+
+msgid "Recommended Loan"
+msgstr "ସୁପାରିଶ କରାଯାଇଥିବା an ଣ"
+
+msgid "👍 Key Strengths"
+msgstr "👍 Key Strengths"
+
+msgid "💡 Key Improvement Areas"
+msgstr "💡 Key Improvement Areas"
+
+msgid "Personalized Cashflow Recommendations"
+msgstr "ବ୍ୟକ୍ତିଗତ କ୍ୟାଶଫ୍ଲୋ ସୁପାରିଶ |"
+
+msgid "Recommended Next Steps"
+msgstr "ପରବର୍ତ୍ତୀ ପଦକ୍ଷେପଗୁଡ଼ିକୁ ସୁପାରିଶ କରାଯାଇଛି |"
+
+msgid "Automated EMI &amp; Obligation Detection"
+msgstr "Automated EMI &amp; Obligation Detection"
+
+msgid "Total Monthly Commitments"
+msgstr "Total Monthly Commitments"
+
+msgid "Fixed Obligation to Income (FOIR)"
+msgstr "ଆୟ ପାଇଁ ସ୍ଥିର ବାଧ୍ୟତାମୂଳକ (FOIR)"
+
+msgid "Active Obligations"
+msgstr "ସକ୍ରିୟ ବାଧ୍ୟତାମୂଳକ |"
+
+msgid "Bounced Mandates (ECS)"
+msgstr "ବାଉନ୍ସ ମଣ୍ଡଳ (ECS)"
+
+msgid "Lender / Commitment"
+msgstr "Ender ଣଦାତା / ପ୍ରତିବଦ୍ଧତା |"
+
+msgid "EMI Amount"
+msgstr "EMI ପରିମାଣ"
+
+msgid "Preferred Date / Freq"
+msgstr "ପସନ୍ଦ ତାରିଖ / ଫ୍ରକ୍ |"
+
+msgid "Status"
+msgstr "ସ୍ଥିତି"
+
+msgid "Payment Timeline (Last 6 Months)"
+msgstr "ଦେୟ ସମୟସୀମା (ଗତ 6 ମାସ)"
+
+msgid "Monthly Cashflow Trends"
+msgstr "ମାସିକ କ୍ୟାସଫ୍ଲୋ ଟ୍ରେଣ୍ଡଗୁଡିକ |"
+
+msgid "Anti-Gaming Sanitization Summary"
+msgstr "ଆଣ୍ଟି-ଗେମିଂ ସାନିଟାଇଜେସନ୍ ସାରାଂଶ |"
+
+msgid "Sanitization Category"
+msgstr "ପରିମଳ ବର୍ଗ |"
+
+msgid "Treatment"
+msgstr "ଚିକିତ୍ସା"
+
+msgid "Txns Affected"
+msgstr "Txns ପ୍ରଭାବିତ |"
+
+msgid "Amount Excluded"
+msgstr "ପରିମାଣ ବାଦ ଦିଆଯାଇଛି"
+
+msgid "Underlying cashflow features"
+msgstr "ଅନ୍ତର୍ନିହିତ କ୍ୟାସଫ୍ଲୋ ବ features ଶିଷ୍ଟ୍ୟଗୁଡିକ |"
+
+msgid "Income consistency"
+msgstr "ଆୟ ସ୍ଥିରତା |"
+
+msgid "Savings ratio"
+msgstr "ସଞ୍ଚୟ ଅନୁପାତ |"
+
+msgid "Payment timeliness"
+msgstr "ଦେୟ ସମୟାନୁବର୍ତ୍ତୀ |"
+
+msgid "Transaction frequency (per month)"
+msgstr "Transaction frequency (per month)"
+
+msgid "Bounce rate"
+msgstr "ବାଉନ୍ସ ହାର |"
+
+msgid "Digital engagement"
+msgstr "ଡିଜିଟାଲ୍ ଯୋଗଦାନ |"

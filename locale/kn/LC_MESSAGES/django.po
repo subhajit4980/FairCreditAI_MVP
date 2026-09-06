@@ -1,0 +1,428 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: FairCreditScore\n"
+"Language: kn\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "English"
+msgstr "ಇಂಗ್ಲೀಷ್"
+
+msgid "Hindi"
+msgstr "ಹಿಂದಿ"
+
+msgid "Bengali"
+msgstr "ಬೆಂಗಾಲಿ"
+
+msgid "Marathi"
+msgstr "ಮರಾಠಿ"
+
+msgid "Telugu"
+msgstr "ತೆಲುಗು"
+
+msgid "Assamese"
+msgstr "ಅಸ್ಸಾಮಿ"
+
+msgid "Gujarati"
+msgstr "ಗುಜರಾತಿ"
+
+msgid "Kannada"
+msgstr "ಕನ್ನಡ"
+
+msgid "Kashmiri"
+msgstr "ಕಾಶ್ಮೀರಿ"
+
+msgid "Konkani"
+msgstr "ಕೊಂಕಣಿ"
+
+msgid "Maithili"
+msgstr "ಮೈಥಿಲಿ"
+
+msgid "Malayalam"
+msgstr "ಮಲಯಾಳಂ"
+
+msgid "Nepali"
+msgstr "Nepali"
+
+msgid "Odia"
+msgstr "ಒಡಿಯಾ"
+
+msgid "Punjabi"
+msgstr "ಪಂಜಾಬಿ"
+
+msgid "Sindhi"
+msgstr "Sindhi"
+
+msgid "Tamil"
+msgstr "ತಮಿಳು"
+
+msgid "Urdu"
+msgstr "ಉರ್ದು"
+
+msgid "Language"
+msgstr "ಭಾಷೆ"
+
+msgid "Go"
+msgstr "Go"
+
+msgid "Admin"
+msgstr "ನಿರ್ವಾಹಕ"
+
+msgid "Users"
+msgstr "ಬಳಕೆದಾರರು"
+
+msgid "Audit"
+msgstr "ಆಡಿಟ್"
+
+msgid "Wiki"
+msgstr "ವಿಕಿ"
+
+msgid "Operations"
+msgstr "ಕಾರ್ಯಾಚರಣೆಗಳು"
+
+msgid "Documents"
+msgstr "ದಾಖಲೆಗಳು"
+
+msgid "Customers"
+msgstr "ಗ್ರಾಹಕರು"
+
+msgid "+ New Customer"
+msgstr "+ ಹೊಸ ಗ್ರಾಹಕ"
+
+msgid "My Score"
+msgstr "ನನ್ನ ಸ್ಕೋರ್"
+
+msgid "Profile"
+msgstr "ಪ್ರೊಫೈಲ್"
+
+msgid "Sign out"
+msgstr "ಸೈನ್ ಔಟ್ ಮಾಡಿ"
+
+msgid "Sign in"
+msgstr "ಸೈನ್ ಇನ್ ಮಾಡಿ"
+
+msgid "Get My Score"
+msgstr "ನನ್ನ ಸ್ಕೋರ್ ಪಡೆಯಿರಿ"
+
+msgid "My Score · FairCreditScore"
+msgstr "ನನ್ನ ಸ್ಕೋರ್ · FairCreditScore"
+
+msgid "Hi"
+msgstr "Hi"
+
+msgid "out of 1 – 100"
+msgstr "out of 1 – 100"
+
+msgid "Generated"
+msgstr "ರಚಿಸಲಾಗಿದೆ"
+
+msgid "View breakdown"
+msgstr "ಸ್ಥಗಿತವನ್ನು ವೀಕ್ಷಿಸಿ"
+
+msgid "No score yet"
+msgstr "No score yet"
+
+msgid "Upload a bank statement and click"
+msgstr "ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್ ಅನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ಕ್ಲಿಕ್ ಮಾಡಿ"
+
+msgid "Get my Credit Score"
+msgstr "ನನ್ನ ಕ್ರೆಡಿಟ್ ಸ್ಕೋರ್ ಪಡೆಯಿರಿ"
+
+msgid ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+msgstr ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+
+msgid "Upload Statement (CSV/XLS)"
+msgstr "ಅಪ್‌ಲೋಡ್ ಹೇಳಿಕೆ (CSV/XLS)"
+
+msgid "Fetch via Account Aggregator"
+msgstr "ಖಾತೆ ಸಂಗ್ರಾಹಕ ಮೂಲಕ ಪಡೆದುಕೊಳ್ಳಿ"
+
+msgid "Bank statements & AA fetches"
+msgstr "ಬ್ಯಾಂಕ್ ಹೇಳಿಕೆಗಳು ಮತ್ತು AA ಪಡೆಯುವಿಕೆಗಳು"
+
+msgid "When"
+msgstr "ಯಾವಾಗ"
+
+msgid "Source"
+msgstr "ಮೂಲ"
+
+msgid "Txns"
+msgstr "Txns"
+
+msgid "Months"
+msgstr "Months"
+
+msgid "Parsed"
+msgstr "ಪಾರ್ಸ್ ಮಾಡಲಾಗಿದೆ"
+
+msgid "Notes"
+msgstr "ಟಿಪ್ಪಣಿಗಳು"
+
+msgid "AA fetch"
+msgstr "ಎಎ ತರುವುದು"
+
+msgid "Upload"
+msgstr "ಅಪ್ಲೋಡ್ ಮಾಡಿ"
+
+msgid "Unparsed"
+msgstr "ಪಾರ್ಸ್ ಮಾಡಲಾಗಿಲ್ಲ"
+
+msgid "Mobile:"
+msgstr "ಮೊಬೈಲ್:"
+
+msgid "PAN:"
+msgstr "ಪ್ಯಾನ್:"
+
+msgid "Income:"
+msgstr "ಆದಾಯ:"
+
+msgid "mo"
+msgstr "ಮೊ"
+
+msgid "Edit profile"
+msgstr "Edit profile"
+
+msgid "Your credit score, made fair."
+msgstr "ನಿಮ್ಮ ಕ್ರೆಡಿಟ್ ಸ್ಕೋರ್, ನ್ಯಾಯೋಚಿತವಾಗಿದೆ."
+
+msgid ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+msgstr ""
+"FairCreditScore ಯುಪಿಐನಲ್ಲಿ ಪ್ರತಿದಿನ ವಹಿವಾಟು ನಡೆಸುವ 400+ ಮಿಲಿಯನ್ ಭಾರತೀಯರಿಗೆ "
+"ಪರ್ಯಾಯ ಕ್ರೆಡಿಟ್ ಸ್ಕೋರಿಂಗ್ ವೇದಿಕೆಯಾಗಿದೆ ಆದರೆ ಸಾಂಪ್ರದಾಯಿಕ ಬ್ಯೂರೋಗಳಿಗೆ "
+"ಅಗೋಚರವಾಗಿರುತ್ತದೆ. FairCreditAI ಮತ್ತು RBI ಖಾತೆ ಅಗ್ರಿಗೇಟರ್ ಫ್ರೇಮ್‌ವರ್ಕ್‌ನಿಂದ "
+"ನಡೆಸಲ್ಪಡುತ್ತಿದೆ."
+
+msgid "Individual Customer"
+msgstr "ವೈಯಕ್ತಿಕ ಗ್ರಾಹಕ"
+
+msgid ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+msgstr ""
+"ಸೆಕೆಂಡುಗಳಲ್ಲಿ ನಿಮ್ಮ FairCreditScore ಅನ್ನು ರಚಿಸಿ. ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್ ಅನ್ನು "
+"ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ಸ್ಕೋರ್‌ಗೆ ಏನು ಸಹಾಯ ಮಾಡಿದೆ ಅಥವಾ ಹಾನಿ ಮಾಡಿದೆ "
+"ಎಂಬುದನ್ನು ನೋಡಿ."
+
+msgid "Get my score"
+msgstr "ನನ್ನ ಸ್ಕೋರ್ ಪಡೆಯಿರಿ"
+
+msgid "Financial Institutions"
+msgstr "ಹಣಕಾಸು ಸಂಸ್ಥೆಗಳು"
+
+msgid ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+msgstr ""
+"ಪಾಲುದಾರ ಬ್ಯಾಂಕ್‌ಗಳು ಮತ್ತು NBFC ಗಳಿಗೆ ಕಾರ್ಯಾಚರಣೆ ಕನ್ಸೋಲ್ &mdash; ಆನ್‌ಬೋರ್ಡ್ "
+"ಗ್ರಾಹಕರು, ಅವರ ಪರವಾಗಿ ಸ್ಕೋರ್‌ಗಳನ್ನು ರಚಿಸಿ."
+
+msgid "Request access"
+msgstr "ಪ್ರವೇಶವನ್ನು ವಿನಂತಿಸಿ"
+
+msgid "Consent-based"
+msgstr "ಸಮ್ಮತಿ ಆಧಾರಿತ"
+
+msgid ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+msgstr ""
+"ಆರ್‌ಬಿಐ-ಪರವಾನಗಿ ಪಡೆದ ಖಾತೆ ಅಗ್ರಿಗೇಟರ್ ಫ್ರೇಮ್‌ವರ್ಕ್ ಮೂಲಕ ಒಮ್ಮೆ ಡೇಟಾವನ್ನು "
+"ಹಂಚಿಕೊಳ್ಳಿ. ಯಾವುದೇ ಸ್ಕ್ರೀನ್ ಸ್ಕ್ರ್ಯಾಪಿಂಗ್ ಇಲ್ಲ, ಡಾಕ್ಯುಮೆಂಟ್ ಜಗಳವಿಲ್ಲ."
+
+msgid "Explainable"
+msgstr "ವಿವರಿಸಬಹುದಾದ"
+
+msgid ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+msgstr ""
+"ಪ್ರತಿ ಸ್ಕೋರ್‌ಗೆ SHAP-ಶೈಲಿಯ ಬ್ರೇಕ್‌ಡೌನ್‌ನೊಂದಿಗೆ ಏನು ಸಹಾಯ ಮಾಡಿದೆ ಅಥವಾ ನೋವುಂಟು "
+"ಮಾಡಿದೆ &mdash; ಕಪ್ಪು ಪೆಟ್ಟಿಗೆ ಇಲ್ಲ."
+
+msgid "Inclusive"
+msgstr "ಒಳಗೊಳ್ಳುವ"
+
+msgid ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+msgstr ""
+"ಗಿಗ್ ಕೆಲಸಗಾರರು, ಕಿರಾನಾ ಅಂಗಡಿಗಳು, ಸಂಬಳದ-ಡೆಬಿಟ್ ಬಳಕೆದಾರರಿಗಾಗಿ ಮತ್ತು CIBIL "
+"ಅನ್ನು ಎಂದಿಗೂ ನಿರ್ಮಿಸಲಾಗಿಲ್ಲ."
+
+msgid "Invalid username or password."
+msgstr "Invalid username or password."
+
+msgid "Username"
+msgstr "ಬಳಕೆದಾರ ಹೆಸರು"
+
+msgid "Password"
+msgstr "ಪಾಸ್ವರ್ಡ್"
+
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "ಖಾತೆ ಇಲ್ಲವೇ? <a href=\"%(signup_url)s\">ಒಂದನ್ನು ರಚಿಸಿ</a>."
+
+msgid "Back to customer details"
+msgstr "ಗ್ರಾಹಕರ ವಿವರಗಳಿಗೆ ಹಿಂತಿರುಗಿ"
+
+msgid "Back to dashboard"
+msgstr "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ"
+
+msgid "Download Transactions (Excel)"
+msgstr "ವಹಿವಾಟುಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ (ಎಕ್ಸೆಲ್)"
+
+msgid "Score Unavailable"
+msgstr "ಸ್ಕೋರ್ ಲಭ್ಯವಿಲ್ಲ"
+
+msgid "Profile &amp; Scoring Summary"
+msgstr "ಪ್ರೊಫೈಲ್ &amp; ಸ್ಕೋರಿಂಗ್ ಸಾರಾಂಶ"
+
+msgid "Underwriter / Admin Portal View"
+msgstr "ಅಂಡರ್ ರೈಟರ್ / ನಿರ್ವಾಹಕ ಪೋರ್ಟಲ್ ವೀಕ್ಷಣೆ"
+
+msgid "Regulatory Grade"
+msgstr "ನಿಯಂತ್ರಕ ದರ್ಜೆ"
+
+msgid "Approved Limit"
+msgstr "Approved Limit"
+
+msgid "Recommended Amount"
+msgstr "ಶಿಫಾರಸು ಮಾಡಲಾದ ಮೊತ್ತ"
+
+msgid "Base Interest Rate"
+msgstr "ಮೂಲ ಬಡ್ಡಿ ದರ"
+
+msgid "Model Inferred Risk Indicators &amp; Attributions"
+msgstr "ಮಾದರಿ ಊಹಿಸಿದ ಅಪಾಯ ಸೂಚಕಗಳು &amp; ಗುಣಲಕ್ಷಣಗಳು"
+
+msgid "Probability of Default (PD)"
+msgstr "ಡೀಫಾಲ್ಟ್ ಸಂಭವನೀಯತೆ (PD)"
+
+msgid "Fraud Probability Indicator"
+msgstr "Fraud Probability Indicator"
+
+msgid "Detailed Underwriting Financial Breakdown"
+msgstr "ವಿವರವಾದ ಅಂಡರ್ರೈಟಿಂಗ್ ಹಣಕಾಸು ಸ್ಥಗಿತ"
+
+msgid "Calculated Monthly Income (Verified Statement/Profile)"
+msgstr "ಲೆಕ್ಕಹಾಕಿದ ಮಾಸಿಕ ಆದಾಯ (ಪರಿಶೀಲಿಸಿದ ಹೇಳಿಕೆ/ಪ್ರೊಫೈಲ್)"
+
+msgid "Calculated Monthly Expense"
+msgstr "Calculated Monthly Expense"
+
+msgid "FOIR %% (Debt Obligations / Monthly Income)"
+msgstr "FOIR %% (Debt Obligations / Monthly Income)"
+
+msgid "Available Surplus Disposable Income"
+msgstr "ಲಭ್ಯವಿರುವ ಹೆಚ್ಚುವರಿ ಬಿಸಾಡಬಹುದಾದ ಆದಾಯ"
+
+msgid "Income Stability Score"
+msgstr "ಆದಾಯ ಸ್ಥಿರತೆ ಸ್ಕೋರ್"
+
+msgid "Savings Ratio"
+msgstr "ಉಳಿತಾಯ ಅನುಪಾತ"
+
+msgid "Essential vs. Discretionary Expense Split"
+msgstr "Essential vs. Discretionary Expense Split"
+
+msgid "Underwriter Key Observations"
+msgstr "ಅಂಡರ್ರೈಟರ್ ಪ್ರಮುಖ ಅವಲೋಕನಗಳು"
+
+msgid "Borrower Dashboard"
+msgstr "Borrower Dashboard"
+
+msgid "Max Approved Limit"
+msgstr "Max Approved Limit"
+
+msgid "Recommended Loan"
+msgstr "Recommended Loan"
+
+msgid "👍 Key Strengths"
+msgstr "👍 Key Strengths"
+
+msgid "💡 Key Improvement Areas"
+msgstr "💡 ಪ್ರಮುಖ ಸುಧಾರಣಾ ಪ್ರದೇಶಗಳು"
+
+msgid "Personalized Cashflow Recommendations"
+msgstr "Personalized Cashflow Recommendations"
+
+msgid "Recommended Next Steps"
+msgstr "Recommended Next Steps"
+
+msgid "Automated EMI &amp; Obligation Detection"
+msgstr "ಸ್ವಯಂಚಾಲಿತ EMI &amp; ಬಾಧ್ಯತೆ ಪತ್ತೆ"
+
+msgid "Total Monthly Commitments"
+msgstr "Total Monthly Commitments"
+
+msgid "Fixed Obligation to Income (FOIR)"
+msgstr "ಆದಾಯಕ್ಕೆ ನಿಶ್ಚಿತ ಬಾಧ್ಯತೆ (FOIR)"
+
+msgid "Active Obligations"
+msgstr "ಸಕ್ರಿಯ ಕಟ್ಟುಪಾಡುಗಳು"
+
+msgid "Bounced Mandates (ECS)"
+msgstr "ಬೌನ್ಸ್ಡ್ ಮ್ಯಾಂಡೇಟ್ಸ್ (ECS)"
+
+msgid "Lender / Commitment"
+msgstr "ಸಾಲದಾತ / ಬದ್ಧತೆ"
+
+msgid "EMI Amount"
+msgstr "EMI ಮೊತ್ತ"
+
+msgid "Preferred Date / Freq"
+msgstr "ಆದ್ಯತೆಯ ದಿನಾಂಕ / ಆವರ್ತನ"
+
+msgid "Status"
+msgstr "ಸ್ಥಿತಿ"
+
+msgid "Payment Timeline (Last 6 Months)"
+msgstr "ಪಾವತಿ ಟೈಮ್‌ಲೈನ್ (ಕಳೆದ 6 ತಿಂಗಳುಗಳು)"
+
+msgid "Monthly Cashflow Trends"
+msgstr "ಮಾಸಿಕ ನಗದು ಹರಿವು ಪ್ರವೃತ್ತಿಗಳು"
+
+msgid "Anti-Gaming Sanitization Summary"
+msgstr "ಆಂಟಿ-ಗೇಮಿಂಗ್ ಸ್ಯಾನಿಟೈಸೇಶನ್ ಸಾರಾಂಶ"
+
+msgid "Sanitization Category"
+msgstr "ನೈರ್ಮಲ್ಯೀಕರಣ ವರ್ಗ"
+
+msgid "Treatment"
+msgstr "Treatment"
+
+msgid "Txns Affected"
+msgstr "Txns ಬಾಧಿತವಾಗಿದೆ"
+
+msgid "Amount Excluded"
+msgstr "ಮೊತ್ತವನ್ನು ಹೊರತುಪಡಿಸಲಾಗಿದೆ"
+
+msgid "Underlying cashflow features"
+msgstr "ಆಧಾರವಾಗಿರುವ ನಗದು ಹರಿವಿನ ವೈಶಿಷ್ಟ್ಯಗಳು"
+
+msgid "Income consistency"
+msgstr "Income consistency"
+
+msgid "Savings ratio"
+msgstr "ಉಳಿತಾಯ ಅನುಪಾತ"
+
+msgid "Payment timeliness"
+msgstr "ಪಾವತಿ ಸಮಯೋಚಿತತೆ"
+
+msgid "Transaction frequency (per month)"
+msgstr "ವಹಿವಾಟಿನ ಆವರ್ತನ (ತಿಂಗಳಿಗೆ)"
+
+msgid "Bounce rate"
+msgstr "ಬೌನ್ಸ್ ದರ"
+
+msgid "Digital engagement"
+msgstr "ಡಿಜಿಟಲ್ ಎಂಗೇಜ್ಮೆಂಟ್"

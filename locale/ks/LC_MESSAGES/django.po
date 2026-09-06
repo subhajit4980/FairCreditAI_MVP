@@ -1,0 +1,427 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: FairCreditScore\n"
+"Language: ks\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "English"
+msgstr "English"
+
+msgid "Hindi"
+msgstr "Hindi"
+
+msgid "Bengali"
+msgstr "Bengali"
+
+msgid "Marathi"
+msgstr "Marathi"
+
+msgid "Telugu"
+msgstr "Telugu"
+
+msgid "Assamese"
+msgstr "Assamese"
+
+msgid "Gujarati"
+msgstr "Gujarati"
+
+msgid "Kannada"
+msgstr "Kannada"
+
+msgid "Kashmiri"
+msgstr "Kashmiri"
+
+msgid "Konkani"
+msgstr "Konkani"
+
+msgid "Maithili"
+msgstr "Maithili"
+
+msgid "Malayalam"
+msgstr "Malayalam"
+
+msgid "Nepali"
+msgstr "Nepali"
+
+msgid "Odia"
+msgstr "Odia"
+
+msgid "Punjabi"
+msgstr "Punjabi"
+
+msgid "Sindhi"
+msgstr "Sindhi"
+
+msgid "Tamil"
+msgstr "Tamil"
+
+msgid "Urdu"
+msgstr "Urdu"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Go"
+msgstr "Go"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Audit"
+msgstr "Audit"
+
+msgid "Wiki"
+msgstr "Wiki"
+
+msgid "Operations"
+msgstr "Operations"
+
+msgid "Documents"
+msgstr "Documents"
+
+msgid "Customers"
+msgstr "Customers"
+
+msgid "+ New Customer"
+msgstr "+ New Customer"
+
+msgid "My Score"
+msgstr "My Score"
+
+msgid "Profile"
+msgstr "Profile"
+
+msgid "Sign out"
+msgstr "Sign out"
+
+msgid "Sign in"
+msgstr "Sign in"
+
+msgid "Get My Score"
+msgstr "Get My Score"
+
+msgid "My Score · FairCreditScore"
+msgstr "My Score · FairCreditScore"
+
+msgid "Hi"
+msgstr "Hi"
+
+msgid "out of 1 – 100"
+msgstr "out of 1 – 100"
+
+msgid "Generated"
+msgstr "Generated"
+
+msgid "View breakdown"
+msgstr "View breakdown"
+
+msgid "No score yet"
+msgstr "No score yet"
+
+msgid "Upload a bank statement and click"
+msgstr "Upload a bank statement and click"
+
+msgid "Get my Credit Score"
+msgstr "Get my Credit Score"
+
+msgid ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+msgstr ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+
+msgid "Upload Statement (CSV/XLS)"
+msgstr "Upload Statement (CSV/XLS)"
+
+msgid "Fetch via Account Aggregator"
+msgstr "Fetch via Account Aggregator"
+
+msgid "Bank statements & AA fetches"
+msgstr "Bank statements & AA fetches"
+
+msgid "When"
+msgstr "When"
+
+msgid "Source"
+msgstr "Source"
+
+msgid "Txns"
+msgstr "Txns"
+
+msgid "Months"
+msgstr "Months"
+
+msgid "Parsed"
+msgstr "Parsed"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "AA fetch"
+msgstr "AA fetch"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Unparsed"
+msgstr "Unparsed"
+
+msgid "Mobile:"
+msgstr "Mobile:"
+
+msgid "PAN:"
+msgstr "PAN:"
+
+msgid "Income:"
+msgstr "Income:"
+
+msgid "mo"
+msgstr "mo"
+
+msgid "Edit profile"
+msgstr "Edit profile"
+
+msgid "Your credit score, made fair."
+msgstr "Your credit score, made fair."
+
+msgid ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+msgstr ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+
+msgid "Individual Customer"
+msgstr "Individual Customer"
+
+msgid ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+msgstr ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+
+msgid "Get my score"
+msgstr "Get my score"
+
+msgid "Financial Institutions"
+msgstr "Financial Institutions"
+
+msgid ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+msgstr ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+
+msgid "Request access"
+msgstr "Request access"
+
+msgid "Consent-based"
+msgstr "Consent-based"
+
+msgid ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+msgstr ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+
+msgid "Explainable"
+msgstr "Explainable"
+
+msgid ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+msgstr ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+
+msgid "Inclusive"
+msgstr "Inclusive"
+
+msgid ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+msgstr ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+
+msgid "Invalid username or password."
+msgstr "Invalid username or password."
+
+msgid "Username"
+msgstr "Username"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "No account? <a href=\"%(signup_url)s\">Create one</a>."
+
+msgid "Back to customer details"
+msgstr "Back to customer details"
+
+msgid "Back to dashboard"
+msgstr "Back to dashboard"
+
+msgid "Download Transactions (Excel)"
+msgstr "Download Transactions (Excel)"
+
+msgid "Score Unavailable"
+msgstr "Score Unavailable"
+
+msgid "Profile &amp; Scoring Summary"
+msgstr "Profile &amp; Scoring Summary"
+
+msgid "Underwriter / Admin Portal View"
+msgstr "Underwriter / Admin Portal View"
+
+msgid "Regulatory Grade"
+msgstr "Regulatory Grade"
+
+msgid "Approved Limit"
+msgstr "Approved Limit"
+
+msgid "Recommended Amount"
+msgstr "Recommended Amount"
+
+msgid "Base Interest Rate"
+msgstr "Base Interest Rate"
+
+msgid "Model Inferred Risk Indicators &amp; Attributions"
+msgstr "Model Inferred Risk Indicators &amp; Attributions"
+
+msgid "Probability of Default (PD)"
+msgstr "Probability of Default (PD)"
+
+msgid "Fraud Probability Indicator"
+msgstr "Fraud Probability Indicator"
+
+msgid "Detailed Underwriting Financial Breakdown"
+msgstr "Detailed Underwriting Financial Breakdown"
+
+msgid "Calculated Monthly Income (Verified Statement/Profile)"
+msgstr "Calculated Monthly Income (Verified Statement/Profile)"
+
+msgid "Calculated Monthly Expense"
+msgstr "Calculated Monthly Expense"
+
+msgid "FOIR %% (Debt Obligations / Monthly Income)"
+msgstr "FOIR %% (Debt Obligations / Monthly Income)"
+
+msgid "Available Surplus Disposable Income"
+msgstr "Available Surplus Disposable Income"
+
+msgid "Income Stability Score"
+msgstr "Income Stability Score"
+
+msgid "Savings Ratio"
+msgstr "Savings Ratio"
+
+msgid "Essential vs. Discretionary Expense Split"
+msgstr "Essential vs. Discretionary Expense Split"
+
+msgid "Underwriter Key Observations"
+msgstr "Underwriter Key Observations"
+
+msgid "Borrower Dashboard"
+msgstr "Borrower Dashboard"
+
+msgid "Max Approved Limit"
+msgstr "Max Approved Limit"
+
+msgid "Recommended Loan"
+msgstr "Recommended Loan"
+
+msgid "👍 Key Strengths"
+msgstr "👍 Key Strengths"
+
+msgid "💡 Key Improvement Areas"
+msgstr "💡 Key Improvement Areas"
+
+msgid "Personalized Cashflow Recommendations"
+msgstr "Personalized Cashflow Recommendations"
+
+msgid "Recommended Next Steps"
+msgstr "Recommended Next Steps"
+
+msgid "Automated EMI &amp; Obligation Detection"
+msgstr "Automated EMI &amp; Obligation Detection"
+
+msgid "Total Monthly Commitments"
+msgstr "Total Monthly Commitments"
+
+msgid "Fixed Obligation to Income (FOIR)"
+msgstr "Fixed Obligation to Income (FOIR)"
+
+msgid "Active Obligations"
+msgstr "Active Obligations"
+
+msgid "Bounced Mandates (ECS)"
+msgstr "Bounced Mandates (ECS)"
+
+msgid "Lender / Commitment"
+msgstr "Lender / Commitment"
+
+msgid "EMI Amount"
+msgstr "EMI Amount"
+
+msgid "Preferred Date / Freq"
+msgstr "Preferred Date / Freq"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Payment Timeline (Last 6 Months)"
+msgstr "Payment Timeline (Last 6 Months)"
+
+msgid "Monthly Cashflow Trends"
+msgstr "Monthly Cashflow Trends"
+
+msgid "Anti-Gaming Sanitization Summary"
+msgstr "Anti-Gaming Sanitization Summary"
+
+msgid "Sanitization Category"
+msgstr "Sanitization Category"
+
+msgid "Treatment"
+msgstr "Treatment"
+
+msgid "Txns Affected"
+msgstr "Txns Affected"
+
+msgid "Amount Excluded"
+msgstr "Amount Excluded"
+
+msgid "Underlying cashflow features"
+msgstr "Underlying cashflow features"
+
+msgid "Income consistency"
+msgstr "Income consistency"
+
+msgid "Savings ratio"
+msgstr "Savings ratio"
+
+msgid "Payment timeliness"
+msgstr "Payment timeliness"
+
+msgid "Transaction frequency (per month)"
+msgstr "Transaction frequency (per month)"
+
+msgid "Bounce rate"
+msgstr "Bounce rate"
+
+msgid "Digital engagement"
+msgstr "Digital engagement"

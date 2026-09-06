@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Q, OuterRef, Subquery
 from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -105,6 +105,7 @@ def customer_dashboard(request):
             "latest_score": latest_score,
             "documents": documents,
             "consents": consents,
+            "bank_statements": BankStatement.objects.filter(customer=request.user).order_by("-uploaded_at"),
         },
     )
 
@@ -141,12 +142,99 @@ def upload_document(request):
 
 
 @customer_required
+def customer_aa_callback(request):
+    """Callback view when Finbox redirects back after consent flow for the customer."""
+    customer = request.user
+    consent = customer.consents.filter(status=AAConsent.Status.PENDING).order_by("-created_at").first()
+    
+    if not consent:
+        messages.error(request, "No pending consent found to process.")
+        return redirect("customer_dashboard")
+
+    from core.finbox import FinboxClient
+    from core.parsers import parse_xml_statement, parse_finbox_transactions_json
+    from django.core.files.base import ContentFile
+    from django.utils import timezone
+    client = FinboxClient()
+    
+    parsed = None
+    xml_text = None
+    tx_res = None
+    
+    progress_res = client.fetch_session_progress_status(consent.handle)
+    if progress_res and progress_res.get("Response"):
+        xml_text = progress_res["Response"]
+        parsed = parse_xml_statement(xml_text)
+        if parsed:
+            consent.status = AAConsent.Status.ACTIVE
+            consent.save()
+    
+    if not parsed:
+        tx_res = client.fetch_transactions(consent.handle)
+        if tx_res and "transactions" in tx_res:
+            parsed = parse_finbox_transactions_json(tx_res)
+            if parsed:
+                consent.status = AAConsent.Status.ACTIVE
+                consent.save()
+                
+    if not parsed:
+        res = client.fetch_raw_aa(consent.handle)
+        if res and "statements" in res:
+            for stmt in res["statements"]:
+                download_url = stmt.get("url") or stmt.get("pdf_url")
+                if download_url:
+                    xml_text = client.download_xml(download_url)
+                    if xml_text:
+                        parsed = parse_xml_statement(xml_text)
+                        if parsed:
+                            consent.status = AAConsent.Status.ACTIVE
+                            consent.save()
+                            break
+
+    if not parsed:
+        consent.status = AAConsent.Status.REVOKED
+        consent.save()
+        messages.error(request, "Failed to retrieve or parse Account Aggregator data from Finbox.")
+        return redirect("customer_dashboard")
+
+    bs = BankStatement(
+        customer=customer,
+        uploaded_by=customer,
+        source=BankStatement.Source.AA_FETCH,
+    )
+    
+    if xml_text:
+        filename = f"aa_fetch_{customer.username}_{int(timezone.now().timestamp())}.xml"
+        bs.file.save(filename, ContentFile(xml_text.encode("utf-8")), save=False)
+    else:
+        import json
+        filename = f"aa_fetch_{customer.username}_{int(timezone.now().timestamp())}.json"
+        bs.file.save(filename, ContentFile(json.dumps(tx_res).encode("utf-8")), save=False)
+
+    bs.parsed_features = parsed["features"]
+    bs.txn_count = parsed["txn_count"]
+    bs.period_months = parsed["period_months"]
+    bs.parsed_at = timezone.now()
+    prefix = "Finbox AA JSON " if not xml_text else "Finbox AA XML "
+    bs.parse_notes = (
+        f"{prefix}fetch: {parsed['txn_count']} txns over ~{parsed['period_months']:.1f} months. "
+    )
+    bs.save()
+    _audit(customer, "aa_data_fetched_finbox", target=bs.id)
+    
+    messages.success(request, f"Successfully linked Account Aggregator via Finbox. Fetched {bs.txn_count} transactions.")
+    return redirect("customer_dashboard")
+
+
+@customer_required
 @require_POST
 def initiate_consent(request):
     """Initiates consent via Finbox, falls back to mock if Finbox fails."""
     from core.finbox import FinboxClient
+    from django.urls import reverse
     client = FinboxClient()
-    res = client.create_session(request.user.username, request.user.email)
+    return_url = request.build_absolute_uri(reverse('customer_aa_callback'))
+    res = client.create_session(request.user.username, request.user.email, return_url=return_url)
     if res and res.get("RetStatus") == "SUCCESS":
         handle = res["tclStatementID"]
         redirect_url = res["redirectUrl"]
@@ -289,6 +377,62 @@ def generate_my_score(request):
 
 
 @login_required
+def download_aa_transactions(request, pk):
+    """Download the raw transactions used to generate a score as an Excel file."""
+    if request.user.is_admin_role or request.user.is_ops_role:
+        report = get_object_or_404(ScoreReport, pk=pk)
+        if report.customer.role == User.Role.CUSTOMER and report.customer.onboarded_by is None:
+            raise Http404("not found")
+    else:
+        report = get_object_or_404(ScoreReport, pk=pk, customer=request.user)
+    
+    bs = BankStatement.objects.filter(
+        customer=report.customer,
+        source=BankStatement.Source.AA_FETCH,
+        parsed_at__isnull=False
+    ).filter(uploaded_at__lte=report.generated_at).order_by("-uploaded_at").first()
+    
+    if not bs or not bs.file:
+        messages.error(request, "No Account Aggregator statement found for this score.")
+        return redirect("score_detail", pk=pk)
+
+    file_content = bs.file.read()
+    filename = bs.file.name.lower()
+    
+    df = None
+    from core.parsers import parse_rebit_xml_to_df, parse_finbox_transactions_json_to_df
+    import json
+    
+    try:
+        if filename.endswith(".xml"):
+            df = parse_rebit_xml_to_df(file_content.decode("utf-8"))
+        elif filename.endswith(".json"):
+            df = parse_finbox_transactions_json_to_df(json.loads(file_content.decode("utf-8")))
+    except Exception as e:
+        print("Error parsing AA file for export:", e)
+        
+    if df is None or df.empty:
+        messages.error(request, "Failed to parse Account Aggregator data for Excel export.")
+        return redirect("score_detail", pk=pk)
+
+    import io
+    import pandas as pd
+    from django.http import HttpResponse
+    
+    if "Date" in df.columns:
+        df["Date"] = pd.to_datetime(df["Date"]).dt.strftime('%Y-%m-%d')
+        
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Transactions")
+    
+    buffer.seek(0)
+    response = HttpResponse(buffer.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f'attachment; filename="aa_transactions_{request.user.username}.xlsx"'
+    return response
+
+
+@login_required
 def score_detail(request, pk):
     if request.user.is_admin_role or request.user.is_ops_role:
         visible_customers = User.objects.filter(role=User.Role.CUSTOMER, onboarded_by__isnull=False)
@@ -297,7 +441,15 @@ def score_detail(request, pk):
             raise Http404("not found")
     else:
         report = get_object_or_404(ScoreReport, pk=pk, customer=request.user)
-    return render(request, "core/score_detail.html", {"report": report})
+        
+    has_aa_statement = BankStatement.objects.filter(
+        customer=report.customer,
+        source=BankStatement.Source.AA_FETCH,
+        parsed_at__isnull=False,
+        uploaded_at__lte=report.generated_at
+    ).exists()
+    
+    return render(request, "core/score_detail.html", {"report": report, "has_aa_statement": has_aa_statement})
 
 
 # --- Operations views -------------------------------------------------------
@@ -309,7 +461,11 @@ def ops_dashboard(request):
     active_consents = AAConsent.objects.filter(status=AAConsent.Status.ACTIVE, customer__in=visible_customers).count()
     pending_consents = AAConsent.objects.filter(status=AAConsent.Status.PENDING, customer__in=visible_customers).count()
     total_customers = visible_customers.count()
-    recent_scores = ScoreReport.objects.filter(customer__in=visible_customers).select_related("customer")[:10]
+    latest_scores = ScoreReport.objects.filter(customer=OuterRef('customer')).order_by('-generated_at')
+    recent_scores = ScoreReport.objects.filter(
+        customer__in=visible_customers,
+        id=Subquery(latest_scores.values('id')[:1])
+    ).select_related("customer").order_by('-generated_at')[:10]
     return render(
         request,
         "core/ops_dashboard.html",
@@ -687,7 +843,7 @@ def ops_generate_score(request, pk):
         request,
         f"{report.get_algorithm_display()} score generated for {customer.username}: {report.score}",
     )
-    return redirect("ops_customer_detail", pk=customer.id)
+    return redirect("score_detail", pk=report.id)
 
 
 # --- Admin views ------------------------------------------------------------

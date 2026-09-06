@@ -137,7 +137,69 @@ LANGUAGES = [
     ("bn", _("Bengali")),
     ("mr", _("Marathi")),
     ("te", _("Telugu")),
+    ("as", _("Assamese")),
+    ("gu", _("Gujarati")),
+    ("kn", _("Kannada")),
+    ("ks", _("Kashmiri")),
+    ("kok", _("Konkani")),
+    ("mai", _("Maithili")),
+    ("ml", _("Malayalam")),
+    ("ne", _("Nepali")),
+    ("or", _("Odia")),
+    ("pa", _("Punjabi")),
+    ("sd", _("Sindhi")),
+    ("ta", _("Tamil")),
+    ("ur", _("Urdu")),
 ]
+
+EXTRA_LANG_INFO = {
+    'as': {
+        'bidi': False,
+        'code': 'as',
+        'name': 'Assamese',
+        'name_local': 'অসমীয়া',
+    },
+    'gu': {
+        'bidi': False,
+        'code': 'gu',
+        'name': 'Gujarati',
+        'name_local': 'ગુજરાતી',
+    },
+    'ks': {
+        'bidi': True,
+        'code': 'ks',
+        'name': 'Kashmiri',
+        'name_local': 'कॉशुर',
+    },
+    'kok': {
+        'bidi': False,
+        'code': 'kok',
+        'name': 'Konkani',
+        'name_local': 'कोंकणी',
+    },
+    'mai': {
+        'bidi': False,
+        'code': 'mai',
+        'name': 'Maithili',
+        'name_local': 'मैथिली',
+    },
+    'or': {
+        'bidi': False,
+        'code': 'or',
+        'name': 'Odia',
+        'name_local': 'ଓଡ଼ିଆ',
+    },
+    'sd': {
+        'bidi': True,
+        'code': 'sd',
+        'name': 'Sindhi',
+        'name_local': 'سنڌي',
+    }
+}
+
+import django.conf.locale
+django.conf.locale.LANG_INFO.update(EXTRA_LANG_INFO)
+
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
 STATIC_URL = "static/"

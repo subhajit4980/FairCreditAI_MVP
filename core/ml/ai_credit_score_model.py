@@ -9,7 +9,7 @@ class AICreditScoreModel:
         self.credit_features = credit_features
         self.GRADE_BOUNDS = {'MAX_A': 0.15, 'MAX_B': 0.30, 'MAX_C': 0.50, 'MAX_D': 0.70}
         self.pricing_matrix = {
-            'Grade A': {"base_rate": 0.105, "multiplier": 5.0},
+            'Grade A': {"base_rate": 0.105, "multiplier": 4.0},
             'Grade B': {"base_rate": 0.120, "multiplier": 3.5},
             'Grade C': {"base_rate": 0.145, "multiplier": 2.5},
             'Grade D': {"base_rate": 0.180, "multiplier": 1.5},
@@ -61,7 +61,8 @@ class AICreditScoreModel:
 
         risk_grade = self.map_pd_to_regulatory_grade(pd_prob)
         tier = self.pricing_matrix.get(risk_grade, self.pricing_matrix['Grade E'])
-        max_approved_loan = int(max(0, monthly_income * tier["multiplier"]))* 0.80
+        
+        max_approved_loan = int(max(0, monthly_income * tier["multiplier"]))* 0.50
         recommended_loan = int(max_approved_loan * 0.80)
 
         decision_str = ""
@@ -87,6 +88,9 @@ class AICreditScoreModel:
         else:
             decision_str = "APPROVED"
             reason_str = "Passed alternative risk underwriting policy based on verified bank statement cashflow."
+
+        max_approved_loan = (int(max_approved_loan) // 10000) * 10000
+        recommended_loan = (int(recommended_loan) // 10000) * 10000
 
         pd_factor = (1.0 - pd_prob) * 45
         income_stability_index = float(cashflow_features.get('income_stability_index', cashflow_features.get('income_consistency', 0.7)))
@@ -139,6 +143,35 @@ class AICreditScoreModel:
         
         digital_e = float(cashflow_features.get("digital_engagement", 0.5))
 
+        from django.utils.translation import gettext as _
+        
+        # SHAP-style logic calculation
+        repayment_pts = int(round(pd_factor))
+        repayment_deficit = 45 - repayment_pts
+        stability_pts = int(round(stability_factor))
+        stability_deficit = 30 - stability_pts
+        fraud_pts = int(round(fraud_factor))
+        fraud_deficit = 15 - fraud_pts
+        savings_pts = int(round(savings_factor))
+        savings_deficit = 10 - savings_pts
+        
+        helped = [
+            {"label": _("Repayment capacity (low default risk)"), "pts": f"+{repayment_pts} pts"},
+            {"label": _("Income stability"), "pts": f"+{stability_pts} pts"},
+            {"label": _("Clean profile (low fraud risk)"), "pts": f"+{fraud_pts} pts"},
+            {"label": _("Savings cushion"), "pts": f"+{savings_pts} pts"}
+        ]
+        
+        hurt = []
+        if repayment_deficit > 0:
+            hurt.append({"label": _("Repayment capacity (low default risk) below target"), "pts": f"-{repayment_deficit} pts"})
+        if stability_deficit > 0:
+            hurt.append({"label": _("Income stability below target"), "pts": f"-{stability_deficit} pts"})
+        if fraud_deficit > 0:
+            hurt.append({"label": _("High fraud risk indicators"), "pts": f"-{fraud_deficit} pts"})
+        if savings_deficit > 0:
+            hurt.append({"label": _("Low savings cushion"), "pts": f"-{savings_deficit} pts"})
+
         biz_explanation = {
             "Executive_Underwriting_Summary": f"Evaluated borrower. Alternative Credit Score: {ai_credit_score}/100. Decision: {decision_str}. Risk Grade: {risk_grade}. Decision Reason: {reason_str}.",
             "Risk_Decomposition": {
@@ -157,48 +190,49 @@ class AICreditScoreModel:
                 "Essential_Expense_Ratio": round(ess_r, 4),
                 "Discretionary_Expense_Ratio": round(disc_r, 4)
             },
-            "Underwriter_Key_Observations": [
-                f"Alternative credit score evaluated at {ai_credit_score}/100 with a {risk_grade} risk classification.",
-                f"Probability of Default is {pd_prob:.2%} (vs standard review thresholds).",
-                f"Fraud probability is {fraud_prob:.2%}, classification shows profile is {'Critical' if fraud_prob >= 0.75 else 'Suspicious' if fraud_prob >= 0.50 else 'Clean'}.",
-                f"Calculated FOIR is {foir:.2%} with a monthly disposable income of ₹{int(available_disposable_income):,}.",
-                f"Digital engagement score is {digital_e:.2%}, demonstrating strong traceability."
-            ]
+            "Score_Factors": {
+                "helped": helped,
+                "hurt": hurt
+            }
         }
 
         key_strengths = []
         if income_stability_index >= 0.75:
-            key_strengths.append(f"Highly stable income streams detected (Index: {income_stability_index:.2f}).")
+            key_strengths.append(f"Highly stable income streams detected (Index: {income_stability_index:.2f}). Regular cash inflows indicate low income volatility, which supports strong repayment capability.")
         elif income_stability_index > 0.6:
-            key_strengths.append("Consistent primary income source identified.")
+            key_strengths.append("Consistent primary income source identified. Your month-on-month cash flow is predictable.")
             
         if fraud_prob < 0.05:
-            key_strengths.append("Excellent digital footprint and extremely low fraud risk.")
+            key_strengths.append("Excellent digital footprint and extremely low fraud risk profile. Identity and transaction velocity align perfectly with trusted patterns.")
             
-        if savings_ratio >= 0.15:
-            key_strengths.append(f"Healthy savings buffer maintained ({savings_ratio:.1%} of net income).")
+        if savings_ratio >= 0.30:
+            key_strengths.append(f"Exceptional savings behavior ({savings_ratio:.1%} of net income). This robust surplus significantly boosts loan eligibility and provides an excellent safety net.")
+        elif savings_ratio >= 0.15:
+            key_strengths.append(f"Healthy savings buffer maintained ({savings_ratio:.1%} of net income). Demonstrates strong financial discipline and the ability to absorb unexpected expenses.")
             
         if foir < 0.20 and pd_prob < 0.3:
-            key_strengths.append(f"Low existing debt obligations (FOIR: {foir:.1%}) resulting in strong repayment capacity.")
+            key_strengths.append(f"Low existing debt obligations (FOIR: {foir:.1%}) resulting in strong repayment capacity for new credit facilities.")
             
         if not key_strengths:
-            key_strengths.append("Consistent transaction activity and baseline profile stability.")
+            key_strengths.append("Consistent transaction activity and baseline profile stability observed across the statement period.")
 
         key_improvement_areas = []
         if pd_prob > 0.40:
-            key_improvement_areas.append("Elevated probability of default risk flagged by AI model.")
+            key_improvement_areas.append("Elevated probability of default risk flagged by AI model based on recent transaction velocity and account balance trends.")
             
         if savings_ratio < 0.05:
-            key_improvement_areas.append(f"Critical: Monthly savings ratio is very low ({savings_ratio:.1%}). Needs improvement to build a cash reserve.")
+            key_improvement_areas.append(f"Critical: Monthly savings ratio is very low ({savings_ratio:.1%}). Needs immediate improvement to build a cash reserve and prevent reliance on short-term debt.")
+        elif savings_ratio < 0.10:
+            key_improvement_areas.append(f"Borderline savings ratio ({savings_ratio:.1%}). Try to optimize discretionary expenses to improve month-end surplus.")
             
         if expense_ratio > 0.85:
-            key_improvement_areas.append(f"High expense-to-income ratio ({expense_ratio:.1%}) indicates tight month-to-month liquidity.")
+            key_improvement_areas.append(f"High expense-to-income ratio ({expense_ratio:.1%}) indicates tight month-to-month liquidity, leaving little room for new EMI payments.")
             
         if foir > 0.45:
-            key_improvement_areas.append(f"Existing EMI and fixed obligations consume a significant portion of income (FOIR: {foir:.1%}).")
+            key_improvement_areas.append(f"Existing EMI and fixed obligations consume a significant portion of income (FOIR: {foir:.1%}). Consider consolidating or paying down existing debt.")
             
         if not key_improvement_areas:
-            key_improvement_areas.append("No critical improvements required. Keep up the good financial behavior!")
+            key_improvement_areas.append("No critical improvements required. Keep up the excellent financial behavior!")
 
         customer_explanation = {
             "Application_Status": decision_str,

@@ -96,14 +96,8 @@ def parse_csv_statement(text: str) -> Optional[dict]:
         if df is not None:
             features = extract_advanced_features(df)
             if features:
-                meta_keys = [
-                    "txn_count", "period_months", "monthly_avg_inflow", "monthly_avg_outflow",
-                    "average_monthly_income", "average_monthly_expense", "bounces", "upi_txns",
-                    "distinct_counterparties"
-                ]
-                parsed_features = {k: v for k, v in features.items() if k not in meta_keys}
                 return {
-                    "features": parsed_features,
+                    "features": features,
                     "txn_count": features["txn_count"],
                     "period_months": features["period_months"],
                     "monthly_avg_inflow": features.get("monthly_avg_inflow", features.get("average_monthly_income", 0.0)),
@@ -341,9 +335,9 @@ def parse_rebit_xml_to_df(xml_content: str) -> Optional[dict]:
                 narration = attrs.get("narration") or attrs.get("narrationDescription") or ""
                 
                 # Try multiple possible date attributes
-                txn_date_str = attrs.get("valueDate") or attrs.get("txnDt") or attrs.get("date") or ""
+                txn_date_str = attrs.get("transactionTimestamp") or attrs.get("valueDate") or attrs.get("txnDt") or attrs.get("date") or ""
                 
-                balance_str = attrs.get("currentBalance") or attrs.get("balance") or "0"
+                balance_str = attrs.get("transactionalBalance") or attrs.get("currentBalance") or attrs.get("balance") or "0"
                 balance = float(balance_str)
                 
                 withdrawal = amount if txn_type == "DEBIT" else 0.0
@@ -414,37 +408,44 @@ def parse_xml_statement(xml_content: str) -> Optional[dict]:
     return None
 
 
+def parse_finbox_transactions_json_to_df(json_data: dict):
+    txns = json_data.get("transactions", [])
+    if not txns:
+        return None
+    
+    rows = []
+    for t in txns:
+        txn_type = t.get("transaction_type", "").lower()
+        amount = float(t.get("amount", 0.0))
+        narration = t.get("transaction_note") or t.get("description") or ""
+        txn_date = t.get("date", "")
+        balance = float(t.get("balance", 0.0))
+        
+        withdrawal = amount if txn_type == "debit" else 0.0
+        deposit = amount if txn_type == "credit" else 0.0
+        
+        rows.append({
+            "Date": txn_date,
+            "Withdrawal Amount": withdrawal,
+            "Deposit Amount": deposit,
+            "Narration": narration,
+            "Closing Balance": balance
+        })
+        
+    import pandas as pd
+    df = pd.DataFrame(rows)
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df = df.dropna(subset=["Date"])
+    df = df.sort_values(by="Date").reset_index(drop=True)
+    return df
+
+
 def parse_finbox_transactions_json(json_data: dict) -> Optional[dict]:
     """Parse Finbox Transactions JSON response directly into standardized features."""
     try:
-        txns = json_data.get("transactions", [])
-        if not txns:
+        df = parse_finbox_transactions_json_to_df(json_data)
+        if df is None or df.empty:
             return None
-        
-        rows = []
-        for t in txns:
-            txn_type = t.get("transaction_type", "").lower()
-            amount = float(t.get("amount", 0.0))
-            narration = t.get("transaction_note") or t.get("description") or ""
-            txn_date = t.get("date", "")
-            balance = float(t.get("balance", 0.0))
-            
-            withdrawal = amount if txn_type == "debit" else 0.0
-            deposit = amount if txn_type == "credit" else 0.0
-            
-            rows.append({
-                "Date": txn_date,
-                "Withdrawal Amount": withdrawal,
-                "Deposit Amount": deposit,
-                "Narration": narration,
-                "Closing Balance": balance
-            })
-            
-        import pandas as pd
-        df = pd.DataFrame(rows)
-        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-        df = df.dropna(subset=["Date"])
-        df = df.sort_values(by="Date").reset_index(drop=True)
         
         from core.ml.features import extract_advanced_features, get_counterparty_signature
         features = extract_advanced_features(df)

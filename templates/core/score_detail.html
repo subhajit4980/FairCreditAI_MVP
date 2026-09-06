@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <style>
@@ -462,11 +463,19 @@
   }
 </style>
 
-<div class="detail-nav">
-  {% if request.user.is_admin_role or request.user.is_ops_role %}
-    <a class="small" href="{% url 'ops_customer_detail' report.customer.id %}">&larr; Back to customer details</a>
-  {% else %}
-    <a class="small" href="{% url 'customer_dashboard' %}">&larr; Back to dashboard</a>
+<div class="detail-nav" style="display: flex; justify-content: space-between; align-items: center;">
+  <div>
+    {% if request.user.is_admin_role or request.user.is_ops_role %}
+      <a class="small" href="{% url 'ops_customer_detail' report.customer.id %}">&larr; {% trans "Back to customer details" %}</a>
+    {% else %}
+      <a class="small" href="{% url 'customer_dashboard' %}">&larr; {% trans "Back to dashboard" %}</a>
+    {% endif %}
+  </div>
+  
+  {% if has_aa_statement %}
+  <div>
+    <a href="{% url 'download_aa_transactions' report.id %}" class="btn secondary" style="font-size: 12px; padding: 6px 12px;">{% trans "Download Transactions (Excel)" %}</a>
+  </div>
   {% endif %}
 </div>
 
@@ -475,7 +484,7 @@
   {% if report.ai_assessment.insufficient_history %}
     <div class="card score-dial" style="border-top: 4px solid #ef4444; background: #fffafb; display: flex; flex-direction: column; justify-content: center; align-items: center;">
       <div style="font-size: 40px; margin-bottom: 8px;">⚠️</div>
-      <div class="band-label" style="color: #ef4444; font-weight: 800; font-size: 18px;">Score Unavailable</div>
+      <div class="band-label" style="color: #ef4444; font-weight: 800; font-size: 18px;">{% trans "Score Unavailable" %}</div>
       <p class="muted small" style="margin-top: 14px; line-height: 1.5; color: #7f1d1d; max-width: 280px; margin-left: auto; margin-right: auto;">
         Underwriting policy requires a minimum of 180 days (6 months) of continuous transaction history.
         Your statement covers only <strong>{{ report.ai_assessment.days_range }} days</strong>.
@@ -495,7 +504,7 @@
   {% endif %}
   
   <div class="card">
-    <h3>Profile &amp; Scoring Summary</h3>
+    <h3>{% trans "Profile &amp; Scoring Summary" %}</h3>
     <table class="ml-meta-table" style="margin-top:10px;">
       <tr><td>CustomerID Reference</td><td><code>{{ report.customer.username }}</code></td></tr>
       <tr><td>Scoring Engine</td><td>{{ report.get_algorithm_display }}</td></tr>
@@ -518,7 +527,7 @@
   <!-- ========================================== -->
   <!-- B. UNDERWRITER / ADMIN PORTAL (INTERNAL)   -->
   <!-- ========================================== -->
-  <div class="portal-badge underwriter">Underwriter / Admin Portal View</div>
+  <div class="portal-badge underwriter">{% trans "Underwriter / Admin Portal View" %}</div>
   
   <!-- Underwrite Banner / Executive Summary Card -->
   <div class="status-banner {% if a.Underwriting_Decision == 'APPROVED' %}approved{% elif a.Underwriting_Decision == 'REJECTED' %}rejected{% else %}review{% endif %}">
@@ -534,30 +543,30 @@
   <!-- Executive Summary Card Grid -->
   <div class="audit-summary-grid">
     <div class="audit-summary-card">
-      <div class="lbl">Regulatory Grade</div>
+      <div class="lbl">{% trans "Regulatory Grade" %}</div>
       <div class="val">{{ a.Risk_Grade }}</div>
     </div>
     <div class="audit-summary-card">
-      <div class="lbl">Approved Limit</div>
+      <div class="lbl">{% trans "Approved Limit" %}</div>
       <div class="val">₹{{ a.Max_Approved_Limit|floatformat:0 }}</div>
     </div>
     <div class="audit-summary-card">
-      <div class="lbl">Recommended Amount</div>
+      <div class="lbl">{% trans "Recommended Amount" %}</div>
       <div class="val">₹{{ a.Recommended_Loan_Amount|floatformat:0 }}</div>
     </div>
     <div class="audit-summary-card">
-      <div class="lbl">Base Interest Rate</div>
+      <div class="lbl">{% trans "Base Interest Rate" %}</div>
       <div class="val">{% widthratio a.Interest_Rate 1 100 %}% p.a.</div>
     </div>
   </div>
 
   <!-- Risk Metrics Grid -->
-  <h3>Model Inferred Risk Indicators &amp; Attributions</h3>
+  <h3>{% trans "Model Inferred Risk Indicators &amp; Attributions" %}</h3>
   <div class="risk-metrics-grid">
     <!-- Probability of Default (PD) -->
     <div class="risk-metric-card">
       <div class="risk-header">
-        <span class="risk-title">Probability of Default (PD)</span>
+        <span class="risk-title">{% trans "Probability of Default (PD)" %}</span>
         <span class="risk-status-badge {% if a.Probability_of_Default <= 0.15 %}clean{% elif a.Probability_of_Default <= 0.50 %}suspicious{% else %}critical{% endif %}">
           {% if a.Probability_of_Default <= 0.15 %}Low Risk{% elif a.Probability_of_Default <= 0.50 %}Moderate Risk{% else %}High Risk{% endif %}
         </span>
@@ -569,13 +578,12 @@
         <div class="metric-bar-fill {% if a.Probability_of_Default <= 0.15 %}safe{% elif a.Probability_of_Default <= 0.50 %}warn{% else %}danger{% endif %}" 
              style="width: {% widthratio a.Probability_of_Default 1 100 %}%;"></div>
       </div>
-      <p class="muted small" style="margin-top: 8px;">Decision threshold: Review triggered at 0.50. Reject triggered at 0.80.</p>
     </div>
 
     <!-- Fraud Probability -->
     <div class="risk-metric-card">
       <div class="risk-header">
-        <span class="risk-title">Fraud Probability Indicator</span>
+        <span class="risk-title">{% trans "Fraud Probability Indicator" %}</span>
         <span class="risk-status-badge {% if a.Fraud_Probability <= 0.25 %}clean{% elif a.Fraud_Probability <= 0.60 %}suspicious{% else %}critical{% endif %}">
           {% if a.Fraud_Probability <= 0.25 %}Clean{% elif a.Fraud_Probability <= 0.60 %}Suspicious{% else %}Critical{% endif %}
         </span>
@@ -587,69 +595,61 @@
         <div class="metric-bar-fill {% if a.Fraud_Probability <= 0.25 %}safe{% elif a.Fraud_Probability <= 0.60 %}warn{% else %}danger{% endif %}" 
              style="width: {% widthratio a.Fraud_Probability 1 100 %}%;"></div>
       </div>
-      <p class="muted small" style="margin-top: 8px;">Decision threshold: Suspicious triggered at 0.50. Critical triggered at 0.75.</p>
+    </div>
+  </div>
+  <!-- Score factors (SHAP-style) -->
+  <div class="card" style="padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f3f4f6; border-radius: 16px;">
+    <h3 style="margin-top: 0; margin-bottom: 24px; font-weight: 600; font-size: 1.25rem; color: #111827;">{% trans "Score factors (SHAP-style)" %}</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <!-- Column 1: What helped -->
+      <div style="background: #f3faf6; border: 1px solid #d1e7dd; border-radius: 12px; padding: 20px;">
+        <h4 style="color: #0f5132; margin-top: 0; margin-bottom: 16px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          {% trans "What helped" %}
+        </h4>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+          {% for factor in a.Business_Explanation.Score_Factors.helped %}
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.06)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)';">
+            <span style="font-weight: 500; color: #374151; font-size: 0.95rem;">{{ factor.label }}</span>
+            <span class="badge" style="background-color: #d1e7dd; color: #0f5132; font-weight: 600; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">{{ factor.pts }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Column 2: What hurt -->
+      <div style="background: #fefcfc; border: 1px solid #f8d7da; border-radius: 12px; padding: 20px;">
+        {% if a.Business_Explanation.Score_Factors.hurt %}
+        <h4 style="color: #842029; margin-top: 0; margin-bottom: 16px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+          {% trans "What hurt" %}
+        </h4>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+          {% for factor in a.Business_Explanation.Score_Factors.hurt %}
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.06)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)';">
+            <span style="font-weight: 500; color: #374151; font-size: 0.95rem;">{{ factor.label }}</span>
+            <span class="badge" style="background-color: #f8d7da; color: #842029; font-weight: 600; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">{{ factor.pts }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #6b7280; text-align: center;">
+          <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-bottom: 12px; opacity: 0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span style="font-size: 0.95rem;">{% trans "Nothing hurt your score!" %}</span>
+        </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 
-  <!-- Financial Breakdown Table -->
-  <div class="card">
-    <h3>Detailed Underwriting Financial Breakdown</h3>
-    <div class="table-wrap" style="margin-top: 12px;">
-      <table class="ml-meta-table">
-        <tbody>
-          <tr>
-            <td>Calculated Monthly Income (Verified Statement/Profile)</td>
-            <td><strong>₹{{ a.Business_Explanation.Financial_Cashflow_Analysis.Calculated_Monthly_Income|floatformat:0 }}</strong></td>
-          </tr>
-          <tr>
-            <td>Calculated Monthly Expense</td>
-            <td><strong>₹{{ a.Business_Explanation.Financial_Cashflow_Analysis.Calculated_Monthly_Expense|floatformat:0 }}</strong></td>
-          </tr>
-          <tr>
-            <td>FOIR % (Debt Obligations / Monthly Income)</td>
-            <td><strong>{% widthratio a.Business_Explanation.Financial_Cashflow_Analysis.Debt_to_Income_Ratio_FOIR 1 100 %}%</strong></td>
-          </tr>
-          <tr>
-            <td>Available Surplus Disposable Income</td>
-            <td><strong>₹{{ a.Business_Explanation.Financial_Cashflow_Analysis.Available_Surplus|floatformat:0 }}</strong></td>
-          </tr>
-          <tr>
-            <td>Income Stability Score</td>
-            <td><strong>{{ a.Business_Explanation.Financial_Cashflow_Analysis.Income_Stability_Index }}</strong></td>
-          </tr>
-          <tr>
-            <td>Savings Ratio</td>
-            <td><strong>{% widthratio a.Business_Explanation.Financial_Cashflow_Analysis.Savings_Ratio 1 100 %}%</strong></td>
-          </tr>
-          <tr>
-            <td>Essential vs. Discretionary Expense Split</td>
-            <td>
-              Essential: <strong>{% widthratio a.Business_Explanation.Financial_Cashflow_Analysis.Essential_Expense_Ratio 1 100 %}%</strong> / 
-              Discretionary: <strong>{% widthratio a.Business_Explanation.Financial_Cashflow_Analysis.Discretionary_Expense_Ratio 1 100 %}%</strong>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
-  <!-- Key Observations List -->
-  <div class="card">
-    <h3>Underwriter Key Observations</h3>
-    <ul class="observation-list" style="margin-top: 10px;">
-      {% for observation in a.Business_Explanation.Underwriter_Key_Observations %}
-        <li>{{ observation }}</li>
-      {% empty %}
-        <li>No observations compiled for this record.</li>
-      {% endfor %}
-    </ul>
-  </div>
 
 {% else %}
   <!-- ========================================== -->
   <!-- A. BORROWER PORTAL (CUSTOMER VIEW)         -->
   <!-- ========================================== -->
-  <div class="portal-badge borrower">Borrower Dashboard</div>
+  <div class="portal-badge borrower">{% trans "Borrower Dashboard" %}</div>
 
   <!-- Empathetic status banner -->
   <div class="status-banner {% if a.Underwriting_Decision == 'APPROVED' %}approved{% elif a.Underwriting_Decision == 'REJECTED' %}rejected{% else %}review{% endif %}">
@@ -675,72 +675,64 @@
   {% if a.Underwriting_Decision != 'REJECTED' %}
   <div class="offer-grid">
     <div class="offer-card primary">
-      <div class="lbl">Max Approved Limit</div>
+      <div class="lbl">{% trans "Max Approved Limit" %}</div>
       <div class="val">₹{{ a.Customer_Explanation.Loan_Offer_Summary.Max_Approved_Limit|floatformat:0 }}</div>
     </div>
     <div class="offer-card">
-      <div class="lbl">Recommended Loan</div>
+      <div class="lbl">{% trans "Recommended Loan" %}</div>
       <div class="val">₹{{ a.Customer_Explanation.Loan_Offer_Summary.Recommended_Loan_Amount|floatformat:0 }}</div>
     </div>
     <div class="offer-card">
-      <div class="lbl">Base Interest Rate</div>
+      <div class="lbl">{% trans "Base Interest Rate" %}</div>
       <div class="val">{% widthratio a.Customer_Explanation.Loan_Offer_Summary.Interest_Rate 1 100 %}% p.a.</div>
     </div>
   </div>
   {% endif %}
 
-  <!-- Drivers (Key Strengths / Key Improvement Areas) -->
-  <div class="drivers-grid">
-    <div class="driver-card strengths">
-      <h4>👍 Key Strengths</h4>
-      <ul class="driver-list">
-        {% for strength in a.Customer_Explanation.Credit_Score_Drivers.Key_Strengths %}
-          <li>{{ strength }}</li>
-        {% empty %}
-          <li>No strengths identified.</li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="driver-card improvements">
-      <h4>💡 Key Improvement Areas</h4>
-      <ul class="driver-list">
-        {% for area in a.Customer_Explanation.Credit_Score_Drivers.Key_Improvement_Areas %}
-          <li>{{ area }}</li>
-        {% empty %}
-          <li>Excellent performance. No improvement areas identified.</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <!-- Categorized Actionable Recommendations (5 keys) -->
-  <div class="rec-card">
-    <h3 style="margin-bottom:14px;">Personalized Cashflow Recommendations</h3>
+  <!-- Score factors (SHAP-style) -->
+  <div class="card" style="padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f3f4f6; border-radius: 16px;">
+    <h3 style="margin-top: 0; margin-bottom: 24px; font-weight: 600; font-size: 1.25rem; color: #111827;">{% trans "Score factors (SHAP-style)" %}</h3>
     
-    {% for category, items in a.Actionable_Recommendations.items %}
-      <div class="rec-category">
-        <div class="rec-category-header">{{ category }}</div>
-        <div class="rec-category-body">
-          <ul class="rec-bullet-list">
-            {% for item in items %}
-              <li>{{ item }}</li>
-            {% empty %}
-              <li>Maintain positive behavior.</li>
-            {% endfor %}
-          </ul>
-        </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <!-- Column 1: What helped -->
+      <div style="background: #f3faf6; border: 1px solid #d1e7dd; border-radius: 12px; padding: 20px;">
+        <h4 style="color: #0f5132; margin-top: 0; margin-bottom: 16px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          {% trans "What helped" %}
+        </h4>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+          {% for factor in a.Business_Explanation.Score_Factors.helped %}
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.06)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)';">
+            <span style="font-weight: 500; color: #374151; font-size: 0.95rem;">{{ factor.label }}</span>
+            <span class="badge" style="background-color: #d1e7dd; color: #0f5132; font-weight: 600; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">{{ factor.pts }}</span>
+          </li>
+          {% endfor %}
+        </ul>
       </div>
-    {% endfor %}
-  </div>
 
-  <!-- Next Steps Card -->
-  <div class="card">
-    <h3>Recommended Next Steps</h3>
-    <ul class="observation-list" style="margin-top: 10px;">
-      {% for step in a.Customer_Explanation.Next_Steps %}
-        <li><strong>Step {{ forloop.counter }}:</strong> {{ step }}</li>
-      {% endfor %}
-    </ul>
+      <!-- Column 2: What hurt -->
+      <div style="background: #fefcfc; border: 1px solid #f8d7da; border-radius: 12px; padding: 20px;">
+        {% if a.Business_Explanation.Score_Factors.hurt %}
+        <h4 style="color: #842029; margin-top: 0; margin-bottom: 16px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+          {% trans "What hurt" %}
+        </h4>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+          {% for factor in a.Business_Explanation.Score_Factors.hurt %}
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.06)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)';">
+            <span style="font-weight: 500; color: #374151; font-size: 0.95rem;">{{ factor.label }}</span>
+            <span class="badge" style="background-color: #f8d7da; color: #842029; font-weight: 600; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">{{ factor.pts }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #6b7280; text-align: center;">
+          <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-bottom: 12px; opacity: 0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span style="font-size: 0.95rem;">{% trans "Nothing hurt your score!" %}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 
 {% endif %}
@@ -753,7 +745,7 @@
 {% with obligations=report.ai_assessment.detected_obligations|default:report.ai_assessment.Detected_Obligations %}
 <div class="card" style="margin-top: 18px;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-    <h3 style="margin: 0;">Automated EMI &amp; Obligation Detection</h3>
+    <h3 style="margin: 0;">{% trans "Automated EMI &amp; Obligation Detection" %}</h3>
     <span class="portal-badge underwriter" style="margin: 0; background: linear-gradient(135deg, #10b981, #059669); font-size: 10px;">Explainable AI Active</span>
   </div>
   <p class="muted small" style="margin-bottom: 18px;">Our algorithm automatically scans transactional patterns in the bank statement to detect repeating debits representing active loans or recurring commitments.</p>
@@ -761,11 +753,11 @@
   <!-- KPI Metrics Grid -->
   <div class="obligation-summary-grid">
     <div class="obligation-summary-card">
-      <div class="lbl">Total Monthly Commitments</div>
+      <div class="lbl">{% trans "Total Monthly Commitments" %}</div>
       <div class="val" style="color: #ef4444;">₹{{ report.ai_assessment.total_active_emi|default:report.ai_assessment.Total_Active_EMI|default:0|floatformat:0 }}</div>
     </div>
     <div class="obligation-summary-card">
-      <div class="lbl">Fixed Obligation to Income (FOIR)</div>
+      <div class="lbl">{% trans "Fixed Obligation to Income (FOIR)" %}</div>
       <div class="val">
         {% if report.ai_assessment.foir %}
           {% widthratio report.ai_assessment.foir 1 100 %}%
@@ -775,11 +767,11 @@
       </div>
     </div>
     <div class="obligation-summary-card">
-      <div class="lbl">Active Obligations</div>
+      <div class="lbl">{% trans "Active Obligations" %}</div>
       <div class="val">{{ report.ai_assessment.active_obligations_count|default:report.ai_assessment.Active_Obligations_Count|default:0 }}</div>
     </div>
     <div class="obligation-summary-card">
-      <div class="lbl">Bounced Mandates (ECS)</div>
+      <div class="lbl">{% trans "Bounced Mandates (ECS)" %}</div>
       <div class="val" style="color: {% if report.ai_assessment.bounced_obligations_count|default:report.ai_assessment.Bounced_Obligations_Count|default:0 > 0 %}#ef4444{% else %}#22c55e{% endif %};">
         {{ report.ai_assessment.bounced_obligations_count|default:report.ai_assessment.Bounced_Obligations_Count|default:0 }}
       </div>
@@ -791,11 +783,11 @@
     <table class="obligations-table" style="width: 100%;">
       <thead>
         <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
-          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">Lender / Commitment</th>
-          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">EMI Amount</th>
-          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Preferred Date / Freq</th>
-          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Status</th>
-          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">Payment Timeline (Last 6 Months)</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">{% trans "Lender / Commitment" %}</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">{% trans "EMI Amount" %}</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">{% trans "Preferred Date / Freq" %}</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">{% trans "Status" %}</th>
+          <th style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: left;">{% trans "Payment Timeline (Last 6 Months)" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -853,7 +845,7 @@
 
 <!-- Cashflow Trends (Visible to both portals) -->
 <div class="card" style="margin-top: 18px;">
-  <h3>Monthly Cashflow Trends</h3>
+  <h3>{% trans "Monthly Cashflow Trends" %}</h3>
   <div style="position: relative; height: 300px; width: 100%;">
     <canvas id="cashflowChart"></canvas>
   </div>
@@ -862,15 +854,15 @@
 {% if report.ai_assessment.sanitization_stats or report.ai_assessment.Sanitization_Stats %}
 {% with stats=report.ai_assessment.sanitization_stats|default:report.ai_assessment.Sanitization_Stats %}
 <div class="card" style="margin-top: 18px;">
-  <h3>Anti-Gaming Sanitization Summary</h3>
+  <h3>{% trans "Anti-Gaming Sanitization Summary" %}</h3>
   <p class="muted small">We filter out non-income inflows and self-transfers to analyze your true cashflow stability.</p>
   <table class="ml-meta-table" style="margin-top:12px; width: 100%;">
     <thead>
       <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
-        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Sanitization Category</th>
-        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Treatment</th>
-        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Txns Affected</th>
-        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: right;">Amount Excluded</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">{% trans "Sanitization Category" %}</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">{% trans "Treatment" %}</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">{% trans "Txns Affected" %}</th>
+        <th style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: right;">{% trans "Amount Excluded" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -997,15 +989,22 @@
 {% endif %}
 
 <div class="card">
-  <h3>Underlying cashflow features</h3>
+  <h3>{% trans "Underlying cashflow features" %}</h3>
   <div class="table-wrap">
     <table id="underlying-features-table">
-      <tr data-feature="consistency"><th>Income consistency</th><td class="percentage-val">{{ report.income_consistency }}</td></tr>
-      <tr data-feature="savings"><th>Savings ratio</th><td class="percentage-val">{{ report.savings_ratio }}</td></tr>
-      <tr data-feature="timeliness"><th>Payment timeliness</th><td class="percentage-val">{{ report.payment_timeliness }}</td></tr>
-      <tr data-feature="frequency"><th>Transaction frequency (per month)</th><td class="frequency-val">{{ report.transaction_frequency }}</td></tr>
-      <tr data-feature="bounce"><th>Bounce rate</th><td class="percentage-val-decimal">{{ report.bounce_rate }}</td></tr>
-      <tr data-feature="digital"><th>Digital engagement</th><td class="percentage-val">{{ report.digital_engagement }}</td></tr>
+      {% if report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis %}
+      <tr data-feature="calc-income"><th>{% trans "Calculated monthly income" %}</th><td class="currency-val">₹{{ report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis.Calculated_Monthly_Income|floatformat:0 }}</td></tr>
+      <tr data-feature="calc-expense"><th>{% trans "Calculated monthly expense" %}</th><td class="currency-val">₹{{ report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis.Calculated_Monthly_Expense|floatformat:0 }}</td></tr>
+      <tr data-feature="foir"><th>{% trans "FOIR (Debt-to-Income)" %}</th><td class="percentage-val-decimal">{{ report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis.Debt_to_Income_Ratio_FOIR }}</td></tr>
+      <tr data-feature="essential"><th>{% trans "Essential expense ratio" %}</th><td class="percentage-val-decimal">{{ report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis.Essential_Expense_Ratio }}</td></tr>
+      <tr data-feature="discretionary"><th>{% trans "Discretionary expense ratio" %}</th><td class="percentage-val-decimal">{{ report.ai_assessment.Business_Explanation.Financial_Cashflow_Analysis.Discretionary_Expense_Ratio }}</td></tr>
+      {% endif %}
+      <tr data-feature="consistency"><th>{% trans "Income consistency" %}</th><td class="percentage-val">{{ report.income_consistency }}</td></tr>
+      <tr data-feature="savings"><th>{% trans "Savings ratio" %}</th><td class="percentage-val">{{ report.savings_ratio }}</td></tr>
+      <tr data-feature="timeliness"><th>{% trans "Payment timeliness" %}</th><td class="percentage-val">{{ report.payment_timeliness }}</td></tr>
+      <tr data-feature="frequency"><th>{% trans "Transaction frequency (per month)" %}</th><td class="frequency-val">{{ report.transaction_frequency }}</td></tr>
+      <tr data-feature="bounce"><th>{% trans "Bounce rate" %}</th><td class="percentage-val-decimal">{{ report.bounce_rate }}</td></tr>
+      <tr data-feature="digital"><th>{% trans "Digital engagement" %}</th><td class="percentage-val">{{ report.digital_engagement }}</td></tr>
     </table>
   </div>
 </div>

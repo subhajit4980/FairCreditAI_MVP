@@ -1,0 +1,427 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: FairCreditScore\n"
+"Language: as\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "English"
+msgstr "ইংৰাজী"
+
+msgid "Hindi"
+msgstr "হিন্দী"
+
+msgid "Bengali"
+msgstr "বাংলা"
+
+msgid "Marathi"
+msgstr "মাৰাঠী"
+
+msgid "Telugu"
+msgstr "তেলেগু"
+
+msgid "Assamese"
+msgstr "Assamese"
+
+msgid "Gujarati"
+msgstr "Gujarati"
+
+msgid "Kannada"
+msgstr "কানাড়া ভাষা"
+
+msgid "Kashmiri"
+msgstr "কাশ্মীৰী"
+
+msgid "Konkani"
+msgstr "কোংকণী"
+
+msgid "Maithili"
+msgstr "মৈথিলী"
+
+msgid "Malayalam"
+msgstr "মালয়ালম"
+
+msgid "Nepali"
+msgstr "নেপালী"
+
+msgid "Odia"
+msgstr "Odia"
+
+msgid "Punjabi"
+msgstr "পাঞ্জাবী"
+
+msgid "Sindhi"
+msgstr "সিন্ধী"
+
+msgid "Tamil"
+msgstr "তামিল"
+
+msgid "Urdu"
+msgstr "উৰ্দু"
+
+msgid "Language"
+msgstr "ভাষা"
+
+msgid "Go"
+msgstr "যাওক"
+
+msgid "Admin"
+msgstr "প্ৰশাসক"
+
+msgid "Users"
+msgstr "ব্যৱহাৰকাৰীসকল"
+
+msgid "Audit"
+msgstr "অডিট"
+
+msgid "Wiki"
+msgstr "ৱিকি"
+
+msgid "Operations"
+msgstr "অপাৰেচন"
+
+msgid "Documents"
+msgstr "নথিপত্ৰ"
+
+msgid "Customers"
+msgstr "গ্ৰাহকসকল"
+
+msgid "+ New Customer"
+msgstr "+ নতুন গ্ৰাহক"
+
+msgid "My Score"
+msgstr "মোৰ স্ক'ৰ"
+
+msgid "Profile"
+msgstr "ৰূপৰেখা"
+
+msgid "Sign out"
+msgstr "চাইন আউট কৰক"
+
+msgid "Sign in"
+msgstr "চাইন ইন কৰক"
+
+msgid "Get My Score"
+msgstr "Get My Score"
+
+msgid "My Score · FairCreditScore"
+msgstr "মোৰ স্ক'ৰ · FairCreditScore"
+
+msgid "Hi"
+msgstr "নমস্কাৰ"
+
+msgid "out of 1 – 100"
+msgstr "out of 1 – 100"
+
+msgid "Generated"
+msgstr "সৃষ্টি কৰা হৈছে"
+
+msgid "View breakdown"
+msgstr "ভিউ ব্ৰেকডাউন"
+
+msgid "No score yet"
+msgstr "এতিয়াও কোনো স্ক’ৰ নাই"
+
+msgid "Upload a bank statement and click"
+msgstr "Upload a bank statement and click"
+
+msgid "Get my Credit Score"
+msgstr "মোৰ ক্ৰেডিট স্ক'ৰ লাভ কৰক"
+
+msgid ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+msgstr ""
+"আপোনাৰ বেংক একাউণ্ট একাউণ্ট এগ্ৰিগেটৰৰ জৰিয়তে লিংক কৰক বা প্ৰকৃত ডাটাত "
+"স্ক'ৰ কৰিবলৈ এটা ষ্টেটমেন্ট আপলোড কৰক &mdash; অন্যথা আমি এটা নমুনা প্ৰফাইললৈ"
+" উভতি যাম।"
+
+msgid "Upload Statement (CSV/XLS)"
+msgstr "আপল'ড বিবৃতি (CSV/XLS)"
+
+msgid "Fetch via Account Aggregator"
+msgstr "Fetch via Account Aggregator"
+
+msgid "Bank statements & AA fetches"
+msgstr "বেংক ষ্টেটমেণ্ট আৰু এ এ ফেচ"
+
+msgid "When"
+msgstr "কেতিয়া"
+
+msgid "Source"
+msgstr "উত্‍স"
+
+msgid "Txns"
+msgstr "Txns"
+
+msgid "Months"
+msgstr "মাহ"
+
+msgid "Parsed"
+msgstr "পাৰ্চ কৰা হৈছে"
+
+msgid "Notes"
+msgstr "টোকাসমূহ"
+
+msgid "AA fetch"
+msgstr "AA fetch"
+
+msgid "Upload"
+msgstr "আপলোড কৰক"
+
+msgid "Unparsed"
+msgstr "আনপাৰ্চড"
+
+msgid "Mobile:"
+msgstr "ম’বাইল:"
+
+msgid "PAN:"
+msgstr "কেৰাহী:"
+
+msgid "Income:"
+msgstr "উপাৰ্জন:"
+
+msgid "mo"
+msgstr "mo"
+
+msgid "Edit profile"
+msgstr "আলেখ্যন সম্পাদনা কৰক"
+
+msgid "Your credit score, made fair."
+msgstr "আপোনাৰ ক্ৰেডিট স্ক’ৰ, ন্যায্য কৰা হৈছে।"
+
+msgid ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+msgstr ""
+"FairCreditScore হৈছে ইউপিআইত প্ৰতিদিনে লেনদেন কৰা কিন্তু পৰম্পৰাগত ব্যুৰোৰ "
+"বাবে অদৃশ্য হৈ থকা ৪০০+ মিলিয়ন ভাৰতীয়ৰ বাবে এটা বিকল্প ক্ৰেডিট স্ক’ৰিং "
+"প্লেটফৰ্ম। FairCreditAI আৰু RBI একাউণ্ট এগ্ৰিগেটৰ কাঠামোৰ দ্বাৰা চালিত।"
+
+msgid "Individual Customer"
+msgstr "ব্যক্তিগত গ্ৰাহক"
+
+msgid ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+msgstr ""
+"চেকেণ্ডত আপোনাৰ FairCreditScore সৃষ্টি কৰক। বেংক ষ্টেটমেন্ট আপলোড কৰক আৰু "
+"চাওক আপোনাৰ স্ক’ৰত কিহে সহায় কৰিলে বা আঘাত কৰিলে।"
+
+msgid "Get my score"
+msgstr "Get my score"
+
+msgid "Financial Institutions"
+msgstr "বিত্তীয় প্ৰতিষ্ঠানসমূহ"
+
+msgid ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+msgstr ""
+"অংশীদাৰ বেংক আৰু এনবিএফচিসমূহৰ বাবে অপাৰেচন কনছ'ল &mdash; গ্ৰাহকসকলক অনবৰ্ড "
+"কৰা, তেওঁলোকৰ হৈ স্ক'ৰ সৃষ্টি কৰা।"
+
+msgid "Request access"
+msgstr "অভিগমৰ অনুৰোধ কৰক"
+
+msgid "Consent-based"
+msgstr "Consent-based"
+
+msgid ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+msgstr ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+
+msgid "Explainable"
+msgstr "Explainable"
+
+msgid ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+msgstr ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+
+msgid "Inclusive"
+msgstr "Inclusive"
+
+msgid ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+msgstr ""
+"গিগ কৰ্মী, কিৰানাৰ দোকান, দৰমহা-ডেবিট ব্যৱহাৰকাৰী, আৰু যিকোনো ব্যক্তিৰ বাবে "
+"নিৰ্মাণ কৰা হৈছে যাৰ বাবে চিবিআইএল কেতিয়াও নিৰ্মাণ কৰা হোৱা নাছিল।"
+
+msgid "Invalid username or password."
+msgstr "Invalid username or password."
+
+msgid "Username"
+msgstr "ব্যৱহাৰকাৰীৰ নাম"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "কোনো একাউণ্ট নাই? <a href=\"%(signup_url)s\">এটা সৃষ্টি কৰক</a> ।"
+
+msgid "Back to customer details"
+msgstr "গ্ৰাহকৰ সবিশেষলৈ উভতি যাওক"
+
+msgid "Back to dashboard"
+msgstr "ডেচব'ৰ্ডলৈ উভতি যাওক"
+
+msgid "Download Transactions (Excel)"
+msgstr "ডাউনলোড লেনদেন (Excel)"
+
+msgid "Score Unavailable"
+msgstr "স্ক'ৰ উপলব্ধ নহয়"
+
+msgid "Profile &amp; Scoring Summary"
+msgstr "প্ৰফাইল &amp; স্ক'ৰিং সাৰাংশ"
+
+msgid "Underwriter / Admin Portal View"
+msgstr "আণ্ডাৰৰাইটাৰ / এডমিন পৰ্টেল দৃশ্য"
+
+msgid "Regulatory Grade"
+msgstr "নিয়ন্ত্ৰণমূলক গ্ৰেড"
+
+msgid "Approved Limit"
+msgstr "অনুমোদিত সীমা"
+
+msgid "Recommended Amount"
+msgstr "পৰামৰ্শ দিয়া ধনৰাশি"
+
+msgid "Base Interest Rate"
+msgstr "ভিত্তি সুতৰ হাৰ"
+
+msgid "Model Inferred Risk Indicators &amp; Attributions"
+msgstr "মডেল অনুমান কৰা বিপদ সূচকসমূহ &amp; এট্ৰিবিউচনসমূহ"
+
+msgid "Probability of Default (PD)"
+msgstr "অবিকল্পিতৰ সম্ভাৱনা (PD)"
+
+msgid "Fraud Probability Indicator"
+msgstr "Fraud Probability Indicator"
+
+msgid "Detailed Underwriting Financial Breakdown"
+msgstr "বিশদ আণ্ডাৰৰাইটিং বিত্তীয় বিভাজন"
+
+msgid "Calculated Monthly Income (Verified Statement/Profile)"
+msgstr "গণনা কৰা মাহিলী আয় (পৰীক্ষিত বিবৃতি/প্ৰফাইল)"
+
+msgid "Calculated Monthly Expense"
+msgstr "Calculated Monthly Expense"
+
+msgid "FOIR %% (Debt Obligations / Monthly Income)"
+msgstr "FOIR %% (ঋণৰ বাধ্যবাধকতা / মাহিলী আয়)"
+
+msgid "Available Surplus Disposable Income"
+msgstr "উপলব্ধ উদ্বৃত্ত ব্যৱহাৰযোগ্য আয়"
+
+msgid "Income Stability Score"
+msgstr "আয়ৰ স্থিৰতা স্ক’ৰ"
+
+msgid "Savings Ratio"
+msgstr "সঞ্চয়ৰ অনুপাত"
+
+msgid "Essential vs. Discretionary Expense Split"
+msgstr "অত্যাৱশ্যকীয় বনাম বিবেচনাধীন খৰচ বিভাজন"
+
+msgid "Underwriter Key Observations"
+msgstr "আণ্ডাৰৰাইটাৰৰ মূল পৰ্যবেক্ষণসমূহ"
+
+msgid "Borrower Dashboard"
+msgstr "Borrower Dashboard"
+
+msgid "Max Approved Limit"
+msgstr "সৰ্বোচ্চ অনুমোদিত সীমা"
+
+msgid "Recommended Loan"
+msgstr "পৰামৰ্শ দিয়া ঋণ"
+
+msgid "👍 Key Strengths"
+msgstr "👍 মূল শক্তি"
+
+msgid "💡 Key Improvement Areas"
+msgstr "💡 মূল ​​উন্নতিৰ ক্ষেত্ৰ"
+
+msgid "Personalized Cashflow Recommendations"
+msgstr "ব্যক্তিগতকৃত নগদ ধনৰ প্ৰবাহৰ পৰামৰ্শ"
+
+msgid "Recommended Next Steps"
+msgstr "পৰামৰ্শ দিয়া পৰৱৰ্তী পদক্ষেপসমূহ"
+
+msgid "Automated EMI &amp; Obligation Detection"
+msgstr "স্বয়ংক্ৰিয় ইএমআই &amp; বাধ্যবাধকতা ধৰা পেলোৱা"
+
+msgid "Total Monthly Commitments"
+msgstr "মুঠ মাহেকীয়া প্ৰতিশ্ৰুতি"
+
+msgid "Fixed Obligation to Income (FOIR)"
+msgstr "আয়ৰ ওপৰত নিৰ্দিষ্ট বাধ্যবাধকতা (FOIR)"
+
+msgid "Active Obligations"
+msgstr "সক্ৰিয় বাধ্যবাধকতাসমূহ"
+
+msgid "Bounced Mandates (ECS)"
+msgstr "বাউন্সড মেণ্ডেট (ECS)"
+
+msgid "Lender / Commitment"
+msgstr "ঋণদাতা / প্ৰতিশ্ৰুতি"
+
+msgid "EMI Amount"
+msgstr "ইএমআইৰ পৰিমাণ"
+
+msgid "Preferred Date / Freq"
+msgstr "পছন্দৰ তাৰিখ / Freq"
+
+msgid "Status"
+msgstr "স্থিতি"
+
+msgid "Payment Timeline (Last 6 Months)"
+msgstr "Payment Timeline (Last 6 Months)"
+
+msgid "Monthly Cashflow Trends"
+msgstr "মাহেকীয়া নগদ ধনৰ প্ৰবাহৰ প্ৰৱণতা"
+
+msgid "Anti-Gaming Sanitization Summary"
+msgstr "এণ্টি-গেমিং চেনিটাইজেচনৰ সাৰাংশ"
+
+msgid "Sanitization Category"
+msgstr "চেনিটাইজেচনৰ শ্ৰেণী"
+
+msgid "Treatment"
+msgstr "উপচাৰ"
+
+msgid "Txns Affected"
+msgstr "Txns প্ৰভাৱিত হৈছে"
+
+msgid "Amount Excluded"
+msgstr "পৰিমাণ বাদ দিয়া হৈছে"
+
+msgid "Underlying cashflow features"
+msgstr "অন্তৰ্নিহিত নগদ ধনৰ প্ৰবাহ বৈশিষ্ট্য"
+
+msgid "Income consistency"
+msgstr "আয়ৰ সামঞ্জস্যতা"
+
+msgid "Savings ratio"
+msgstr "সঞ্চয়ৰ অনুপাত"
+
+msgid "Payment timeliness"
+msgstr "Payment timeliness"
+
+msgid "Transaction frequency (per month)"
+msgstr "Transaction frequency (per month)"
+
+msgid "Bounce rate"
+msgstr "বাউন্স ৰেট"
+
+msgid "Digital engagement"
+msgstr "ডিজিটেল এংগেজমেণ্ট"

@@ -16,11 +16,13 @@ urlpatterns = [
     path("me/documents/upload/", views.upload_document, name="upload_document"),
     path("me/bank-statement/upload/", views.upload_bank_statement, name="upload_bank_statement"),
     path("me/consent/initiate/", views.initiate_consent, name="initiate_consent"),
+    path("me/fetch-aa/callback/", views.customer_aa_callback, name="customer_aa_callback"),
     path("me/consent/<str:handle>/", views.consent_review, name="consent_review"),
     path("me/consent/<str:handle>/approve/", views.consent_approve, name="consent_approve"),
     path("me/consent/<str:handle>/revoke/", views.consent_revoke, name="consent_revoke"),
     path("me/score/generate/", views.generate_my_score, name="generate_my_score"),
     path("me/score/<int:pk>/", views.score_detail, name="score_detail"),
+    path("me/score/<int:pk>/download-transactions/", views.download_aa_transactions, name="download_aa_transactions"),
 
     # Operations
     path("ops/", views.ops_dashboard, name="ops_dashboard"),

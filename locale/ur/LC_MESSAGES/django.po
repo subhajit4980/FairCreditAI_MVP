@@ -1,0 +1,427 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: FairCreditScore\n"
+"Language: ur\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "English"
+msgstr "انگریزی"
+
+msgid "Hindi"
+msgstr "ہندی"
+
+msgid "Bengali"
+msgstr "بنگالی"
+
+msgid "Marathi"
+msgstr "مراٹھی"
+
+msgid "Telugu"
+msgstr "تیلگو"
+
+msgid "Assamese"
+msgstr "آسامی"
+
+msgid "Gujarati"
+msgstr "گجراتی"
+
+msgid "Kannada"
+msgstr "کنڑ"
+
+msgid "Kashmiri"
+msgstr "Kashmiri"
+
+msgid "Konkani"
+msgstr "کونکنی"
+
+msgid "Maithili"
+msgstr "میتھلی"
+
+msgid "Malayalam"
+msgstr "ملیالم"
+
+msgid "Nepali"
+msgstr "نیپالی"
+
+msgid "Odia"
+msgstr "اوڈیا"
+
+msgid "Punjabi"
+msgstr "پنجابی"
+
+msgid "Sindhi"
+msgstr "سندھی"
+
+msgid "Tamil"
+msgstr "تامل"
+
+msgid "Urdu"
+msgstr "اردو"
+
+msgid "Language"
+msgstr "زبان"
+
+msgid "Go"
+msgstr "جاؤ"
+
+msgid "Admin"
+msgstr "ایڈمن"
+
+msgid "Users"
+msgstr "صارفین"
+
+msgid "Audit"
+msgstr "آڈٹ"
+
+msgid "Wiki"
+msgstr "وکی"
+
+msgid "Operations"
+msgstr "آپریشنز"
+
+msgid "Documents"
+msgstr "Documents"
+
+msgid "Customers"
+msgstr "گاہکوں"
+
+msgid "+ New Customer"
+msgstr "+ نیا گاہک"
+
+msgid "My Score"
+msgstr "میرا سکور"
+
+msgid "Profile"
+msgstr "پروفائل"
+
+msgid "Sign out"
+msgstr "سائن آؤٹ کریں۔"
+
+msgid "Sign in"
+msgstr "سائن ان کریں۔"
+
+msgid "Get My Score"
+msgstr "میرا اسکور حاصل کریں۔"
+
+msgid "My Score · FairCreditScore"
+msgstr "My Score · FairCreditScore"
+
+msgid "Hi"
+msgstr "Hi"
+
+msgid "out of 1 – 100"
+msgstr "out of 1 – 100"
+
+msgid "Generated"
+msgstr "پیدا کیا"
+
+msgid "View breakdown"
+msgstr "بریک ڈاؤن دیکھیں"
+
+msgid "No score yet"
+msgstr "ابھی تک کوئی سکور نہیں۔"
+
+msgid "Upload a bank statement and click"
+msgstr "Upload a bank statement and click"
+
+msgid "Get my Credit Score"
+msgstr "میرا کریڈٹ سکور حاصل کریں۔"
+
+msgid ""
+"Link your bank account via Account Aggregator or upload a statement to score"
+" on real data &mdash; otherwise we fall back to a sample profile."
+msgstr ""
+"اپنے بینک اکاؤنٹ کو اکاؤنٹ ایگریگیٹر کے ذریعے لنک کریں یا حقیقی ڈیٹا پر "
+"اسکور کرنے کے لیے اسٹیٹمنٹ اپ لوڈ کریں &mdash; دوسری صورت میں ہم ایک نمونہ "
+"پروفائل پر واپس آتے ہیں."
+
+msgid "Upload Statement (CSV/XLS)"
+msgstr "اپ لوڈ اسٹیٹمنٹ (CSV/XLS)"
+
+msgid "Fetch via Account Aggregator"
+msgstr "اکاؤنٹ ایگریگیٹر کے ذریعے بازیافت کریں۔"
+
+msgid "Bank statements & AA fetches"
+msgstr "Bank statements & AA fetches"
+
+msgid "When"
+msgstr "جب"
+
+msgid "Source"
+msgstr "Source"
+
+msgid "Txns"
+msgstr "Txns"
+
+msgid "Months"
+msgstr "Months"
+
+msgid "Parsed"
+msgstr "تجزیہ کیا گیا۔"
+
+msgid "Notes"
+msgstr "نوٹس"
+
+msgid "AA fetch"
+msgstr "AA بازیافت کریں۔"
+
+msgid "Upload"
+msgstr "اپ لوڈ کریں۔"
+
+msgid "Unparsed"
+msgstr "Unparsed"
+
+msgid "Mobile:"
+msgstr "موبائل:"
+
+msgid "PAN:"
+msgstr "PAN:"
+
+msgid "Income:"
+msgstr "Income:"
+
+msgid "mo"
+msgstr "mo"
+
+msgid "Edit profile"
+msgstr "Edit profile"
+
+msgid "Your credit score, made fair."
+msgstr "Your credit score, made fair."
+
+msgid ""
+"FairCreditScore is an alternative credit scoring platform for the 400+ "
+"million Indians who transact every day on UPI but stay invisible to "
+"traditional bureaus. Powered by FairCreditAI and the RBI Account Aggregator "
+"framework."
+msgstr ""
+"FairCreditScore 400+ ملین ہندوستانیوں کے لیے ایک متبادل کریڈٹ اسکورنگ پلیٹ "
+"فارم ہے جو UPI پر روزانہ لین دین کرتے ہیں لیکن روایتی بیوروز سے پوشیدہ رہتے "
+"ہیں۔ FairCreditAI اور RBI اکاؤنٹ ایگریگیٹر فریم ورک کے ذریعے تقویت یافتہ۔"
+
+msgid "Individual Customer"
+msgstr "انفرادی گاہک"
+
+msgid ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+msgstr ""
+"Generate your FairCreditScore in seconds. Upload a bank statement and see "
+"what helped or hurt your score."
+
+msgid "Get my score"
+msgstr "Get my score"
+
+msgid "Financial Institutions"
+msgstr "Financial Institutions"
+
+msgid ""
+"Operations console for partner banks and NBFCs &mdash; onboard customers, "
+"generate scores on their behalf."
+msgstr ""
+"پارٹنر بینکوں اور NBFCs کے لیے آپریشنز کنسول &mdash; آن بورڈ صارفین، ان کی "
+"جانب سے اسکور تیار کریں۔"
+
+msgid "Request access"
+msgstr "رسائی کی درخواست کریں۔"
+
+msgid "Consent-based"
+msgstr "رضامندی پر مبنی"
+
+msgid ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+msgstr ""
+"Share data once via the RBI-licensed Account Aggregator framework. No screen"
+" scraping, no document hassle."
+
+msgid "Explainable"
+msgstr "قابل وضاحت"
+
+msgid ""
+"Every score comes with a SHAP-style breakdown of what helped or hurt &mdash;"
+" no black box."
+msgstr ""
+"ہر اسکور SHAP طرز کی خرابی کے ساتھ آتا ہے کہ کس چیز نے مدد یا نقصان پہنچایا "
+"&mdash; کوئی بلیک باکس نہیں."
+
+msgid "Inclusive"
+msgstr "شامل ہے۔"
+
+msgid ""
+"Built for gig workers, kirana shops, salaried-debit users, and anyone CIBIL "
+"was never built for."
+msgstr ""
+"ٹمٹم کارکنوں، کرانہ کی دکانوں، تنخواہ دار-ڈیبٹ صارفین، اور کسی کے لیے بھی "
+"CIBIL کبھی نہیں بنایا گیا تھا۔"
+
+msgid "Invalid username or password."
+msgstr "غلط صارف نام یا پاس ورڈ۔"
+
+msgid "Username"
+msgstr "صارف نام"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "No account? <a href=\"%(signup_url)s\">Create one</a>."
+msgstr "No account? <a href=\"%(signup_url)s\">Create one</a>."
+
+msgid "Back to customer details"
+msgstr "کسٹمر کی تفصیلات پر واپس جائیں۔"
+
+msgid "Back to dashboard"
+msgstr "ڈیش بورڈ پر واپس جائیں۔"
+
+msgid "Download Transactions (Excel)"
+msgstr "لین دین ڈاؤن لوڈ کریں (ایکسل)"
+
+msgid "Score Unavailable"
+msgstr "اسکور دستیاب نہیں ہے۔"
+
+msgid "Profile &amp; Scoring Summary"
+msgstr "پروفائل &amp; اسکورنگ کا خلاصہ"
+
+msgid "Underwriter / Admin Portal View"
+msgstr "انڈر رائٹر / ایڈمن پورٹل ویو"
+
+msgid "Regulatory Grade"
+msgstr "ریگولیٹری گریڈ"
+
+msgid "Approved Limit"
+msgstr "منظور شدہ حد"
+
+msgid "Recommended Amount"
+msgstr "تجویز کردہ رقم"
+
+msgid "Base Interest Rate"
+msgstr "بنیادی شرح سود"
+
+msgid "Model Inferred Risk Indicators &amp; Attributions"
+msgstr "ماڈل انفریڈ رسک انڈیکیٹرز &amp; انتسابات"
+
+msgid "Probability of Default (PD)"
+msgstr "Probability of Default (PD)"
+
+msgid "Fraud Probability Indicator"
+msgstr "دھوکہ دہی کا امکان اشارے"
+
+msgid "Detailed Underwriting Financial Breakdown"
+msgstr "تفصیلی انڈر رائٹنگ مالیاتی خرابی"
+
+msgid "Calculated Monthly Income (Verified Statement/Profile)"
+msgstr "شمار شدہ ماہانہ آمدنی (تصدیق شدہ بیان/پروفائل)"
+
+msgid "Calculated Monthly Expense"
+msgstr "شمار شدہ ماہانہ اخراجات"
+
+msgid "FOIR %% (Debt Obligations / Monthly Income)"
+msgstr "FOIR %% (قرض واجبات / ماہانہ آمدنی)"
+
+msgid "Available Surplus Disposable Income"
+msgstr "دستیاب سرپلس ڈسپوزایبل آمدنی"
+
+msgid "Income Stability Score"
+msgstr "آمدنی کا استحکام اسکور"
+
+msgid "Savings Ratio"
+msgstr "بچت کا تناسب"
+
+msgid "Essential vs. Discretionary Expense Split"
+msgstr "ضروری بمقابلہ صوابدیدی اخراجات کی تقسیم"
+
+msgid "Underwriter Key Observations"
+msgstr "انڈر رائٹر کلیدی مشاہدات"
+
+msgid "Borrower Dashboard"
+msgstr "قرض لینے والا ڈیش بورڈ"
+
+msgid "Max Approved Limit"
+msgstr "زیادہ سے زیادہ منظور شدہ حد"
+
+msgid "Recommended Loan"
+msgstr "تجویز کردہ قرض"
+
+msgid "👍 Key Strengths"
+msgstr "👍 کلیدی طاقتیں۔"
+
+msgid "💡 Key Improvement Areas"
+msgstr "💡 کلیدی بہتری کے شعبے"
+
+msgid "Personalized Cashflow Recommendations"
+msgstr "ذاتی نوعیت کی کیش فلو کی سفارشات"
+
+msgid "Recommended Next Steps"
+msgstr "تجویز کردہ اگلے اقدامات"
+
+msgid "Automated EMI &amp; Obligation Detection"
+msgstr "خودکار EMI &amp; ذمہ داری کا پتہ لگانا"
+
+msgid "Total Monthly Commitments"
+msgstr "کل ماہانہ وعدے"
+
+msgid "Fixed Obligation to Income (FOIR)"
+msgstr "آمدنی کے لیے مقررہ ذمہ داری (FOIR)"
+
+msgid "Active Obligations"
+msgstr "فعال ذمہ داریاں"
+
+msgid "Bounced Mandates (ECS)"
+msgstr "باؤنسڈ مینڈیٹس (ECS)"
+
+msgid "Lender / Commitment"
+msgstr "قرض دینے والا / عزم"
+
+msgid "EMI Amount"
+msgstr "EMI رقم"
+
+msgid "Preferred Date / Freq"
+msgstr "ترجیحی تاریخ / تعدد"
+
+msgid "Status"
+msgstr "حیثیت"
+
+msgid "Payment Timeline (Last 6 Months)"
+msgstr "ادائیگی کی ٹائم لائن (گزشتہ 6 ماہ)"
+
+msgid "Monthly Cashflow Trends"
+msgstr "ماہانہ کیش فلو کے رجحانات"
+
+msgid "Anti-Gaming Sanitization Summary"
+msgstr "اینٹی گیمنگ سینیٹائزیشن کا خلاصہ"
+
+msgid "Sanitization Category"
+msgstr "سینیٹائزیشن کیٹیگری"
+
+msgid "Treatment"
+msgstr "علاج"
+
+msgid "Txns Affected"
+msgstr "Txns متاثر"
+
+msgid "Amount Excluded"
+msgstr "رقم خارج کر دی گئی۔"
+
+msgid "Underlying cashflow features"
+msgstr "کیش فلو کی بنیادی خصوصیات"
+
+msgid "Income consistency"
+msgstr "آمدنی میں مستقل مزاجی"
+
+msgid "Savings ratio"
+msgstr "بچت کا تناسب"
+
+msgid "Payment timeliness"
+msgstr "Payment timeliness"
+
+msgid "Transaction frequency (per month)"
+msgstr "لین دین کی تعدد (فی ماہ)"
+
+msgid "Bounce rate"
+msgstr "اچھال کی شرح"
+
+msgid "Digital engagement"
+msgstr "ڈیجیٹل مصروفیت"
