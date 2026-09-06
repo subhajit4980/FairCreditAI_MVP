@@ -3,8 +3,8 @@ services:
   - type: web
     name: fair-credit-ai
     env: python
-    # Build Command installs dependencies and collects static files
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    # Build Command installs dependencies, collects static files, and applies migrations
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
     # Start Command runs gunicorn
     startCommand: "gunicorn faircredit.wsgi --log-file -"
     # Specify the Python version to use

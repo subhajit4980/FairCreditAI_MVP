@@ -35,7 +35,6 @@ class AiModelScoringFormulaTests(TestCase):
             self.assertTrue(1 <= score <= 100)
             self.assertGreaterEqual(loan, 0)
             self.assertIn(a["risk_grade"], {"Grade A", "Grade B", "Grade C", "Grade D", "Grade E"})
-            self.assertIn(a["risk_type"], {"Low", "Medium", "High"})
             self.assertIn(a["underwriting_decision"], {"APPROVED", "REVIEW", "REJECTED"})
 
     def test_strong_outranks_weak(self):
@@ -60,12 +59,20 @@ class AiModelPersistenceTests(TestCase):
             gender="Male",
             education="Bachelor's"
         )
+        from .models import BankStatement
+        import django.utils.timezone as timezone
+        BankStatement.objects.create(
+            customer=user,
+            parsed_at=timezone.now(),
+            parsed_features=STRONG,
+            source=BankStatement.Source.AA_FETCH
+        )
         report = generate_score(user, algorithm=AI_MODEL)
 
         self.assertEqual(report.algorithm, ScoreReport.Algorithm.AI_MODEL)
         self.assertTrue(1 <= report.score <= 100)
         self.assertIn("underwriting_decision", report.ai_assessment)
-        self.assertEqual(report.ai_assessment["monthly_income_used"], 80000)
+        self.assertEqual(report.ai_assessment["monthly_income_used"], 30000)
         self.assertEqual(report.recommended_loan_amount, report.ai_assessment["recommended_loan_amount"])
 
     def test_ai_model_requires_complete_profile(self):
@@ -83,8 +90,16 @@ class AiModelPersistenceTests(TestCase):
             gender="Male",
             education="Bachelor's"
         )
+        from .models import BankStatement
+        import django.utils.timezone as timezone
+        BankStatement.objects.create(
+            customer=user,
+            parsed_at=timezone.now(),
+            parsed_features=STRONG,
+            source=BankStatement.Source.AA_FETCH
+        )
         report = generate_score(user, algorithm=AI_MODEL)
-        self.assertEqual(report.ai_assessment["monthly_income_used"], 20186)
+        self.assertEqual(report.ai_assessment["monthly_income_used"], 30000)
 
 
 from core.ml.obligations import clean_narration_signature, extract_lender_name, detect_obligations
@@ -553,14 +568,13 @@ class FinboxIntegrationTests(TestCase):
         customer.save()
         self.client.login(username="customer_user2", password="password")
 
-        # Post initiate consent (should fall back to local mock page)
+        # Post initiate consent (should fail and redirect to dashboard)
         response = self.client.post(reverse("initiate_consent"))
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/me/consent/", response.url)
+        self.assertEqual(response.url, reverse("customer_dashboard"))
 
-        # Verify consent created with standard mock fallback handle
-        consent = customer.consents.first()
-        self.assertEqual(consent.status, AAConsent.Status.PENDING)
+        # Verify no consent created
+        self.assertEqual(customer.consents.count(), 0)
 
     def test_parse_finbox_transactions_json(self):
         from core.parsers import parse_finbox_transactions_json

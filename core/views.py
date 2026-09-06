@@ -246,17 +246,8 @@ def initiate_consent(request):
         )
         _audit(request.user, "consent_initiated_finbox", target=consent.id)
         return redirect(redirect_url)
-    
-    # Fallback to local mock consent screen
-    handle = secrets.token_hex(16)
-    consent = AAConsent.objects.create(
-        customer=request.user,
-        handle=handle,
-        status=AAConsent.Status.PENDING,
-        aa_provider="Finbox BankConnect (Mock Fallback)"
-    )
-    _audit(request.user, "consent_initiated", target=consent.id)
-    return redirect("consent_review", handle=handle)
+    messages.error(request, "Failed to initiate Account Aggregator session with Finbox. Please try again later.")
+    return redirect("customer_dashboard")
 
 
 @customer_required
@@ -606,57 +597,7 @@ def ops_upload_bank_statement(request, pk):
     )
 
 
-def _synthetic_aa_csv(customer) -> str:
-    """Generate a believable 6-month UPI+bank CSV for a customer.
 
-    Mirrors what Setu Bridge would return after AA consent — salary on the 5th,
-    rent on the 10th, recurring mobile/electricity, daily UPI for groceries
-    and food, occasional ATM. Seeded by customer.id so each customer always
-    sees the same 'fetched' dataset.
-    """
-    rng = random.Random(customer.id * 17 + 31)
-    salary = rng.choice([28000, 38000, 45000, 60000, 78000])
-    rent = int(salary * rng.uniform(0.22, 0.42))
-    months_back = 6
-    today = date.today()
-    start = today.replace(day=1) - timedelta(days=months_back * 30)
-    lines = ["Date,Description,Withdrawal,Deposit,Balance"]
-    balance = rng.randint(5000, 35000)
-    daily_descs = [
-        "UPI/GPAY/MILK SHOP",
-        "UPI/PAYTM/VEGETABLES",
-        "UPI/GPAY/RESTAURANT",
-        "UPI/PHONEPE/GROCERY",
-        "UPI/PAYTM/PETROL",
-        "UPI/GPAY/AMAZON",
-        "UPI/PHONEPE/SWIGGY",
-    ]
-    cur = start
-    while cur <= today:
-        if cur.day == 5:
-            balance += salary
-            lines.append(f"{cur:%d-%m-%Y},SALARY VIA NEFT,,{salary},{balance}")
-        if cur.day == 6:
-            balance -= 299
-            lines.append(f"{cur:%d-%m-%Y},UPI/PHONEPE/MOBILE RECHARGE,299,,{balance}")
-        if cur.day == 10:
-            balance -= rent
-            lines.append(f"{cur:%d-%m-%Y},UPI/IMPS/RENT TRANSFER,{rent},,{balance}")
-        if cur.day == 20:
-            amt = rng.randint(1500, 2600)
-            balance -= amt
-            lines.append(f"{cur:%d-%m-%Y},UPI/PHONEPE/ELECTRICITY,{amt},,{balance}")
-        if cur.day == 28:
-            amt = rng.randint(2000, 5000)
-            balance -= amt
-            lines.append(f"{cur:%d-%m-%Y},ATM WITHDRAWAL,{amt},,{balance}")
-        if cur.weekday() in (1, 3, 5):
-            amt = rng.randint(80, 950)
-            balance -= amt
-            desc = rng.choice(daily_descs)
-            lines.append(f"{cur:%d-%m-%Y},{desc},{amt},,{balance}")
-        cur += timedelta(days=1)
-    return "\n".join(lines) + "\n"
 
 
 @ops_required
@@ -682,46 +623,7 @@ def ops_fetch_aa(request, pk):
         _audit(request.user, "ops_consent_initiated", target=consent.id)
         return redirect(redirect_url)
         
-    # Mock Fallback if Finbox fails
-    csv_text = _synthetic_aa_csv(customer)
-    parsed = parse_csv_statement(csv_text)
-    
-    bs = BankStatement(
-        customer=customer,
-        uploaded_by=request.user,
-        source=BankStatement.Source.AA_FETCH,
-    )
-    filename = f"aa_fetch_mock_{customer.username}_{int(timezone.now().timestamp())}.csv"
-    bs.file.save(filename, ContentFile(csv_text.encode("utf-8")), save=False)
-    
-    if parsed:
-        bs.parsed_features = parsed["features"]
-        bs.txn_count = parsed["txn_count"]
-        bs.period_months = parsed["period_months"]
-        bs.parsed_at = timezone.now()
-        bs.parse_notes = (
-            f"Mock fetch: {parsed['txn_count']} txns over ~{parsed['period_months']:.1f} months. "
-            f"avg inflow ₹{parsed['monthly_avg_inflow']:.0f}/mo, "
-            f"avg outflow ₹{parsed['monthly_avg_outflow']:.0f}/mo, "
-            f"bounces={parsed['bounces']}, upi_txns={parsed['upi_txns']}, "
-            f"counterparties={parsed['distinct_counterparties']}."
-        )
-    else:
-        bs.parse_notes = "Fetch failed to parse."
-        
-    bs.save()
-    _audit(
-        request.user,
-        "ops_aa_fetch_mock",
-        target=bs.id,
-        detail=f"customer={customer.username}; {bs.parse_notes}",
-    )
-    
-    if parsed:
-        messages.success(request, f"Fetched transactions for {customer.username} via Account Aggregator (Simulated Mock Fallback): {bs.txn_count} txns.")
-    else:
-        messages.warning(request, f"Fetch completed but parser failed: {bs.parse_notes}")
-        
+    messages.error(request, "Failed to initiate Account Aggregator session with Finbox. Please check your configuration.")
     return redirect("ops_customer_detail", pk=customer.id)
 
 
